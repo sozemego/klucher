@@ -5,17 +5,17 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 
-@Component
 public class KlucherAuthenticationProvider implements AuthenticationProvider {
 
   private final UserDao userDao;
@@ -35,18 +35,20 @@ public class KlucherAuthenticationProvider implements AuthenticationProvider {
     String username = authentication.getName();
     String password = authentication.getCredentials().toString();
     User user = userDao.findOne(username);
-    if (user != null
-        && user.getPassword().equals(passwordEncoder.encode(password))) {
-      List<GrantedAuthority> grantedAuths = new ArrayList<>();
-      for(GrantedAuthority ga: user.getAuthorities()) {
-        grantedAuths.add(ga);
-      }
-      Authentication auth = new UsernamePasswordAuthenticationToken(username,
-          password, grantedAuths);
-      return auth;
-    } else {
-      return null;
+    if (user == null) {
+      throw new UsernameNotFoundException(username);
     }
+    boolean sameHash = passwordEncoder.matches(password, user.getHashedPassword());
+    if (!sameHash) {
+      throw new BadCredentialsException(username);
+    }
+    List<GrantedAuthority> grantedAuths = new ArrayList<>();
+    for (GrantedAuthority ga : user.getAuthorities()) {
+      grantedAuths.add(ga);
+    }
+    Authentication auth = new UsernamePasswordAuthenticationToken(username,
+        password, grantedAuths);
+    return auth;
   }
 
   @Override
