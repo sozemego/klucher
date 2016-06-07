@@ -2,6 +2,7 @@ package com.soze.login.controller;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -60,6 +61,47 @@ public class LoginControllerTest extends TestWithUserBase {
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(view().name("user"));
+  }
+  
+  @Test
+  public void testValidLogin() throws Exception {
+    String username = "user";
+    String password = "password";
+    addUserToDb(username, password);
+    mvc.perform(MockMvcRequestBuilders.post("/login")
+        .param("username", username)
+        .param("password", password)
+        .accept(MediaType.APPLICATION_FORM_URLENCODED)
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+        .andDo(print())
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/user"));
+  }
+  
+  @Test
+  public void testWrongPasswordLogin() throws Exception {
+    String username = "user";
+    addUserToDb(username, "password");
+    mvc.perform(MockMvcRequestBuilders.post("/login")
+        .param("username", username)
+        .param("password", "wrong password")
+        .accept(MediaType.APPLICATION_FORM_URLENCODED)
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+        .andDo(print())
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/login?error"));
+  }
+  
+  @Test
+  public void testUserDoesNotExist() throws Exception {
+    mvc.perform(MockMvcRequestBuilders.post("/login")
+        .param("username", "user")
+        .param("password", "password")
+        .accept(MediaType.APPLICATION_FORM_URLENCODED)
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+        .andDo(print())
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/login?error"));
   }
 
 }
