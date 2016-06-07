@@ -25,12 +25,14 @@
 					name="remember-me"> Remember me
 				<input type="submit" value="Log in"/></td>
 			</tr>
+			<c:if test="${not empty error}">
+			<tr>
+				<td class = "error" colspan = "2" align="center">${error}</td>
+			</tr>
+			</c:if>
 		</table>
 		<input type="hidden" name="${_csrf.parameterName}"
 			value="${_csrf.token}" />
 	</form>
-	<c:if test="${not empty error}">
-		<div class="error">${error}</div>
-	</c:if>
 </body>
 </html>
