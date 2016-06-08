@@ -8,22 +8,22 @@
 	<form action="login" method="post">
 		<table class = "centered roundedCorners">
 			<tr>
-				<td class = "welcome" colspan = "2">Welcome back!</td>
+				<td class = "welcome" colspan = "2">welcome back!</td>
 			</tr>
 			<tr>
-				<td>Username</td>
+				<td>username</td>
 				<td><input name="username" type="text" value="${clientId}"
 					size="50"></td>
 			</tr>
 			<tr>
-				<td>Password</td>
+				<td>password</td>
 				<td><input name="password" type="text" size="50"></td>
 			</tr>
 			<tr>
 				<td colspan= "2" align="right">
 				<input type="checkbox" id="rememberme"
 					name="remember-me"> Remember me
-				<input type="submit" value="Log in"/></td>
+				<input type="submit" value="log in"/></td>
 			</tr>
 			<c:if test="${not empty error}">
 			<tr>

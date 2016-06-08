@@ -2,16 +2,9 @@ package com.soze.register.model;
 
 import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 public class RegisterForm {
   
-  @NotNull
-  @Size(min = 1, max = 255)
   private String username;
-  @NotNull
-  @Size(min = 1, max = 255)
   private String password;
 
   public RegisterForm() {
