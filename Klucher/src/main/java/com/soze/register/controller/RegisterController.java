@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.soze.login.service.LoginService;
 import com.soze.register.model.RegisterForm;
@@ -56,6 +58,16 @@ public class RegisterController {
     populateModelWithErrors(errors, model);
     addOldValuesBackToModel(form, model);
     return "register";
+  }
+  
+  @RequestMapping(value = "/available/{name}")
+  @ResponseBody
+  public Boolean available(@PathVariable String name)  {
+    log.info("A register controller which checks for available usernames was triggered for name [{}].", name);
+    if(name == null || name.isEmpty()) {
+      return false;
+    }
+    return registerService.isAvailable(name);
   }
 
   private boolean login(String username, String password,

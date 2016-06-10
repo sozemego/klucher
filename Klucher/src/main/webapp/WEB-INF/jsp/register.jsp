@@ -14,7 +14,7 @@
 			</tr>
 			<tr>
 				<td>username</td>
-				<td><input id = "username" name="username" type="text" size="50" maxlength="64" value = "${username}"></td>				
+				<td><input id = "username" class = "available" name="username" type="text" size="50" maxlength="64" value = "${username}"></td>				
 			</tr>
 			<tr>
 				<td>password</td>
@@ -43,5 +43,8 @@
 		<input type="hidden" name="${_csrf.parameterName}"
 			value="${_csrf.token}" />
 	</form>
+<script>
+$(document).ready(whenReady());
+</script>
 </body>
 </html>

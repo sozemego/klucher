@@ -85,5 +85,9 @@ public class RegisterService {
     }
     return errors;
   }
+  
+  public boolean isAvailable(String username) {
+    return !userDao.exists(username);
+  }
 
 }
