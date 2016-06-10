@@ -1,17 +1,17 @@
 function validateRegister() {
 	var valid = false;
-	valid = validateUsername();
+	valid = validateUsernameLength();
 	if(!valid) {
 		return valid;
 	}
-	valid = validatePassword();
+	valid = validatePasswordLength();
 	if(!valid) {
 		return valid;
 	}
 	return valid;
 }
 
-function validateUsername() {
+function validateUsernameLength() {
 	var username = document.getElementById("username");
 	var usernameLength = username.value.length;
 	if(usernameLength > 64) {
@@ -21,7 +21,7 @@ function validateUsername() {
 	return true;
 }
 
-function validatePassword() {
+function validatePasswordLength() {
 	var password = document.getElementById("password");
 	var passwordLength = password.value.length;
 	if(passwordLength > 64) {
