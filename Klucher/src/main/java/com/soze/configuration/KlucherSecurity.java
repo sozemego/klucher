@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
@@ -57,6 +58,7 @@ public class KlucherSecurity extends WebSecurityConfigurerAdapter {
       .loginProcessingUrl("/login").permitAll()
     .and()
       .rememberMe()
+      .authenticationSuccessHandler(authenticationSuccessHandler())
       .rememberMeParameter("remember-me")
       .tokenRepository(persistentTokenRepository())
       .tokenValiditySeconds(86400)
@@ -67,6 +69,11 @@ public class KlucherSecurity extends WebSecurityConfigurerAdapter {
        .authenticationEntryPoint(new AjaxAwareAuthenticationEntryPoint("/login"))
      .and()                                                               
        .headers().frameOptions().disable();
+  }
+  
+  @Bean
+  public AuthenticationSuccessHandler authenticationSuccessHandler() {
+    return new RememberMeSuccessHandler();
   }
   
   @Bean

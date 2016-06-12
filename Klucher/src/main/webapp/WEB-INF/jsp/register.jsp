@@ -14,11 +14,11 @@
 			</tr>
 			<tr>
 				<td>username</td>
-				<td><input id = "username" class = "available validate" name="username" type="text" size="50" maxlength="64" value = "${username}"></td>				
+				<td><input id = "username" class = "available myInput" name="username" type="text" size="50" maxlength="64" value = "${username}"></td>				
 			</tr>
 			<tr>
 				<td>password</td>
-				<td><input id = "password" class = "validate" name="password" type="text" size="50" maxlength="64 value = "${password}"></td>
+				<td><input id = "password" class = "myInput" name="password" type="password" size="50" maxlength="64 value = "${password}"></td>
 			</tr>
 			<tr>
 				<td>

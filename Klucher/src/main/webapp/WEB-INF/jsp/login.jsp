@@ -12,12 +12,12 @@
 			</tr>
 			<tr>
 				<td>username</td>
-				<td><input name="username" type="text" value="${clientId}"
+				<td><input name="username" class = "myInput" type="text"
 					size="50"></td>
 			</tr>
 			<tr>
 				<td>password</td>
-				<td><input name="password" type="text" size="50"></td>
+				<td><input name="password" class = "myInput" type="password" size="50"></td>
 			</tr>
 			<tr>
 				<td colspan= "2" align="right">
