@@ -59,27 +59,29 @@ public class RegisterService {
       Map<String, String> errors) {
     String username = form.getUsername();
     if (username == null || !StringUtils.hasText(username)) {
-      errors.put("username_error", "Username cannot be empty.");
+      errors.put("username_error", "Username should be at least "
+          + MIN_USERNAME_LENGTH + " characters long.");
     } else {
       if (!username.isEmpty() && username.length() < MIN_USERNAME_LENGTH) {
-        errors.put("username_error", "Username cannot be shorter than "
-            + MIN_USERNAME_LENGTH + " characters.");
+        errors.put("username_error", "Username should be at least "
+            + MIN_USERNAME_LENGTH + " characters long.");
       }
       if (username.length() > MAX_USERNAME_LENGTH) {
-        errors.put("username_error", "Username cannot be longer than "
+        errors.put("username_error", "Username should not be longer than "
             + MAX_USERNAME_LENGTH + " characters.");
       }
     }
     String password = form.getPassword();
     if (password == null || !StringUtils.hasText(password)) {
-      errors.put("password_error", "Password cannot be empty.");
+      errors.put("password_error", "Password should be at least "
+          + MIN_PASSWORD_LENGTH + " characters long.");
     } else {
       if (!password.isEmpty() && password.length() < MIN_PASSWORD_LENGTH) {
-        errors.put("password_error", "Password cannot be shorter than "
-            + MIN_PASSWORD_LENGTH + " characters.");
+        errors.put("password_error", "Password should be at least "
+            + MIN_PASSWORD_LENGTH + " characters long.");
       }
       if (password.length() > MAX_PASSWORD_LENGTH) {
-        errors.put("password_error", "Password cannot be longer than "
+        errors.put("password_error", "Password should not be longer than "
             + MAX_PASSWORD_LENGTH + " characters.");
       }
     }

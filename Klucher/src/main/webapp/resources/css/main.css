@@ -49,8 +49,22 @@
 	color: red;	
 }
 
-input[type="text"] {
+.validate {
 	line-height:28px;
 	border-width: 1px;
 	border-color: gray;
+}
+
+.validImg {
+	background-image: url("../images/valid.png");
+	background-position: right top;
+  	background-repeat: no-repeat;
+  	background-size: contain;
+}
+
+.invalidImg {
+	background-image: url("../images/invalid.png");
+	background-position: right top;
+  	background-repeat: no-repeat;
+  	background-size: contain;
 }

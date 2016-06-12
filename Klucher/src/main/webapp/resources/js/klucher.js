@@ -1,43 +1,17 @@
-function validateRegister() {
-	var valid = false;
-	valid = validateUsernameLength();
-	if(!valid) {
-		return valid;
-	}
-	valid = validatePasswordLength();
-	if(!valid) {
-		return valid;
-	}
-	return valid;
-}
-
-function validateUsernameLength() {
-	var username = document.getElementById("username");
-	var usernameLength = username.value.length;
-	if(usernameLength > 64) {
-		username.value = username.value.slice(0, 65);
-		return false;
-	}
-	return true;
-}
-
-function validatePasswordLength() {
-	var password = document.getElementById("password");
-	var passwordLength = password.value.length;
-	if(passwordLength > 64) {
-		password.value = password.value.slice(0, 65);
-		return false;
-	}
-	return true;
-}
-
 function whenReady() {
 	checkAvailibility(null);
+	validateStart();
 }
 
+var usernameAvailable = true;
+
 function checkAvailibility(lastUsername) {
-	var currentUsername = document.getElementById("username").value;
+	var currentUsername = $("#username").val();
 	if(lastUsername === currentUsername) {
+		setTimeout(checkAvailibility, 2500, currentUsername);
+		return;
+	}
+	if(currentUsername == null || currentUsername === "") {
 		setTimeout(checkAvailibility, 2500, currentUsername);
 		return;
 	}
@@ -48,20 +22,107 @@ function checkAvailibility(lastUsername) {
 			setTimeout(checkAvailibility, 2500, currentUsername);
 		},
 		success: function(data) {
-			var currentUsernameElement = document.getElementById("username");
+			var currentUsernameElement = $("#username");
+			usernameAvailable = data;
 			if(data) {
-				currentUsernameElement.className = document.getElementById("username").className.replace(/(?:^|\s)unavailable(?!\S)/g , 'available');
-				if(!currentUsernameElement.className.match(/(?:^|\s)available(?!\S)/)) {
-					currentUsernameElement.className += "available";
-				}
+				currentUsernameElement.removeClass("unavailable");
+				currentUsernameElement.addClass("available");				
 			} else {
-				currentUsernameElement.className = document.getElementById("username").className.replace(/(?:^|\s)available(?!\S)/g , 'unavailable');
-				if(!currentUsernameElement.className.match(/(?:^|\s)unavailable(?!\S)/)) {
-					currentUsernameElement.className += "unavailable";
-				}
+				currentUsernameElement.removeClass("available");
+				currentUsernameElement.addClass("unavailable");			
 			}
-			setTimeout(checkAvailibility, 1000, currentUsername);
-			
+			addUsernameAvailableMessage();
+			setTimeout(checkAvailibility, 1000, currentUsername);			
 		}
 	});
+}
+
+function validateStart() {
+	$("#username").keyup(function() {
+		validate();
+	});
+	$("#username").blur(function() {
+		validate();
+	});
+	$("#password").keyup(function() {
+		validate();
+	});
+	$("#password").blur(function() {
+		validate();
+	});
+}
+
+function validate() {
+	clearErrorTable();
+	addUsernameAvailableMessage();
+	validateUsername();
+	validatePassword();
+}
+
+function clearErrorTable() {
+	$("#errorTable").empty();
+}
+
+function validateUsername() {
+	var usernameElement = $("#username");
+	usernameElement.removeClass("invalidImg");
+	usernameElement.addClass("validImg");
+	var username = usernameElement.val();
+	var isTooShort = isUsernameTooShort(username);
+	var isTooLong = isUsernameTooLong(username);
+	if(isTooShort || isTooLong) {
+		usernameElement.removeClass("validImg");
+		usernameElement.addClass("invalidImg");
+	}
+	if(isTooShort) {
+		$("#errorTable").append(createTableRowWithText("Username should be at least 4 characters long."));
+	}
+	if(isTooLong) {
+		$("#errorTable").append(createTableRowWithText("Username should not be longer than 64 characters."));
+	}
+}
+
+function validatePassword() {
+	var passwordElement = $("#password");
+	passwordElement.removeClass("invalidImg");
+	passwordElement.addClass("validImg");
+	var username = passwordElement.val();
+	var isTooShort = isPasswordTooShort(username);
+	var isTooLong = isPasswordTooLong(username);
+	if(isTooShort || isTooLong) {
+		passwordElement.removeClass("validImg");
+		passwordElement.addClass("invalidImg");
+	}
+	if(isTooShort) {
+		$("#errorTable").append(createTableRowWithText("Password should be at least 6 characters long."));
+	}
+	if(isTooLong) {
+		$("#errorTable").append(createTableRowWithText("Password should not be longer than 64 characters."));
+	}
+}
+
+function addUsernameAvailableMessage() {
+	if(!usernameAvailable) {
+		$("#errorTable").prepend(createTableRowWithText("Username exists already."));
+	}
+}
+
+function createTableRowWithText(text) {
+	return "<tr><td align = \"center\">"+text+"</td></tr>";
+}
+
+function isUsernameTooShort(username) {
+	return username.length < 4;
+}
+
+function isUsernameTooLong(username) {
+	return username.length > 64;
+}
+
+function isPasswordTooShort(password) {
+	return password.length < 6;
+}
+
+function isPasswordTooLong(password) {
+	return password.length > 64;
 }
