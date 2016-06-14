@@ -60,7 +60,7 @@ public class LoginControllerTest extends TestWithUserBase {
         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andDo(print())
         .andExpect(status().isOk())
-        .andExpect(view().name("user"));
+        .andExpect(view().name("login"));
   }
   
   @Test
