@@ -2,7 +2,7 @@
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
 }
 
-.centered {
+.centerViewport {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -20,9 +20,18 @@
     min-height: 15%;
 }
 
-.welcome {
-	text-align: center;
+.slightUnderline {
+	border-bottom-style: dashed;
+	border-width: 1px;
+	border-color: gray;
+}
+
+.welcome {	
 	font-size: 3em;
+}
+
+.centerText {
+	text-align: center;
 }
 
 .gray {
@@ -68,3 +77,42 @@
   	background-repeat: no-repeat;
   	background-size: contain;
 }
+
+.frontItem {
+	padding: 15px;
+	border-right-style: dashed;
+}
+
+.nearImage {
+	padding: 15px;
+	text-align: center;
+	width: 100%;
+}
+
+.verticalCenter {
+	display:flex;
+	align-items:center;
+}
+
+.container {
+	width: 100%;
+}
+
+.leftSide {
+	width: 50%;
+	float: left;
+}
+
+.rightSide {
+	width: 50%;
+	overflow: hidden;
+}
+
+.frontForm {
+	margin: auto;
+}
+
+.paddedHeader {
+	padding-bottom: 45px;
+}
+

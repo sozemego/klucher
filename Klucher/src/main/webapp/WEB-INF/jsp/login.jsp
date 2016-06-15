@@ -6,9 +6,9 @@
 </head>
 <body>
 	<form action="login" method="post">
-		<table class = "centered roundedCorners">
+		<table class = "centerViewport roundedCorners">
 			<tr>
-				<td class = "welcome" colspan = "2">welcome back!</td>
+				<td class = "welcome centerText" colspan = "2">welcome back!</td>
 			</tr>
 			<tr>
 				<td>username</td>

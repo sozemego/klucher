@@ -1,4 +1,4 @@
-function whenReady() {
+function registerOnLoad() {
 	checkAvailibility(null);
 	validateStart();
 }

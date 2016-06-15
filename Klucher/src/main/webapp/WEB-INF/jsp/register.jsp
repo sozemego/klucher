@@ -8,9 +8,9 @@
 </head>
 <body>
 	<form action="register" method="POST" modelAttribute="registerForm">
-		<table class = "centered roundedCorners" id = "registerTable">
+		<table class = "centerViewport roundedCorners" id = "registerTable">
 			<tr>
-				<td class = "welcome" colspan = "2">welcome to Klucher</td>				
+				<td class = "welcome centerText" colspan = "2">welcome to Klucher</td>				
 			</tr>
 			<tr>
 				<td>username</td>
@@ -50,7 +50,7 @@
 			value="${_csrf.token}" />
 	</form>
 <script>
-$(document).ready(whenReady());
+$(document).ready(registerOnLoad());
 </script>
 </body>
 </html>
