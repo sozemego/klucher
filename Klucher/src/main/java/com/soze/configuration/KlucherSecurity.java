@@ -53,7 +53,7 @@ public class KlucherSecurity extends WebSecurityConfigurerAdapter {
       .antMatchers("/info/**").hasRole("ADMIN")
     .and()
       .formLogin()
-      .defaultSuccessUrl("/user", true)
+      .defaultSuccessUrl("/dashboard", true)
       .loginPage("/login")
       .loginProcessingUrl("/login").permitAll()
     .and()

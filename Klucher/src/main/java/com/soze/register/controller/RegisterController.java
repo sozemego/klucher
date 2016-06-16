@@ -42,7 +42,7 @@ public class RegisterController {
   @RequestMapping(method = RequestMethod.GET)
   public String getRegister(Authentication authentication) {
     if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-      return "user";
+      return "redirect:/dashboard";
     }
     return "register";
   }
@@ -58,7 +58,7 @@ public class RegisterController {
         form.getUsername(), registrationSuccessful, errors.size(), errors);
     if (registrationSuccessful) {
       login(form.getUsername(), form.getPassword(), request);
-      return "redirect:user";
+      return "redirect:/dashboard";
     }
     populateModelWithErrors(errors, model);
     addOldValuesBackToModel(form, model);

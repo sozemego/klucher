@@ -75,7 +75,7 @@ public class LoginControllerTest extends TestWithUserBase {
         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andDo(print())
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirectedUrl("/user"));
+        .andExpect(redirectedUrl("/dashboard"));
   }
   
   @Test
