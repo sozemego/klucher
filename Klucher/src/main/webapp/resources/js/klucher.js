@@ -39,20 +39,20 @@ function checkAvailibility(lastUsername) {
 
 function validateStart() {
 	$("#username").keyup(function() {
-		validate();
+		validateRegisterForm();
 	});
 	$("#username").blur(function() {
-		validate();
+		validateRegisterForm();
 	});
 	$("#password").keyup(function() {
-		validate();
+		validateRegisterForm();
 	});
 	$("#password").blur(function() {
-		validate();
+		validateRegisterForm();
 	});
 }
 
-function validate() {
+function validateRegisterForm() {
 	clearErrorTable();
 	addUsernameAvailableMessage();
 	validateUsername();
@@ -126,3 +126,31 @@ function isPasswordTooShort(password) {
 function isPasswordTooLong(password) {
 	return password.length > 64;
 }
+
+function dashboardOnLoad() {
+	attachInputListener();
+}
+
+function attachInputListener() {
+	$("#composeKluch").keyup(function() {
+		checkCharacterCount();
+	});
+}
+
+function checkCharacterCount() {
+	var textArea = $("#composeKluch");
+	var charactersLeft = charactersRemaining(textArea.val(), 250);
+	var charactersLeftElement = $("#charactersLeft");
+	if(charactersLeft < 0) {
+		var text = textArea.val();
+		text = text.slice(0, 250);
+		textArea.val(text);
+	}
+	charactersLeftElement.empty();
+	charactersLeftElement.append(charactersRemaining(textArea.val(), 250));
+}
+
+function charactersRemaining(text, length) {
+	return length - text.length;
+}
+

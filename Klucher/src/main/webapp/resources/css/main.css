@@ -2,6 +2,11 @@
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
 }
 
+body {
+	padding: 0;
+	margin: 0;
+}
+
 .centerViewport {
 	position: absolute;
 	top: 50%;
@@ -114,5 +119,36 @@
 
 .paddedHeader {
 	padding-bottom: 45px;
+}
+
+.headerImage {
+	width: 64px;
+	height: 64px;
+	transform: translate(-50%, 0%);
+}
+
+.headerLogo {
+	text-align: center;
+}
+
+.headerBackground {
+	background: #FFF0F5;
+	border-bottom: solid 1px gray;
+}
+
+.dashboardTextInput {	
+	width: 100%;
+	height: 85px;
+	resize: none;	
+}
+
+.dashboardInputContainer {
+	text-align: center;
+	width: 400px;
+	margin: auto;
+}
+
+.underInput {
+	text-align: right;
 }
 
