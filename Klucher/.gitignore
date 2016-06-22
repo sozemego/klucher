@@ -9,7 +9,6 @@ data
 /data
 db
 /db
-dev
 /dev
 /log
 .classpath
