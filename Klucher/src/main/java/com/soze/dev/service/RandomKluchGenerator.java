@@ -1,9 +1,12 @@
 package com.soze.dev.service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
@@ -27,6 +30,7 @@ public class RandomKluchGenerator {
       Arrays.asList('b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p',
           'q', 'r', 's', 't', 'v', 'x', 'z'));
   private final Random random = new Random();
+  private final AtomicInteger atomicInteger = new AtomicInteger();
 
   @PostConstruct
   public void init() {
@@ -49,6 +53,15 @@ public class RandomKluchGenerator {
   public String getRandomKluch() {
     int randomIndex = random.nextInt(randomKluchs.size() - 1);
     return randomKluchs.get(randomIndex);
+  }
+  
+  public String getCurrentTimestamp() {
+    Timestamp timestamp = new Timestamp(Instant.now().toEpochMilli());
+    return timestamp.toString();
+  }
+  
+  public String getUniqueIdAsText() {
+    return "" + atomicInteger.getAndIncrement();
   }
 
   private Character getRandomVowel() {

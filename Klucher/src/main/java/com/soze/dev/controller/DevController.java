@@ -3,6 +3,7 @@ package com.soze.dev.controller;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +31,34 @@ public class DevController {
     this.kluchGenerator = kluchGenerator;
   }
   
-  @RequestMapping("/genKluchs/{username}")
-  public void genKluchs(@PathVariable String username, @RequestParam(required = true) Integer number, @RequestParam(required = false) Integer milis) {
-    log.info("Adding ");
+  @RequestMapping("/genKluchs/random/{username}")
+  public void genKluchsRandom(@PathVariable String username, @RequestParam(required = true) Integer number, @RequestParam(required = false) Integer milis) {
+    log.info("Adding random [{}] posts for user [{}]", number, username);
     ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-    FixedRatePoster poster = new FixedRatePoster(username, number, executor);
+    FixedRatePoster poster = new FixedRatePoster(username, number, executor, kluchGenerator::getRandomKluch);
     executor.scheduleAtFixedRate(poster, 0, milis == null ? 250 : milis, TimeUnit.MILLISECONDS);
+  }
+  
+  @RequestMapping("/genKluchs/timestamp/{username}")
+  public void genKluchsTimestamp(@PathVariable String username, @RequestParam(required = true) Integer number, @RequestParam(required = false) Integer milis) {
+    log.info("Adding timestamp [{}] posts for user [{}]", number, username);
+    ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+    FixedRatePoster poster = new FixedRatePoster(username, number, executor, kluchGenerator::getCurrentTimestamp);
+    executor.scheduleAtFixedRate(poster, 0, milis == null ? 0 : milis, TimeUnit.MILLISECONDS);
+  }
+  
+  @RequestMapping("/genKluchs/id/{username}")
+  public void genKluchsId(@PathVariable String username, @RequestParam(required = true) Integer number, @RequestParam(required = false) Integer milis) {
+    log.info("Adding timestamp [{}] posts for user [{}]", number, username);
+    ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+    FixedRatePoster poster = new FixedRatePoster(username, number, executor, kluchGenerator::getUniqueIdAsText);
+    executor.scheduleAtFixedRate(poster, 0, milis == null ? 0 : milis, TimeUnit.MILLISECONDS);
+  }
+  
+  @RequestMapping("/genKluchs/delete/{username}")
+  public void deleteKluchs(@PathVariable String username) {
+    log.info("Removing all posts for user [{}]", username);
+    kluchService.deleteAll(username);
   }
   
   /**
@@ -49,15 +72,17 @@ public class DevController {
     private final int timesToRun;
     private int timesRun;
     private final ScheduledExecutorService executor;
+    private final Supplier<String> supplier;
     
-    FixedRatePoster(String username, int timesToRun, ScheduledExecutorService executor) {
+    FixedRatePoster(String username, int timesToRun, ScheduledExecutorService executor, Supplier<String> supplier) {
       this.username = username;
       this.timesToRun = timesToRun;
       this.executor = executor;
+      this.supplier = supplier;
     }
     
     public void run() {
-      kluchService.post(username, kluchGenerator.getRandomKluch());
+      kluchService.post(username, supplier.get());
       timesRun++;
       if(timesRun >= timesToRun) {
         executor.shutdown();
