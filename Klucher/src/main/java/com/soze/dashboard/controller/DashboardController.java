@@ -13,12 +13,12 @@ import com.soze.user.model.User;
 public class DashboardController {
 
   private final UserDao userDao;
-  
+
   @Autowired
   public DashboardController(UserDao userDao) {
     this.userDao = userDao;
   }
-  
+
   @RequestMapping("/dashboard")
   public String getDashboard(Authentication authentication, Model model) {
     String username = authentication.getName();
@@ -26,6 +26,5 @@ public class DashboardController {
     model.addAttribute("user", user);
     return "dashboard";
   }
-  
-  
+
 }
