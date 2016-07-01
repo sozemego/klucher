@@ -132,7 +132,7 @@ body {
 }
 
 .headerBackground {
-	background: #FFF0F5;
+	background: #CDFFFF;
 	border-bottom: solid 1px gray;
 }
 
@@ -150,5 +150,77 @@ body {
 
 .underInput {
 	text-align: right;
+}
+
+.kluchFeed {
+	padding-top: 45px;
+}
+
+.kluch {
+	width: 450px;
+	margin: auto;
+}
+
+.kluchTextArea {	
+	border: 1px solid gray;	
+	height: 94px;
+	margin: auto;
+}
+
+.opacityAnimation {
+	-webkit-animation: opac 0.3s ease-out forwards;
+	-moz-animation: opac 0.3s ease-out forwards;
+	-o-animation: opac 0.3s ease-out forwards;
+	animation: opac 0.3s ease-out forwards;
+}
+
+@-webkit-keyframes opac {
+	0% {opacity: 0.0;}
+	25% {opacity: 0.25;}
+	50% {opacity: 0.50;}
+	75% {opacity: 0.75;}
+	100% {opacity: 1.0;}
+}
+
+@-moz-keyframes opac {
+	0% {opacity: 0.0;}
+	25% {opacity: 0.25;}
+	50% {opacity: 0.50;}
+	75% {opacity: 0.75;}
+	100% {opacity: 1.0;}
+}
+
+@-o-keyframes opac {
+	0% {opacity: 0.0;}
+	25% {opacity: 0.25;}
+	50% {opacity: 0.50;}
+	75% {opacity: 0.75;}
+	100% {opacity: 1.0;}
+}
+
+@keyframes opac {
+	0% {opacity: 0.0;}
+	25% {opacity: 0.25;}
+	50% {opacity: 0.50;}
+	75% {opacity: 0.75;}
+	100% {opacity: 1.0;}
+}
+
+
+.author {
+	font-size: 0.85em;
+	color: gray;
+	text-align: right;
+	margin: auto;
+}
+
+.newKluch {
+	width: 350px;
+	height: 85px;
+	margin: auto;	
+}
+
+.cursorPointer {
+	cursor: pointer;
 }
 

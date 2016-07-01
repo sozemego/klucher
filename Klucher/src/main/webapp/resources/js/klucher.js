@@ -128,17 +128,21 @@ function isPasswordTooLong(password) {
 }
 
 function dashboardOnLoad() {
+	getFeed("after");
 	attachInputListener();
+	attachShareKluchListener();
+	attachInfiniteScrollingListener();
+	pollFeed();
 }
 
 function attachInputListener() {
-	$("#composeKluch").keyup(function() {
+	$("#kluchTextArea").keyup(function() {
 		checkCharacterCount();
 	});
 }
 
 function checkCharacterCount() {
-	var textArea = $("#composeKluch");
+	var textArea = $("#kluchTextArea");
 	var charactersLeft = charactersRemaining(textArea.val(), 250);
 	var charactersLeftElement = $("#charactersLeft");
 	if(charactersLeft < 0) {
@@ -153,4 +157,221 @@ function checkCharacterCount() {
 function charactersRemaining(text, length) {
 	return length - text.length;
 }
+
+function attachShareKluchListener() {
+	$("#kluchForm").submit(function(event) {
+		event.preventDefault();
+		ajaxPostKluch();
+	});
+}
+
+function ajaxPostKluch() {
+	var kluchText = $("#kluchTextArea").val();
+	if(kluchText.length === 0) {
+		return;
+	}
+	$.ajax({
+		type: "POST",
+		url: "/kluch",
+		data: {"kluch" : kluchText },
+		error: function(xhr, status, error) {	
+			var something = xhr.getAllResponseHeaders();
+			
+		},
+		success: function(data, status, xhr) {
+			clearTextArea();
+			addKluchToFeed(getUsername(), new Date(), kluchText, false);
+		}
+	});
+}
+
+function getFeed() {
+	var isGettingFeed = $("#data").attr("data-getting-feed");
+	if(isGettingFeed == 1) {
+		return;
+	}
+	var page = $("#data").attr("data-page");
+	if(page == -1) {
+		return;
+	}
+	setGettingFeed(1);
+	var timestamp = parseInt($("#data").attr("data-last-timestamp"));	
+	$.ajax({
+		dataType: "json",
+		type: "GET",
+		url: "/feed",
+		data: {
+			"timestamp" : timestamp,
+			"direction" : "after"
+		},
+		error: function(xhr, status, error) {	
+			setGettingFeed(0);			
+		},
+		success: function(data, status, xhr) {
+			addKluchsToFeed(data.kluchs.content, true);
+			setPage(data);
+			setGettingFeed(0);
+		}
+	});
+}
+
+function getFeedBefore() {
+	var isGettingFeed = $("#data").attr("data-getting-feed");
+	if(isGettingFeed == 1) {
+		return;
+	}
+	setGettingFeed(1);
+	var timestamp = parseInt($("#data").attr("data-first-timestamp"));	
+	$.ajax({
+		dataType: "json",
+		type: "GET",
+		url: "/feed",
+		data: {
+			"timestamp" : timestamp,
+			"direction" : "before"
+		},
+		error: function(xhr, status, error) {	
+			setGettingFeed(0);			
+		},
+		success: function(data, status, xhr) {
+			addKluchsToFeed(data.kluchs.content, false);
+			setGettingFeed(0);
+		}
+	});
+}
+
+function setPage(data) {
+	var page = data.kluchs;
+	if(page.last) {
+		$("#data").attr("data-page", -1);
+	} 
+}
+
+function clearTextArea() {
+	$("#kluchTextArea").val("");
+}
+
+function addKluchsToFeed(kluchs, append) {
+	for(var i = 0; i < kluchs.length; i++) {
+		var kluch = kluchs[i];		
+		addKluchToFeed(kluch.author, new Date(kluch.timestamp), kluch.text, append);
+	}
+	if(kluchs.length > 0) {	
+		if(append) {
+			setLastTimestamp(kluchs[kluchs.length - 1]);
+			setFirstTimestamp(kluchs[0]);
+		} else {
+			setLastTimestamp(kluchs[0]);
+			setFirstTimestamp(kluchs[kluchs.length - 1]);
+		}
+	}
+}
+
+function addKluchToFeed(author, date, text, append) {
+	if(typeof author === "undefined") {
+		
+	}
+	var outerDiv = document.createElement("div");
+	append ? $("#kluchFeed").append(outerDiv) : $("#kluchFeed").prepend(outerDiv);
+	outerDiv.classList.toggle("kluch");
+	var authorDiv = document.createElement("div");
+	authorDiv.classList.toggle("author");
+	$("<abc>" + author + " " + date.toLocaleString() + "</abc>").appendTo(authorDiv);
+	$(authorDiv).appendTo(outerDiv);
+	var textAreaDiv = document.createElement("div");
+	textAreaDiv.classList.toggle("kluchTextArea");
+	textAreaDiv.classList.toggle("opacityAnimation");
+	$("<abc>" +  text + "</abc>").appendTo(textAreaDiv);
+	$(textAreaDiv).appendTo(outerDiv);
+}
+
+function getUsername() {
+	return $("#data").attr("data-username");
+}
+
+function attachInfiniteScrollingListener() {
+	$(window).scroll(function(ev) {
+		var windowInnerHeight = window.innerHeight;
+		var scrollY = window.scrollY;
+		var bodyHeight = document.body.offsetHeight;
+	    if ((windowInnerHeight + scrollY) >= bodyHeight * 0.9) {
+	        getFeed("after");
+	    }
+	});
+}
+
+function setGettingFeed(data) {
+	$("#data").attr("data-getting-feed", data);
+}
+
+function setLastTimestamp(kluch) {
+	var kluchTimestamp = kluch.timestamp;
+	var currentLastTimestamp = parseInt($("#data").attr("data-last-timestamp"));
+	if(currentLastTimestamp > kluchTimestamp) {
+		$("#data").attr("data-last-timestamp", kluchTimestamp);
+	}
+}
+
+function setFirstTimestamp(kluch) {
+	var kluchTimestamp = kluch.timestamp;
+	var currentFirstTimestamp = parseInt($("#data").attr("data-first-timestamp"));
+	if(currentFirstTimestamp < kluchTimestamp) {
+		$("#data").attr("data-first-timestamp", kluchTimestamp);
+	}
+}
+
+function pollFeed() {
+	var isGettingFeed = $("#data").attr("data-getting-feed");
+	if(isGettingFeed == 1) {
+		setTimeout(pollFeed, 5000);
+		return;
+	}
+	var timestamp = $("#data").attr("data-first-timestamp");
+	if(timestamp == null) {
+		setTimeout(pollFeed, 5000);
+	}
+	$.ajax({
+		dataType: "json",
+		type: "GET",
+		url: "/feed/poll",
+		data: {
+			"timestamp" : timestamp,
+			"direction" : "after"
+		},
+		error: function(xhr, status, error) {	
+			setTimeout(pollFeed, 5000);
+		},
+		success: function(data, status, xhr) {
+			setTimeout(pollFeed, 5000);
+			if(data) {
+				displayNewKluchElement();
+			}
+		}
+	});
+}
+
+function displayNewKluchElement() {
+	var newKluchElement = $("#newKluch");
+	var hasChildren = newKluchElement.children().length != 0;
+	if(!hasChildren) {
+		$("<span id = 'newKluchText'>new kluchs available, click here to view!</span>").appendTo("#newKluch");
+		var newKluchText = $("#newKluchText");
+		newKluchText.addClass("opacityAnimation");
+		newKluchText.addClass("centerText");
+		newKluchText.addClass("roundedCorners");
+		newKluchText.addClass("verticalCenter");
+		newKluchText.addClass("cursorPointer");
+		newKluchText.click(clickNewKluchs);	
+	}
+}
+
+function clickNewKluchs() {
+	hideNewKluchElement();
+	getFeedBefore();
+}
+
+function hideNewKluchElement() {
+	$("#newKluch").empty();
+}
+
 

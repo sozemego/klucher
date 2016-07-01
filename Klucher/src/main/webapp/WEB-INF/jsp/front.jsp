@@ -13,15 +13,15 @@ Welcome to Klucher!
 <div class = "container">
 <div class = "leftSide">
 	<div class = "frontItem verticalCenter">
-	<img src = "../../resources/images/write-post-image-front.png" width = "120" height = "120">
+	<img src = "../../resources/images/write-post-image-front.png" width = "96" height = "96">
 		<span class = "nearImage">Publish your thoughts (up to 250 characters).</span>
 	</div>
 	<div class = "frontItem verticalCenter">
-	<img src = "../../resources/images/followers.png" width = "120" height = "120">
+	<img src = "../../resources/images/followers.png" width = "96" height = "96">
 		<span class = "nearImage">Follow your favourite users and receive a feed of their thoughts.</span>
 	</div>
 	<div class = "frontItem verticalCenter">
-	<img src = "../../resources/images/chat.png" width = "120" height = "120">
+	<img src = "../../resources/images/chat.png" width = "96" height = "96">
 		<span class = "nearImage">Join the discussion! Most popular #topics will automatically open chat rooms.</span>
 	</div>
 </div>

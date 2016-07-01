@@ -7,15 +7,16 @@
 <script src="/resources/js/klucher.js"></script>
 </head>
 <body>
+<input type = "hidden" id = "data" data-username = "${user.username}" data-page = "0" data-last-timestamp="9007199254740991" data-first-timestamp = "0">
 <div class = "headerLogo headerBackground">
-<img class = "headerImage" src = "../../resources/images/logo-darker-small.png">
+<img class = "headerImage" src = "../../resources/images/logo-green.png">
 </div>
 Welcome, ${user.username}.
-<form method = "POST" action = "kluch">
+<form method = "POST" action = "kluch" id = "kluchForm">
 <div class = "dashboardInputContainer">
 	<div class = "boxContainer">
 		
-		<textarea class = "dashboardTextInput" id = "composeKluch" placeholder = "Don't be shy, tell us what you're thinking."  name = "text"></textarea>
+		<textarea class = "dashboardTextInput" id = "kluchTextArea" placeholder = "Don't be shy, tell us what you're thinking."  name = "kluch"></textarea>
 			<div class = "underInput">
 				<span id = "charactersLeft">250</span>
 				<input type="submit" value="share"/>
@@ -24,10 +25,17 @@ Welcome, ${user.username}.
 	</div>
 	
 </div>
-<div class = "kluchFeed">
-
-</div>
 </form>
+<div class = "newKluch centerText" id = "newKluch"></div>
+<div class = "kluchFeed" id = "kluchFeed">
+<c:forEach items = "${feed.kluchs}" var = "kluch">
+<div class = "kluch">
+<div class = "author">${kluch.author} ${kluch.timestamp}</div>
+<div class = "kluchTextArea opacityAnimation">${kluch.text}</div>
+</div>
+</c:forEach>
+</div>
+
 		
 <script>
 $(dashboardOnLoad());
