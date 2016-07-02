@@ -179,8 +179,10 @@ function ajaxPostKluch() {
 			
 		},
 		success: function(data, status, xhr) {
+			var currentTimestamp = Date.now();
+			setFirstTimestamp(currentTimestamp);
 			clearTextArea();
-			addKluchToFeed(getUsername(), new Date(), kluchText, false);
+			addKluchToFeed(getUsername(), millisToText(currentTimestamp), kluchText, false);
 		}
 	});
 }
@@ -258,24 +260,23 @@ function addKluchsToFeed(kluchs, append) {
 	}
 	if(kluchs.length > 0) {	
 		if(append) {
-			setLastTimestamp(kluchs[kluchs.length - 1]);
-			setFirstTimestamp(kluchs[0]);
+			setLastTimestamp(kluchs[kluchs.length - 1].timestamp);
+			setFirstTimestamp(kluchs[0].timestamp);
 		} else {
-			setLastTimestamp(kluchs[0]);
-			setFirstTimestamp(kluchs[kluchs.length - 1]);
+			setLastTimestamp(kluchs[0].timestamp);
+			setFirstTimestamp(kluchs[kluchs.length - 1].timestamp);
 		}
 	}
 }
 
 function addKluchToFeed(author, timeText, text, append) {
 	if(typeof author === "undefined") {
-		
+		return;
 	}
 	var outerDiv = document.createElement("div");
 	append ? $("#kluchFeed").append(outerDiv) : $("#kluchFeed").prepend(outerDiv);
 	outerDiv.classList.toggle("kluch");
 	var authorDiv = document.createElement("div");
-	//authorDiv.classList.toggle("author");
 	$("<span class = 'author'>" + author + "</span>").appendTo(authorDiv);
 	$("<span class = 'dashboardTime'>" + timeText + "</span>").appendTo(authorDiv);
 	$(authorDiv).appendTo(outerDiv);
@@ -305,19 +306,17 @@ function setGettingFeed(data) {
 	$("#data").attr("data-getting-feed", data);
 }
 
-function setLastTimestamp(kluch) {
-	var kluchTimestamp = kluch.timestamp;
+function setLastTimestamp(millis) {
 	var currentLastTimestamp = parseInt($("#data").attr("data-last-timestamp"));
-	if(currentLastTimestamp > kluchTimestamp) {
-		$("#data").attr("data-last-timestamp", kluchTimestamp);
+	if(currentLastTimestamp > millis) {
+		$("#data").attr("data-last-timestamp", millis);
 	}
 }
 
-function setFirstTimestamp(kluch) {
-	var kluchTimestamp = kluch.timestamp;
+function setFirstTimestamp(millis) {
 	var currentFirstTimestamp = parseInt($("#data").attr("data-first-timestamp"));
-	if(currentFirstTimestamp < kluchTimestamp) {
-		$("#data").attr("data-first-timestamp", kluchTimestamp);
+	if(currentFirstTimestamp < millis) {
+		$("#data").attr("data-first-timestamp", millis);
 	}
 }
 

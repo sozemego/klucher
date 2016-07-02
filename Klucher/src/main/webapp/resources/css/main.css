@@ -210,7 +210,6 @@ body {
 .author {
 	font-size: 0.85em;
 	color: gray;
-	text-align: right;
 	margin: auto;
 }
 
@@ -222,5 +221,15 @@ body {
 
 .cursorPointer {
 	cursor: pointer;
+}
+
+.dashboardAuthor {
+	float:left;
+}
+
+.dashboardTime {
+	font-size: 0.85em;
+	color: gray;
+	float: right;
 }
 
