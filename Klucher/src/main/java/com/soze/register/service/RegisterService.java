@@ -16,7 +16,7 @@ import com.soze.user.model.User;
 public class RegisterService {
 
   private static final int MIN_USERNAME_LENGTH = 4;
-  private static final int MAX_USERNAME_LENGTH = 64;
+  private static final int MAX_USERNAME_LENGTH = 32;
   private static final int MIN_PASSWORD_LENGTH = 6;
   private static final int MAX_PASSWORD_LENGTH = 64;
   private static final Logger log = LoggerFactory

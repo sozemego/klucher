@@ -78,7 +78,7 @@ function validateUsername() {
 		$("#errorTable").append(createTableRowWithText("Username should be at least 4 characters long."));
 	}
 	if(isTooLong) {
-		$("#errorTable").append(createTableRowWithText("Username should not be longer than 64 characters."));
+		$("#errorTable").append(createTableRowWithText("Username should not be longer than 32 characters."));
 	}
 }
 
@@ -116,7 +116,7 @@ function isUsernameTooShort(username) {
 }
 
 function isUsernameTooLong(username) {
-	return username.length > 64;
+	return username.length > 32;
 }
 
 function isPasswordTooShort(password) {
@@ -254,7 +254,7 @@ function clearTextArea() {
 function addKluchsToFeed(kluchs, append) {
 	for(var i = 0; i < kluchs.length; i++) {
 		var kluch = kluchs[i];		
-		addKluchToFeed(kluch.author, new Date(kluch.timestamp), kluch.text, append);
+		addKluchToFeed(kluch.author, millisToText(kluch.timestamp), kluch.text, append);
 	}
 	if(kluchs.length > 0) {	
 		if(append) {
@@ -267,7 +267,7 @@ function addKluchsToFeed(kluchs, append) {
 	}
 }
 
-function addKluchToFeed(author, date, text, append) {
+function addKluchToFeed(author, timeText, text, append) {
 	if(typeof author === "undefined") {
 		
 	}
@@ -275,8 +275,9 @@ function addKluchToFeed(author, date, text, append) {
 	append ? $("#kluchFeed").append(outerDiv) : $("#kluchFeed").prepend(outerDiv);
 	outerDiv.classList.toggle("kluch");
 	var authorDiv = document.createElement("div");
-	authorDiv.classList.toggle("author");
-	$("<abc>" + author + " " + date.toLocaleString() + "</abc>").appendTo(authorDiv);
+	//authorDiv.classList.toggle("author");
+	$("<span class = 'author'>" + author + "</span>").appendTo(authorDiv);
+	$("<span class = 'dashboardTime'>" + timeText + "</span>").appendTo(authorDiv);
 	$(authorDiv).appendTo(outerDiv);
 	var textAreaDiv = document.createElement("div");
 	textAreaDiv.classList.toggle("kluchTextArea");
@@ -373,5 +374,48 @@ function clickNewKluchs() {
 function hideNewKluchElement() {
 	$("#newKluch").empty();
 }
+
+function millisToText(millis) {
+	var date = new Date(millis);
+	var now = new Date();
+	var millisNow = now.getTime();
+	var millisDifference = millisNow - date.getTime();
+	var minutesPassed = Math.floor(this.minutesPassed(millisDifference));
+	if(minutesPassed < 60) {
+		if(minutesPassed === 0) {
+			return "less than a minute ago";
+		} 
+		if(minutesPassed === 1) {
+			return "a minute ago";
+		}
+		return minutesPassed + " minutes ago";
+	}
+	var hoursPassed = Math.floor(this.hoursPassed(minutesPassed));
+    if(hoursPassed < 24) {
+    	if(hoursPassed === 1) {
+    		return "an hour ago";
+    	}
+    	return hoursPassed + " hours ago";
+    }
+    var daysPassed = Math.floor(this.daysPassed(hoursPassed));
+    if(daysPassed === 1) {
+    	return "a day ago";
+    }
+    return daysPassed + " days ago";
+}
+
+function minutesPassed(millis) {
+	var seconds = millis / 1000;
+	return seconds / 60;
+}
+
+function hoursPassed(minutes) {
+	return minutes / 60;
+}
+
+function daysPassed(hours) {
+	return hours / 24;
+}
+
 
 
