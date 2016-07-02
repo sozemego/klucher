@@ -31,7 +31,7 @@ public class DevController {
     this.kluchGenerator = kluchGenerator;
   }
   
-  @RequestMapping("/genKluchs/random/{username}")
+  @RequestMapping("/dev/genKluchs/random/{username}")
   public void genKluchsRandom(@PathVariable String username, @RequestParam(required = true) Integer number, @RequestParam(required = false) Integer milis) {
     log.info("Adding random [{}] posts for user [{}]", number, username);
     ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
@@ -39,23 +39,23 @@ public class DevController {
     executor.scheduleAtFixedRate(poster, 0, milis == null ? 250 : milis, TimeUnit.MILLISECONDS);
   }
   
-  @RequestMapping("/genKluchs/timestamp/{username}")
+  @RequestMapping("/dev/genKluchs/timestamp/{username}")
   public void genKluchsTimestamp(@PathVariable String username, @RequestParam(required = true) Integer number, @RequestParam(required = false) Integer milis) {
     log.info("Adding timestamp [{}] posts for user [{}]", number, username);
     ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     FixedRatePoster poster = new FixedRatePoster(username, number, executor, kluchGenerator::getCurrentTimestamp);
-    executor.scheduleAtFixedRate(poster, 0, milis == null ? 0 : milis, TimeUnit.MILLISECONDS);
+    executor.scheduleAtFixedRate(poster, 0, milis == null ? 250 : milis, TimeUnit.MILLISECONDS);
   }
   
-  @RequestMapping("/genKluchs/id/{username}")
+  @RequestMapping("/dev/genKluchs/id/{username}")
   public void genKluchsId(@PathVariable String username, @RequestParam(required = true) Integer number, @RequestParam(required = false) Integer milis) {
     log.info("Adding timestamp [{}] posts for user [{}]", number, username);
     ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     FixedRatePoster poster = new FixedRatePoster(username, number, executor, kluchGenerator::getUniqueIdAsText);
-    executor.scheduleAtFixedRate(poster, 0, milis == null ? 0 : milis, TimeUnit.MILLISECONDS);
+    executor.scheduleAtFixedRate(poster, 0, milis == null ? 250 : milis, TimeUnit.MILLISECONDS);
   }
   
-  @RequestMapping("/genKluchs/delete/{username}")
+  @RequestMapping("/dev/genKluchs/delete/{username}")
   public void deleteKluchs(@PathVariable String username) {
     log.info("Removing all posts for user [{}]", username);
     kluchService.deleteAll(username);
