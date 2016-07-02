@@ -39,7 +39,7 @@ public class FeedController {
       return false;
     }
     String username = authentication.getName();
-    return feedConstructor.existsFeedBefore(username, timestamp);
+    return feedConstructor.existsFeedAfter(username, timestamp);
   }
 
   @RequestMapping(value = "/feed", method = RequestMethod.GET)
@@ -65,7 +65,7 @@ public class FeedController {
     if (direction.equalsIgnoreCase("after")) {
       feed = feedConstructor.constructFeed(username, timestamp);
     } else if (direction.equals("before")) {
-      feed = feedConstructor.constructFeedBefore(username, timestamp);
+      feed = feedConstructor.constructFeedAfter(username, timestamp);
     }
     return feed;
   }
