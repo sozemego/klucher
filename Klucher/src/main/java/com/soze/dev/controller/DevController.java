@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.soze.dev.service.RandomKluchGenerator;
+import com.soze.kluch.exceptions.KluchException;
 import com.soze.kluch.service.KluchService;
 
 @Controller
@@ -82,10 +83,14 @@ public class DevController {
     }
     
     public void run() {
-      kluchService.post(username, supplier.get());
-      timesRun++;
-      if(timesRun >= timesToRun) {
-        executor.shutdown();
+      try {
+        kluchService.post(username, supplier.get());
+        timesRun++;
+        if(timesRun >= timesToRun) {
+          executor.shutdown();
+        }
+      } catch (KluchException e) {
+        
       }
     }
   }
