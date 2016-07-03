@@ -58,7 +58,7 @@ public class KluchService {
     Kluch kluch = kluchAssembler.assembleKluch(username, kluchText);
     kluchDao.save(kluch);
     saveLastKluch(username, kluchText);
-    log.info("User [{}] successfuly posted a Kluch with text [{}]", username,
+    log.info("User [{}] successfuly posted a Kluch with text [{}].", username,
         kluchText);
   }
 
@@ -68,7 +68,7 @@ public class KluchService {
     if (!kluchText.equals(pastKluch)) {
       throw new AlreadyPostedException("User [" + username
           + "] tried to post a Kluch with content identical to the previous Kluch ["
-          + kluchText + "]");
+          + kluchText + "].");
     }
   }
 
@@ -78,10 +78,12 @@ public class KluchService {
 
   public void deleteKluch(long id) {
     kluchDao.delete(id);
+    log.info("Deleting a kluch with id [{}].", id);
   }
 
   public void deleteAll(String username) {
     kluchDao.deleteByAuthor(username);
+    log.info("Deleting all Kluchs posted by [{}].", username);
   }
 
 }
