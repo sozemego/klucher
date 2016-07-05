@@ -38,6 +38,11 @@ public class FeedController {
           "You are not logged in.");
       return false;
     }
+    if(timestamp == null) {
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+          "Timestamp cannot be null.");
+      return false;
+    }
     String username = authentication.getName();
     return feedConstructor.existsFeedAfter(username, timestamp);
   }

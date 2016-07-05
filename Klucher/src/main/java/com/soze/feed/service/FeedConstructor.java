@@ -26,8 +26,10 @@ import com.soze.user.model.User;
 @Service
 public class FeedConstructor {
 
-  private final PageRequest before = new PageRequest(0, 30, new Sort(new Order(Direction.DESC, "timestamp")));
-  private final PageRequest after = new PageRequest(0, 3000, new Sort(new Order(Direction.ASC, "timestamp")));
+  public static final int BEFORE_KLUCHS_PER_REQUEST = 30;
+  public static final int AFTER_KLUCHS_PER_REQUEST = 30;
+  private final PageRequest before = new PageRequest(0, BEFORE_KLUCHS_PER_REQUEST, new Sort(new Order(Direction.DESC, "timestamp")));
+  private final PageRequest after = new PageRequest(0, AFTER_KLUCHS_PER_REQUEST, new Sort(new Order(Direction.ASC, "timestamp")));
   private final PageRequest exists = new PageRequest(0, 1);
   private final KluchDao kluchDao;
   private final UserDao userDao;
