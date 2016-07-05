@@ -40,4 +40,5 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-devtools')
 	compile('org.springframework.security:spring-security-test:4.1.0.RELEASE')
 	testCompile('org.springframework.boot:spring-boot-starter-test') 
+	testCompile('com.jayway.jsonpath:json-path')
 }
