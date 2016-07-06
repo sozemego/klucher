@@ -20,14 +20,15 @@ public class KluchAssembler {
   
   /**
    * Assembles and returns a valid Kluch object for a given author and text.
-   * This method removes all non-dictionary characters from the KluchText.
-   * @param author
-   * @param kluchText
+   * @param author cannot be empty or null
+   * @param kluchText cannot be empty or null
    * @return
+   * @throws InvalidKluchContentException if kluchText is null, empty or too long
+   * @throws IllegalArgumentException if author is null or empty
    */
-  public Kluch assembleKluch(String author, String kluchText) throws InvalidKluchContentException {
+  public Kluch assembleKluch(String author, String kluchText) throws InvalidKluchContentException, IllegalArgumentException {
+    validateAuthor(author);
     validateKluch(kluchText);
-    kluchText = stripNonDictionaryCharacters(kluchText);
     Kluch kluch = new Kluch();
     kluch.setAuthor(author);
     kluch.setText(kluchText);
@@ -35,15 +36,25 @@ public class KluchAssembler {
     return kluch;
   }
   
-  private void validateKluch(String kluchText) throws InvalidKluchContentException {
-    if(kluchText.length() > KLUCH_MAX_LENGTH) {
-      throw new InvalidKluchContentException("Kluch content is too long.");
+  private void validateAuthor(String author) {
+    if(author == null) {
+      throw new IllegalArgumentException("Author name cannot be null.");
+    }
+    if(author.isEmpty()) {
+      throw new IllegalArgumentException("Author name cannot be empty.");
     }
   }
   
-  private String stripNonDictionaryCharacters(String kluchText) {
-    return kluchText.replaceAll("[^\\p{IsAlphabetic}^\\p{IsDigit}]", "");
+  private void validateKluch(String kluchText) throws InvalidKluchContentException {
+    if(kluchText == null) {
+      throw new InvalidKluchContentException("Kluch content cannot be null.");
+    }
+    if(kluchText.length() > KLUCH_MAX_LENGTH) {
+      throw new InvalidKluchContentException("Kluch content is too long.");
+    }
+    if(kluchText.isEmpty()) {
+      throw new InvalidKluchContentException("Kluch cannot be empty.");
+    }
   }
-  
-  
+
 }
