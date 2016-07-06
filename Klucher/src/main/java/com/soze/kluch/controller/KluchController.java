@@ -38,10 +38,10 @@ public class KluchController {
       log.info("User [{}] last Kluch content equals this one [{}].", username, kluch, e);
       return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
     } catch (InvalidKluchContentException e) {
-      log.info("User [{}] posted a Kluch with invalid content [{}].", username, kluch, e);
+      log.info("User [{}] tried to post a Kluch with invalid content [{}].", username, kluch, e);
       return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
     } catch (IllegalArgumentException e) {
-      log.info("Either username [{}] or kluchContent [{}] are null.", username, kluch, e);
+      log.info("Username [{}] is null or empty.", username, e);
       return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
     } 
     return new ResponseEntity<String>(HttpStatus.OK);
