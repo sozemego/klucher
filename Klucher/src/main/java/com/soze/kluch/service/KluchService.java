@@ -65,7 +65,7 @@ public class KluchService {
   private void checkAlreadyPosted(String username, String kluchText)
       throws AlreadyPostedException {
     String pastKluch = pastKluchs.get(username);
-    if (!kluchText.equals(pastKluch)) {
+    if (kluchText.equals(pastKluch)) {
       throw new AlreadyPostedException("User [" + username
           + "] tried to post a Kluch with content identical to the previous Kluch ["
           + kluchText + "].");
