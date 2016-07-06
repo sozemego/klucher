@@ -42,18 +42,11 @@ public class KluchService {
    * @param username author of given Kluch, cannot be null or empty
    * @param kluchText Kluch content, cannot be null or empty
    * @throws AlreadyPostedException if this author's last successful kluch's content is identical to this one
-   * @throws InvalidKluchContentException if the content is too long or otherwise invalid
-   * @throws IllegalArgumentException if either username or kluch content is null or empty
+   * @throws InvalidKluchContentException if the content is too long, empty or otherwise invalid
+   * @throws IllegalArgumentException if username is null or empty
    */
   public void post(String username, String kluchText)
       throws AlreadyPostedException, InvalidKluchContentException, IllegalArgumentException {
-    if (username == null || username.isEmpty()) {
-      throw new IllegalArgumentException("Username cannot be empty or null.");
-    }
-    if (kluchText == null || kluchText.isEmpty()) {
-      throw new IllegalArgumentException(
-          "Kluch content cannot be empty or null.");
-    }
     checkAlreadyPosted(username, kluchText);
     Kluch kluch = kluchAssembler.assembleKluch(username, kluchText);
     kluchDao.save(kluch);
@@ -65,7 +58,7 @@ public class KluchService {
   private void checkAlreadyPosted(String username, String kluchText)
       throws AlreadyPostedException {
     String pastKluch = pastKluchs.get(username);
-    if (kluchText.equals(pastKluch)) {
+    if (kluchText != null && kluchText.equals(pastKluch)) {
       throw new AlreadyPostedException("User [" + username
           + "] tried to post a Kluch with content identical to the previous Kluch ["
           + kluchText + "].");
