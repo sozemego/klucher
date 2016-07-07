@@ -157,7 +157,7 @@ public class RegisterControllerTest extends TestWithUserBase {
         .param("password", generateString(6)))
     .andDo(print())
     .andExpect(status().is3xxRedirection())
-    .andExpect(redirectedUrl("dashboard"));
+    .andExpect(redirectedUrl("/dashboard"));
     assertThat(userDao.count(), equalTo(1L));
   }
   
