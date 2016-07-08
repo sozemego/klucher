@@ -16,7 +16,7 @@ body {
 
 .roundedCorners {
 	border-radius: 25px;
-	background-color: #ADD8E6;
+	background-color: #add8e6;
     border: solid 1px gray;
     padding: 20px; 
     width: auto;
@@ -122,7 +122,8 @@ body {
 }
 
 .paddedHeader {
-	padding-bottom: 45px;
+	padding-top: 5px;
+	padding-bottom: 10px;
 }
 
 .headerImage {
@@ -142,7 +143,7 @@ body {
 }
 
 .headerBackground {
-	background: #CDFFFF;
+	background: white;
 	border-bottom: solid 1px gray;
 }
 
@@ -175,6 +176,7 @@ body {
 	border: 1px solid gray;	
 	height: 94px;
 	margin: auto;
+	word-wrap: break-word;
 }
 
 .opacityAnimation {

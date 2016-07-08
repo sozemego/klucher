@@ -8,21 +8,21 @@
 </head>
 <body>
 <div class = "welcome paddedHeader centerText">
-Welcome to Klucher <img class = "dashboardLogo" src = "../../resources/images/logo-green.png"></img>
+Welcome to Klucher <img class = "dashboardLogo" src = "../../resources/images/logo_2.png"></img>
 </div>
 <div class = "container">
 <div class = "leftSide">
 	<div class = "frontItem verticalCenter">
 		<span class = "nearImage">Publish your thoughts (up to 250 characters).</span>
-	<img src = "../../resources/images/write-post-image-front.png" width = "96" height = "96">
+	<img src = "../../resources/images/write-post-image-front_color.png" width = "96" height = "96">
 	</div>
 	<div class = "frontItem verticalCenter">
 		<span class = "nearImage">Follow your favourite users and receive a feed of their thoughts.</span>
-	<img src = "../../resources/images/followers.png" width = "96" height = "96">
+	<img src = "../../resources/images/followers_color.png" width = "96" height = "96">
 	</div>
 	<div class = "frontItem verticalCenter">
 		<span class = "nearImage">Join the discussion! Most popular #topics will automatically open chat rooms.</span>
-	<img src = "../../resources/images/chat.png" width = "96" height = "96">
+	<img src = "../../resources/images/chat_color.png" width = "96" height = "96">
 	</div>
 </div>
 <div class = "rightSide">

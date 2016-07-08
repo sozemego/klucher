@@ -8,8 +8,8 @@
 </head>
 <body>
 <input type = "hidden" id = "data" data-username = "${user.username}" data-page = "0" data-last-timestamp="9007199254740991" data-first-timestamp = "0">
-<div class = "headerLogo headerBackground">
-<img class = "headerImage" src = "../../resources/images/logo-green.png">
+<div class = "headerLogo paddedHeader headerBackground">
+<img class = "headerImage" src = "../../resources/images/logo_2.png">
 </div>
 Welcome, ${user.username}.
 <form method = "POST" action = "kluch" id = "kluchForm">
