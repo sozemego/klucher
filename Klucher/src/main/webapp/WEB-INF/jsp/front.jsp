@@ -8,25 +8,25 @@
 </head>
 <body>
 <div class = "welcome paddedHeader centerText">
-Welcome to Klucher!
+Welcome to Klucher <img class = "dashboardLogo" src = "../../resources/images/logo-green.png"></img>
 </div>
 <div class = "container">
 <div class = "leftSide">
 	<div class = "frontItem verticalCenter">
-	<img src = "../../resources/images/write-post-image-front.png" width = "96" height = "96">
 		<span class = "nearImage">Publish your thoughts (up to 250 characters).</span>
+	<img src = "../../resources/images/write-post-image-front.png" width = "96" height = "96">
 	</div>
 	<div class = "frontItem verticalCenter">
-	<img src = "../../resources/images/followers.png" width = "96" height = "96">
 		<span class = "nearImage">Follow your favourite users and receive a feed of their thoughts.</span>
+	<img src = "../../resources/images/followers.png" width = "96" height = "96">
 	</div>
 	<div class = "frontItem verticalCenter">
-	<img src = "../../resources/images/chat.png" width = "96" height = "96">
 		<span class = "nearImage">Join the discussion! Most popular #topics will automatically open chat rooms.</span>
+	<img src = "../../resources/images/chat.png" width = "96" height = "96">
 	</div>
 </div>
 <div class = "rightSide">
-	<div class = "login">	
+	<div class = "form">	
 		<form action="login" method="post">
 		<table class = "roundedCorners frontForm">
 			<tr>
@@ -57,7 +57,7 @@ Welcome to Klucher!
 			value="${_csrf.token}" />
 	</form>
 	</div>
-	<div class = "register">		
+	<div class = "form">		
 		<form action="register" method="POST" modelAttribute="registerForm">
 		<table class = "roundedCorners frontForm" id = "registerTable">
 			<tr>
