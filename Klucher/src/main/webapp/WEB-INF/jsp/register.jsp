@@ -7,6 +7,7 @@
 <script src="/resources/js/klucher.js"></script>
 </head>
 <body>
+<c:import url="header.jsp"></c:import>
 	<form action="register" method="POST" modelAttribute="registerForm">
 		<table class = "centerViewport roundedCorners" id = "registerTable">
 			<tr>

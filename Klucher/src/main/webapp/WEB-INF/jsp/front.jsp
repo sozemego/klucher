@@ -7,9 +7,7 @@
 <script src="/resources/js/klucher.js"></script>
 </head>
 <body>
-<div class = "welcome paddedHeader centerText">
-Welcome to Klucher <img class = "dashboardLogo" src = "../../resources/images/logo_2.png"></img>
-</div>
+<c:import url="header.jsp"></c:import>
 <div class = "container">
 <div class = "leftSide">
 	<div class = "frontItem verticalCenter">

@@ -5,6 +5,7 @@
 	href="<c:url value="/resources/css/main.css" />"></link>
 </head>
 <body>
+<c:import url="header.jsp"></c:import>
 	<form action="login" method="post">
 		<table class = "centerViewport roundedCorners">
 			<tr>

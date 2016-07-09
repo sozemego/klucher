@@ -129,7 +129,7 @@ body {
 .headerImage {
 	width: 64px;
 	height: 64px;
-	transform: translate(-50%, 0%);
+	//transform: translate(-50%, 0%);
 }
 
 .dashboardLogo {
@@ -144,6 +144,9 @@ body {
 
 .headerBackground {
 	background: white;
+}
+
+.bottomBorder {
 	border-bottom: solid 1px gray;
 }
 
