@@ -172,9 +172,28 @@ body {
 	margin: auto;
 }
 
+.authorDiv {
+	background-image: url("../images/author_div_background_25.png");
+  	background-repeat: no-repeat;
+  	background-size: cover;
+}
+
+.author {
+	font-size: 0.85em;
+	color: black;
+	margin: auto;
+	padding-left: 1px;
+}
+
+.dashboardTime {
+	font-size: 0.85em;
+	color: black;
+	float: right;
+}
+
 .kluchTextArea {	
 	border: 1px solid gray;	
-	height: 94px;
+	min-height: 3em;
 	margin: auto;
 	word-wrap: break-word;
 }
@@ -218,13 +237,6 @@ body {
 	100% {opacity: 1.0;}
 }
 
-
-.author {
-	font-size: 0.85em;
-	color: gray;
-	margin: auto;
-}
-
 .newKluch {
 	width: 350px;
 	height: 85px;
@@ -239,9 +251,6 @@ body {
 	float:left;
 }
 
-.dashboardTime {
-	font-size: 0.85em;
-	color: gray;
-	float: right;
+.preWrap {
+	white-space: pre-wrap;
 }
-

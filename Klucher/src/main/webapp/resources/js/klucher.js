@@ -161,7 +161,7 @@ function charactersRemaining(text, length) {
 function attachShareKluchListener() {
 	$("#kluchForm").submit(function(event) {
 		event.preventDefault();
-		ajaxPostKluch();
+		ajaxPostKluch();		
 	});
 }
 
@@ -183,6 +183,7 @@ function ajaxPostKluch() {
 			setFirstTimestamp(currentTimestamp);
 			clearTextArea();
 			addKluchToFeed(getUsername(), millisToText(currentTimestamp), kluchText, false);
+			checkCharacterCount();
 		}
 	});
 }
@@ -276,14 +277,16 @@ function addKluchToFeed(author, timeText, text, append) {
 	var outerDiv = document.createElement("div");
 	append ? $("#kluchFeed").append(outerDiv) : $("#kluchFeed").prepend(outerDiv);
 	outerDiv.classList.toggle("kluch");
+	outerDiv.classList.toggle("opacityAnimation");
 	var authorDiv = document.createElement("div");
+	authorDiv.classList.toggle("authorDiv");
 	$("<span class = 'author'>" + author + "</span>").appendTo(authorDiv);
 	$("<span class = 'dashboardTime'>" + timeText + "</span>").appendTo(authorDiv);
 	$(authorDiv).appendTo(outerDiv);
 	var textAreaDiv = document.createElement("div");
 	textAreaDiv.classList.toggle("kluchTextArea");
-	textAreaDiv.classList.toggle("opacityAnimation");
-	$("<abc>" +  text + "</abc>").appendTo(textAreaDiv);
+	textAreaDiv.classList.toggle("preWrap");
+	$("<span>" +  text + "</span>").appendTo(textAreaDiv);
 	$(textAreaDiv).appendTo(outerDiv);
 }
 
