@@ -26,9 +26,9 @@
 					name="remember-me"> Remember me
 				<input type="submit" value="log in"/></td>
 			</tr>
-			<c:if test="${not empty error}">
+			<c:if test="${not empty SPRING_SECURITY_LAST_EXCEPTION}">
 			<tr>
-				<td class = "error" colspan = "2" align="center">${error}</td>
+				<td class = "error" colspan = "2" align="center">Wrong username or password!</td>
 			</tr>
 			</c:if>
 		</table>
