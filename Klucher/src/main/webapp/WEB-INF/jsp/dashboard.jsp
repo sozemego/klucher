@@ -11,6 +11,7 @@
 <div class = "bottomBorder">
 <c:import url="header.jsp"></c:import>
 </div>
+<div class = "content">
 Welcome, ${user.username}.
 <form method = "POST" action = "kluch" id = "kluchForm">
 <div class = "dashboardInputContainer">
@@ -36,7 +37,7 @@ Welcome, ${user.username}.
 </c:forEach>
 </div>
 
-		
+</div>
 <script>
 $(dashboardOnLoad());
 </script>	

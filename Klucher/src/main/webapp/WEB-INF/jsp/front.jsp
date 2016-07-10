@@ -8,7 +8,7 @@
 </head>
 <body>
 <c:import url="header.jsp"></c:import>
-<div class = "container">
+<div class = "container content">
 <div class = "leftSide">
 	<div class = "frontItem verticalCenter">
 		<span class = "nearImage">Publish your thoughts (up to 250 characters).</span>

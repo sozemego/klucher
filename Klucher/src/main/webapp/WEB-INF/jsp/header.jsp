@@ -5,6 +5,6 @@
 	href="<c:url value="/resources/css/main.css" />"></link>
 </head>
 <body>
-<div class = "headerLogo paddedHeader headerBackground">
+<div class = "mainHeader headerLogo paddedHeader headerBackground">
 <img class = "headerImage" src = "../../resources/images/logo_2.png">
 </div>
