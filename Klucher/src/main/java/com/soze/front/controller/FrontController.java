@@ -14,7 +14,7 @@ public class FrontController {
   @RequestMapping(method = RequestMethod.GET)
   public String getFrontPage(Authentication authentication) {
     if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-      return "dashboard";
+      return "redirect:dashboard";
     }
     return "front";
   }
