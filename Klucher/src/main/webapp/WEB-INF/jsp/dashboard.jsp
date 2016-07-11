@@ -12,7 +12,6 @@
 <c:import url="header.jsp"></c:import>
 </div>
 <div class = "content">
-Welcome, ${user.username}.
 <form method = "POST" action = "kluch" id = "kluchForm">
 <div class = "dashboardInputContainer">
 	<div class = "boxContainer">
@@ -28,6 +27,7 @@ Welcome, ${user.username}.
 </div>
 </form>
 <div class = "newKluch centerText" id = "newKluch"></div>
+<div class = "kluchContainer">
 <div class = "kluchFeed" id = "kluchFeed">
 <c:forEach items = "${feed.kluchs}" var = "kluch">
 <div class = "kluch">
@@ -36,7 +36,8 @@ Welcome, ${user.username}.
 </div>
 </c:forEach>
 </div>
-
+<div id = "lastPage" class = "lastPage hidden">No more Kluchs to load :(</div>
+</div>
 </div>
 <script>
 $(dashboardOnLoad());

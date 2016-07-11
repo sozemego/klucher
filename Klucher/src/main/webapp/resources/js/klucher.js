@@ -247,6 +247,7 @@ function setPage(data) {
 	var page = data.kluchs;
 	if(page.last) {
 		$("#data").attr("data-page", -1);
+		$("#lastPage").removeClass("hidden");
 	} 
 }
 

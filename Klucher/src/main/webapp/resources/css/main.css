@@ -213,6 +213,7 @@ body {
 
 .kluchTextArea:hover {	
 	background-color: add8e6;
+	cursor: pointer;
 }
 
 .opacityAnimation {
@@ -270,4 +271,12 @@ body {
 
 .preWrap {
 	white-space: pre-wrap;
+}
+
+.lastPage {
+	text-align: center;
+}
+
+.hidden {
+	visibility: hidden;	
 }
