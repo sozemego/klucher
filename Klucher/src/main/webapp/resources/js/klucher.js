@@ -247,7 +247,6 @@ function setPage(data) {
 	var page = data.kluchs;
 	if(page.last) {
 		$("#data").attr("data-page", -1);
-		$("#lastPage").removeClass("hidden");
 	} 
 }
 
@@ -301,8 +300,9 @@ function attachInfiniteScrollingListener() {
 		var scrollY = window.scrollY;
 		var bodyHeight = document.body.offsetHeight;
 	    if ((windowInnerHeight + scrollY) >= bodyHeight * 0.9) {
-	        getFeed("after");
+	        getFeed();
 	    }
+	    displayLastPageMessage();
 	});
 }
 
@@ -376,6 +376,13 @@ function clickNewKluchs() {
 
 function hideNewKluchElement() {
 	$("#newKluch").empty();
+}
+
+function displayLastPageMessage() {
+	var lastPage = $("#data").attr("data-page");
+	if(lastPage == -1) {
+		$("#lastPage").removeClass("hidden");
+	}
 }
 
 function millisToText(millis) {
