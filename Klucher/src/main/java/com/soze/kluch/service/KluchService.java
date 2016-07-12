@@ -6,12 +6,12 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.soze.kluch.dao.KluchDao;
-import com.soze.kluch.exceptions.AlreadyPostedException;
-import com.soze.kluch.exceptions.InvalidKluchContentException;
 import com.soze.kluch.model.Kluch;
+import com.soze.kluch.model.KluchResult;
 
 /**
  * A service responsible for posting new Kluchs. It validates them, assembles
@@ -26,6 +26,10 @@ import com.soze.kluch.model.Kluch;
 public class KluchService {
 
   private static final Logger log = LoggerFactory.getLogger(KluchService.class);
+  private static final int KLUCH_MAX_LENGTH = 250;
+  private static final HttpStatus ALREADY_POSTED = HttpStatus.BAD_REQUEST;
+  private static final HttpStatus INVALID_AUTHOR = HttpStatus.BAD_REQUEST;
+  private static final HttpStatus INVALID_KLUCH_CONTENT = HttpStatus.BAD_REQUEST;
   private final KluchDao kluchDao;
   private final KluchAssembler kluchAssembler;
   private final Map<String, String> pastKluchs = new HashMap<>();
@@ -38,32 +42,61 @@ public class KluchService {
 
   /**
    * Attempts to post a Kluch with given content for a given User. This method validates
-   * input and throws appropriate exceptions for invalid input.
+   * input and the result is stored in the KluchResult object.
    * @param username author of given Kluch, cannot be null or empty
    * @param kluchText Kluch content, cannot be null or empty
-   * @throws AlreadyPostedException if this author's last successful kluch's content is identical to this one
-   * @throws InvalidKluchContentException if the content is too long, empty or otherwise invalid
-   * @throws IllegalArgumentException if username is null or empty
    */
-  public void post(String username, String kluchText)
-      throws AlreadyPostedException, InvalidKluchContentException, IllegalArgumentException {
-    checkAlreadyPosted(username, kluchText);
+  public KluchResult post(String username, String kluchText) {
+    KluchResult result = new KluchResult(username, kluchText);
+    validateInput(username, kluchText, result);
+    if(!result.isSuccessful()) {
+      return result;
+    }
+    checkAlreadyPosted(username, kluchText, result);
+    if(!result.isSuccessful()) {
+      return result;
+    }
     Kluch kluch = kluchAssembler.assembleKluch(username, kluchText);
     kluchDao.save(kluch);
     saveLastKluch(username, kluchText);
     log.info("User [{}] successfuly posted a Kluch with text [{}].", username,
         kluchText);
+    return result;
   }
 
-  private void checkAlreadyPosted(String username, String kluchText)
-      throws AlreadyPostedException {
+  private void checkAlreadyPosted(String username, String kluchText, KluchResult result) {
     String pastKluch = pastKluchs.get(username);
     if (kluchText != null && kluchText.equals(pastKluch)) {
-      throw new AlreadyPostedException("User [" + username
-          + "] tried to post a Kluch with content identical to the previous Kluch ["
-          + kluchText + "].");
+      result.setResult("User's [" + username + "] last Kluch was identical.", ALREADY_POSTED);
     }
   }
+  
+  private void validateInput(String username, String kluchText, KluchResult result) {
+    validateAuthor(username, result);
+    validateKluch(kluchText, result);
+  }
+  
+  private void validateAuthor(String author, KluchResult result) {
+    if (author == null) {
+      result.setResult("Author name cannot be null.", INVALID_AUTHOR);
+    } else if (author.isEmpty()) {
+      result.setResult("Author name cannot be empty.", INVALID_AUTHOR);
+    }
+  }
+  
+  private void validateKluch(String kluchText, KluchResult result) {
+    if (kluchText == null) {
+      result.setResult("Kluch content cannot be null.", INVALID_KLUCH_CONTENT);
+    } else {
+      if (kluchText.length() > KLUCH_MAX_LENGTH) {
+        result.setResult("Kluch content is too long.", INVALID_KLUCH_CONTENT);
+      }
+      if (kluchText.isEmpty()) {
+        result.setResult("Kluch cannot be empty.", INVALID_KLUCH_CONTENT);
+      }
+    }
+  }
+
 
   private void saveLastKluch(String username, String kluchText) {
     pastKluchs.put(username, kluchText);

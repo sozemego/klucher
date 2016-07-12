@@ -8,14 +8,14 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.Klucher;
 import com.soze.kluch.dao.KluchDao;
-import com.soze.kluch.exceptions.AlreadyPostedException;
-import com.soze.kluch.exceptions.InvalidKluchContentException;
+import com.soze.kluch.model.KluchResult;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Klucher.class)
@@ -30,10 +30,12 @@ public class KluchServiceTest {
   @Autowired
   private KluchDao kluchDao;
   
-  @Test(expected = InvalidKluchContentException.class)
+  @Test
   public void testTooLongKluch() throws Exception {
     assertThat(kluchDao.count(), equalTo(0L));
-    kluchService.post("author", generateString(251));
+    KluchResult result = kluchService.post("author", generateString(251));
+    assertThat(result.getStatus(), equalTo(HttpStatus.BAD_REQUEST));
+    assertThat(result.isSuccessful(), equalTo(false));
     assertThat(kluchDao.count(), equalTo(0L));
   }
   
@@ -45,39 +47,48 @@ public class KluchServiceTest {
     assertThat(kluchDao.count(), equalTo(1L));
   }
   
-  @Test(expected = InvalidKluchContentException.class)
+  @Test
   public void testEmptyKluch() throws Exception {
     assertThat(kluchDao.count(), equalTo(0L));
-    kluchService.post("author", "");
+    KluchResult result = kluchService.post("author", "");
+    assertThat(result.getStatus(), equalTo(HttpStatus.BAD_REQUEST));
+    assertThat(result.isSuccessful(), equalTo(false));
     assertThat(kluchDao.count(), equalTo(0L));
   }
   
-  @Test(expected = InvalidKluchContentException.class)
+  @Test
   public void testNullKluch() throws Exception {
     assertThat(kluchDao.count(), equalTo(0L));
-    kluchService.post("author", null);
+    KluchResult result = kluchService.post("author", null);
+    assertThat(result.getStatus(), equalTo(HttpStatus.BAD_REQUEST));
+    assertThat(result.isSuccessful(), equalTo(false));
     assertThat(kluchDao.count(), equalTo(0L));
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNullAuthor() throws Exception {
     assertThat(kluchDao.count(), equalTo(0L));
-    kluchService.post(null, generateString(50));
+    KluchResult result = kluchService.post(null, generateString(50));
+    assertThat(result.getStatus(), equalTo(HttpStatus.BAD_REQUEST));
+    assertThat(result.isSuccessful(), equalTo(false));
     assertThat(kluchDao.count(), equalTo(0L));
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testEmptyAuthor() throws Exception {
     assertThat(kluchDao.count(), equalTo(0L));
-    kluchService.post("", generateString(50));
+    KluchResult result = kluchService.post("", generateString(50));
+    assertThat(result.getStatus(), equalTo(HttpStatus.BAD_REQUEST));
+    assertThat(result.isSuccessful(), equalTo(false));
     assertThat(kluchDao.count(), equalTo(0L));
   }
   
-  @Test(expected = AlreadyPostedException.class)
   public void testAlreadyPosted() throws Exception {
     assertThat(kluchDao.count(), equalTo(0L));
     String kluchText = generateString(50);
-    kluchService.post("author", kluchText);
+    KluchResult result = kluchService.post("author", kluchText);
+    assertThat(result.getStatus(), equalTo(HttpStatus.BAD_REQUEST));
+    assertThat(result.isSuccessful(), equalTo(false));
     assertThat(kluchDao.count(), equalTo(1L));
     kluchService.post("author", kluchText);
     assertThat(kluchDao.count(), equalTo(1L));

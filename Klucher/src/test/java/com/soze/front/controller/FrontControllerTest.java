@@ -58,7 +58,7 @@ public class FrontControllerTest extends TestWithUserBase {
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andDo(print())
-        .andExpect(status().isOk())
-        .andExpect(view().name("dashboard"));
+        .andExpect(status().is3xxRedirection())
+        .andExpect(view().name("redirect:dashboard"));
   }
 }
