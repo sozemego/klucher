@@ -183,9 +183,10 @@ function ajaxPostKluch() {
 			setFirstTimestamp(currentTimestamp);
 			clearTextArea();
 			addKluchToFeed(getUsername(), millisToText(currentTimestamp), kluchText, false);
-			checkCharacterCount();
+			checkCharacterCount();		
 		}
 	});
+	focusInputArea();
 }
 
 function getFeed() {
@@ -367,6 +368,10 @@ function displayNewKluchElement() {
 		newKluchText.addClass("cursorPointer");
 		newKluchText.click(clickNewKluchs);	
 	}
+}
+
+function focusInputArea() {
+	$("#kluchTextArea").focus();
 }
 
 function clickNewKluchs() {

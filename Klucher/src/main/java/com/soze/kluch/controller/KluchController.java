@@ -11,15 +11,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.soze.kluch.model.KluchResult;
 import com.soze.kluch.service.KluchService;
+import com.soze.ratelimiter.service.RateLimiter;
 
 @Controller
 public class KluchController {
   
   private final KluchService kluchService;
+  private final RateLimiter rateLimiter;
   
   @Autowired
-  public KluchController(KluchService kluchService) {
+  public KluchController(KluchService kluchService, RateLimiter rateLimiter) {
     this.kluchService = kluchService;
+    this.rateLimiter = rateLimiter;
   }
 
   @RequestMapping(value = "/kluch", method = RequestMethod.POST)
@@ -28,8 +31,12 @@ public class KluchController {
       return new ResponseEntity<String>(HttpStatus.UNAUTHORIZED);
     }
     String username = authentication.getName();
-    KluchResult result = kluchService.post(username, kluch);
-    return new ResponseEntity<String>(result.getMessage(), result.getStatus());
+    boolean canInteract = rateLimiter.interact(username);
+    if(canInteract) {
+      KluchResult result = kluchService.post(username, kluch);
+      return new ResponseEntity<String>(result.getMessage(), result.getStatus());
+    }
+    return new ResponseEntity<String>(HttpStatus.TOO_MANY_REQUESTS);
   }
   
 }
