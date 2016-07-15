@@ -1,7 +1,7 @@
 package com.soze.kluch.service;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class KluchService {
   private static final HttpStatus INVALID_KLUCH_CONTENT = HttpStatus.BAD_REQUEST;
   private final KluchDao kluchDao;
   private final KluchAssembler kluchAssembler;
-  private final Map<String, String> pastKluchs = new HashMap<>();
+  private final Map<String, String> pastKluchs = new ConcurrentHashMap<>();
 
   @Autowired
   public KluchService(KluchDao kluchDao, KluchAssembler kluchAssembler) {
