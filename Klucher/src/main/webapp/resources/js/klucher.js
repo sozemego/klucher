@@ -133,6 +133,7 @@ function dashboardOnLoad() {
 	attachShareKluchListener();
 	attachInfiniteScrollingListener();
 	pollFeed();
+	attachSubmitButtonListener();
 }
 
 function attachInputListener() {
@@ -388,6 +389,12 @@ function clickNewKluchs() {
 
 function hideNewKluchElement() {
 	$("#newKluch").empty();
+}
+
+function attachSubmitButtonListener() {
+	$("#submitButton").click(function () {
+		$("#kluchForm").submit();
+	});
 }
 
 function displayLastPageMessage() {

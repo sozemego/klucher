@@ -18,9 +18,8 @@
 		
 		<textarea class = "dashboardTextInput" id = "kluchTextArea" placeholder = "Don't be shy, tell us what you're thinking."  name = "kluch"></textarea>
 			<div class = "underInput">
-				<span id = "charactersLeft">250</span>
-				<input type="submit" value="share"/>
-			
+				<span class = "charactersLeft" id = "charactersLeft">250</span>
+				<span class = "submitButton centerText" id = "submitButton">share</span>
 			</div>
 	</div>
 	
