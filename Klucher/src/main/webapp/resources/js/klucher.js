@@ -272,6 +272,7 @@ function addKluchsToFeed(kluchs, append) {
 }
 
 function addKluchToFeed(author, timeText, text, append) {
+	text = escapeHtml(text);
 	if(typeof author === "undefined") {
 		return;
 	}
@@ -289,6 +290,12 @@ function addKluchToFeed(author, timeText, text, append) {
 	textAreaDiv.classList.toggle("preWrap");
 	$("<span>" +  text + "</span>").appendTo(textAreaDiv);
 	$(textAreaDiv).appendTo(outerDiv);
+}
+
+function escapeHtml(text) {
+	text = text.replace(/</g, "&lt");
+	text = text.replace(/>/g, "&gt");
+	return text;
 }
 
 function getUsername() {
