@@ -12,24 +12,21 @@
 <c:import url="header.jsp"></c:import>
 </div>
 <div class = "content">
-<form method = "POST" action = "kluch" id = "kluchForm">
-<div class = "dashboardInputContainer">
-	<div class = "boxContainer">
-		
-		<textarea class = "dashboardTextInput" id = "kluchTextArea" placeholder = "Don't be shy, tell us what you're thinking."  name = "kluch"></textarea>
-			<div class = "underInput">
-				<span class = "charactersLeft centerText" id = "charactersLeft">250</span>
-				<span class = "submitButton centerText" id = "submitButton">share</span>
-			</div>
-	</div>
-	
-</div>
-</form>
 <div class = "newKluch centerText" id = "newKluch"></div>
-<c:import url="feed.jsp"></c:import>
+<div class = "kluchContainer">
+<div class = "kluchFeed" id = "kluchFeed">
+<c:forEach items = "${feed.kluchs}" var = "kluch">
+<div class = "kluch">
+<div class = "author">${kluch.author} ${kluch.timestamp}</div>
+<div class = "kluchTextArea opacityAnimation">${kluch.text}</div>
+</div>
+</c:forEach>
+</div>
+<div id = "lastPage" class = "lastPage hidden">No more Kluchs to load :(</div>
+</div>
 </div>
 <script>
-$(dashboardOnLoad());
+$(userOnLoad());
 </script>	
 </body>
 </html>

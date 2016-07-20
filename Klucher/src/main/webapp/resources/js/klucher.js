@@ -171,20 +171,22 @@ function ajaxPostKluch() {
 	if(kluchText.length === 0) {
 		return;
 	}
+	setGettingFeed(1);
 	$.ajax({
 		type: "POST",
 		url: "/kluch",
 		data: {"kluch" : kluchText },
 		error: function(xhr, status, error) {	
 			var something = xhr.getAllResponseHeaders();
-			
+			setGettingFeed(0);
 		},
 		success: function(data, status, xhr) {
 			var currentTimestamp = Date.now();
 			setFirstTimestamp(currentTimestamp);
 			clearTextArea();
 			addKluchToFeed(getUsername(), millisToText(currentTimestamp), kluchText, false);
-			checkCharacterCount();		
+			checkCharacterCount();	
+			setGettingFeed(0);
 		}
 	});
 	focusInputArea();
@@ -444,6 +446,12 @@ function hoursPassed(minutes) {
 
 function daysPassed(hours) {
 	return hours / 24;
+}
+
+function userOnLoad() {
+	getFeed("after");
+	attachInfiniteScrollingListener();
+	pollFeed();
 }
 
 

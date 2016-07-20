@@ -32,7 +32,7 @@ public class RegisterService {
   }
 
   /**
-   * Attempts to register a new {@liln User}. Any validation errors are stored
+   * Attempts to register a new {@link User}. Any validation errors are stored
    * in the errors map.
    * 
    * @param form
