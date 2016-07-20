@@ -2,9 +2,12 @@ package com.soze.user.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
@@ -26,6 +29,10 @@ public class User implements UserDetails {
   @OneToOne(cascade = {CascadeType.ALL })
   @NotNull
   private UserRoles userRoles;
+  @ElementCollection
+  private Set<String> followers = new HashSet<>();
+  @ElementCollection
+  private Set<String> following = new HashSet<>();
 
   public User() {
 
@@ -49,6 +56,22 @@ public class User implements UserDetails {
 
   public void setUsername(String username) {
     this.username = username;
+  }
+
+  public Set<String> getFollowers() {
+    return followers;
+  }
+
+  public void setFollowers(Set<String> followers) {
+    this.followers = followers;
+  }
+
+  public Set<String> getFollowing() {
+    return following;
+  }
+
+  public void setFollowing(Set<String> following) {
+    this.following = following;
   }
 
   @Override

@@ -26,4 +26,8 @@ public interface UserDao {
   
   public void deleteAll();
   
+  public boolean follow(String username, String follow);
+  
+  public boolean unfollow(String username, String follow);
+  
 }

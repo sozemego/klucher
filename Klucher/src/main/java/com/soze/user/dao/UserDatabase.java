@@ -1,5 +1,7 @@
 package com.soze.user.dao;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,5 +72,43 @@ public class UserDatabase implements UserDao {
   public void deleteAll() {
     userRepository.deleteAll();
   }
-  
+
+  @Override
+  public boolean follow(String username, String follow) {
+    User user = userRepository.findOne(username);
+    if(user == null) {
+      return false;
+    }
+    User followUser = userRepository.findOne(follow);
+    if(followUser == null) {
+      return false;
+    }
+    Set<String> following = user.getFollowing();
+    following.add(follow);
+    userRepository.save(user);
+    Set<String> followers = followUser.getFollowers();
+    followers.add(username);
+    userRepository.save(followUser);
+    return true;
+  }
+
+  @Override
+  public boolean unfollow(String username, String follow) {
+    User user = userRepository.findOne(username);
+    if(user == null) {
+      return false;
+    }
+    User followUser = userRepository.findOne(follow);
+    if(followUser == null) {
+      return false;
+    }
+    Set<String> following = user.getFollowing();
+    following.remove(follow);
+    userRepository.save(user);
+    Set<String> followers = followUser.getFollowers();
+    followers.remove(username);
+    userRepository.save(followUser);
+    return true;
+  }
+
 }
