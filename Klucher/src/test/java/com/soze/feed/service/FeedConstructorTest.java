@@ -36,18 +36,18 @@ public class FeedConstructorTest extends TestWithUserBase {
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidUser() {
-    constructor.constructFeed("doesNotExist", 0);
+    constructor.constructFeed("doesNotExist", 0, false);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidUserEmptyName() {
-    constructor.constructFeed("", 0);
+    constructor.constructFeed("", 0, false);
   }
 
   @Test
   public void testNoKluchs() {
     addUserToDb("test", "password");
-    Feed feed = constructor.constructFeed("test", 0);
+    Feed feed = constructor.constructFeed("test", 0, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
         equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
@@ -60,7 +60,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     addUserToDb("test", "password");
     long kluchsToAdd = 25;
     addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE);
+    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
         equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
@@ -73,7 +73,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     addUserToDb("test", "password");
     long kluchsToAdd = 25;
     addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeed("test", 0);
+    Feed feed = constructor.constructFeed("test", 0, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
         equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
@@ -86,7 +86,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     addUserToDb("test", "password");
     long kluchsToAdd = 35;
     addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE);
+    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
         equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
@@ -100,7 +100,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     addUserToDb("test", "password");
     long kluchsToAdd = 35;
     addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE);
+    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
         equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
@@ -108,7 +108,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     assertThat(kluchs.getNumberOfElements(),
         equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
     long oldestTimestamp = getOldestTimestamp(kluchs);
-    Feed secondFeed = constructor.constructFeed("test", oldestTimestamp);
+    Feed secondFeed = constructor.constructFeed("test", oldestTimestamp, false);
     Page<Kluch> secondKluchs = secondFeed.getKluchs();
     assertThat(secondKluchs.getSize(),
         equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
@@ -123,7 +123,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     addUserToDb("test", "password");
     long kluchsToAdd = 25;
     addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeedAfter("test", 0);
+    Feed feed = constructor.constructFeedAfter("test", 0, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
         equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
@@ -136,7 +136,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     addUserToDb("test", "password");
     long kluchsToAdd = 25;
     addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeedAfter("test", Long.MAX_VALUE);
+    Feed feed = constructor.constructFeedAfter("test", Long.MAX_VALUE, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
         equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
@@ -149,7 +149,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     addUserToDb("test", "password");
     long kluchsToAdd = 35;
     addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeedAfter("test", 0);
+    Feed feed = constructor.constructFeedAfter("test", 0, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
         equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
@@ -163,7 +163,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     addUserToDb("test", "password");
     long kluchsToAdd = 35;
     addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeedAfter("test", 0);
+    Feed feed = constructor.constructFeedAfter("test", 0, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
         equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
@@ -171,7 +171,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     assertThat(kluchs.getNumberOfElements(),
         equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
     long earliestTimestamp = getEarliestTimestamp(kluchs);
-    Feed secondFeed = constructor.constructFeedAfter("test", earliestTimestamp);
+    Feed secondFeed = constructor.constructFeedAfter("test", earliestTimestamp, false);
     Page<Kluch> secondKluchs = secondFeed.getKluchs();
     assertThat(secondKluchs.getSize(),
         equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
@@ -184,7 +184,7 @@ public class FeedConstructorTest extends TestWithUserBase {
   @Test
   public void testExistAfterNoKluchs() {
     addUserToDb("test", "password");
-    boolean exists = constructor.existsFeedAfter("test", 0);
+    boolean exists = constructor.existsFeedAfter("test", 0, false);
     assertThat(exists, equalTo(false));
   }
 
@@ -193,7 +193,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     addUserToDb("test", "password");
     long kluchsToAdd = 120;
     addKluchsForUser("test", kluchsToAdd);
-    boolean exists = constructor.existsFeedAfter("test", 0);
+    boolean exists = constructor.existsFeedAfter("test", 0, false);
     assertThat(exists, equalTo(true));
   }
 
@@ -202,18 +202,18 @@ public class FeedConstructorTest extends TestWithUserBase {
     addUserToDb("test", "password");
     long kluchsToAdd = 120;
     addKluchsForUser("test", kluchsToAdd);
-    boolean exists = constructor.existsFeedAfter("test", Long.MAX_VALUE);
+    boolean exists = constructor.existsFeedAfter("test", Long.MAX_VALUE, false);
     assertThat(exists, equalTo(false));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidUsername() {
-    constructor.constructFeed(null, 0);
+    constructor.constructFeed(null, 0, false);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testNonExistedUsername() {
-    constructor.constructFeed("iDontExist", 0);
+    constructor.constructFeed("iDontExist", 0, false);
   }
 
   private void addKluchsForUser(String username, long kluchsToAdd) {

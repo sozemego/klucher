@@ -49,9 +49,9 @@ public class FeedConstructor {
    * @return
    * @throws IllegalArgumentException if username is null or user with given name doesn't exist
    */
-  public Feed constructFeed(String username, long beforeTimestamp) throws IllegalArgumentException {    
+  public Feed constructFeed(String username, long beforeTimestamp, boolean onlyForUser) throws IllegalArgumentException {    
     User user = getUser(username);
-    List<String> authors = getListOfAuthors(user);
+    List<String> authors = getListOfAuthors(user, onlyForUser);
     Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampLessThan(authors, new Timestamp(beforeTimestamp), before);
     Feed feed = new Feed();
     feed.setKluchs(kluchs);
@@ -67,9 +67,9 @@ public class FeedConstructor {
    * @return
    * @throws IllegalArgumentException if username is null or user with given name doesn't exist
    */
-  public Feed constructFeedAfter(String username, long afterTimestamp) throws IllegalArgumentException{
+  public Feed constructFeedAfter(String username, long afterTimestamp, boolean onlyForUser) throws IllegalArgumentException{
     User user = getUser(username);
-    List<String> authors = getListOfAuthors(user);
+    List<String> authors = getListOfAuthors(user, onlyForUser);
     Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), after);
     Feed feed = new Feed();
     feed.setKluchs(kluchs);
@@ -83,9 +83,9 @@ public class FeedConstructor {
    * @return true if there are Kluchs posted after given timestamp (in epoch millis)
    * @throws IllegalArgumentException if username is null or user with given name doesn't exist
    */
-  public boolean existsFeedAfter(String username, long afterTimestamp) throws IllegalArgumentException {
+  public boolean existsFeedAfter(String username, long afterTimestamp, boolean onlyForUser) throws IllegalArgumentException {
     User user = getUser(username);
-    List<String> authors = getListOfAuthors(user);
+    List<String> authors = getListOfAuthors(user, onlyForUser);
     Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), exists);
     boolean exists = kluchs.hasContent() ? !kluchs.getContent().isEmpty() : false;
     return exists;
@@ -113,9 +113,12 @@ public class FeedConstructor {
    * @param user
    * @return
    */
-  private List<String> getListOfAuthors(User user) {
+  private List<String> getListOfAuthors(User user, boolean onlyForUser) {
     List<String> authors = new ArrayList<>();
     authors.add(user.getUsername());
+    if(!onlyForUser) {
+      authors.addAll(user.getFollowing());
+    }
     return authors;
   }
   

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,7 +45,16 @@ public class FeedController {
       return false;
     }
     String username = authentication.getName();
-    return feedConstructor.existsFeedAfter(username, timestamp);
+    boolean existsAfter = feedConstructor.existsFeedAfter(username, timestamp, false);
+    log.info("User [{}] polled their feed, with timestamp [{}] and feed constructor returned [{}].", username, timestamp, existsAfter);
+    return existsAfter;
+  }
+  
+  @RequestMapping(value = "/feed/poll/{username}", method = RequestMethod.GET)
+  @ResponseBody
+  public Boolean pollFeed(@RequestParam Long timestamp, @PathVariable String username)
+      throws Exception {
+    return feedConstructor.existsFeedAfter(username, timestamp, true);
   }
 
   @RequestMapping(value = "/feed", method = RequestMethod.GET)
@@ -68,9 +78,29 @@ public class FeedController {
         username, timestamp, direction);
     Feed feed = null;
     if (direction.equalsIgnoreCase("after")) {
-      feed = feedConstructor.constructFeed(username, timestamp);
+      feed = feedConstructor.constructFeed(username, timestamp, false);
     } else if (direction.equals("before")) {
-      feed = feedConstructor.constructFeedAfter(username, timestamp);
+      feed = feedConstructor.constructFeedAfter(username, timestamp, false);
+    }
+    return feed;
+  }
+  
+  @RequestMapping(value = "/feed/{username}", method = RequestMethod.GET)
+  @ResponseBody
+  public Feed getFeed(@RequestParam Long timestamp,
+      @RequestParam(required = false) String direction, @PathVariable String username) throws Exception {
+    if (timestamp == null) {
+      timestamp = Long.MAX_VALUE;
+    }
+    if (direction == null || direction.isEmpty()) {
+      direction = "after";
+    }
+    log.info("Trying to construct feed of user [{}] with direction [{}] and timestamp [{}]", username, direction, timestamp);
+    Feed feed = null;
+    if (direction.equalsIgnoreCase("after")) {
+      feed = feedConstructor.constructFeed(username, timestamp, true);
+    } else if (direction.equals("before")) {
+      feed = feedConstructor.constructFeedAfter(username, timestamp, true);
     }
     return feed;
   }
