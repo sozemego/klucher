@@ -26,8 +26,8 @@ import com.soze.user.model.User;
 @Service
 public class FeedConstructor {
 
-  public static final int BEFORE_KLUCHS_PER_REQUEST = 30;
-  public static final int AFTER_KLUCHS_PER_REQUEST = 30;
+  private static final int BEFORE_KLUCHS_PER_REQUEST = 30;
+  private static final int AFTER_KLUCHS_PER_REQUEST = 30;
   private final PageRequest before = new PageRequest(0, BEFORE_KLUCHS_PER_REQUEST, new Sort(new Order(Direction.DESC, "timestamp")));
   private final PageRequest after = new PageRequest(0, AFTER_KLUCHS_PER_REQUEST, new Sort(new Order(Direction.ASC, "timestamp")));
   private final PageRequest exists = new PageRequest(0, 1);
@@ -46,10 +46,12 @@ public class FeedConstructor {
    * Returned Kluchs are sorted from newest to oldest.
    * @param username cannot be null
    * @param beforeTimestamp returned Kluchs were posted before this epoch millis value
+   * @param onlyForUser true if feed should contain only this user's Kluchs
    * @return
-   * @throws IllegalArgumentException if username is null or user with given name doesn't exist
+   * @throws IllegalArgumentException if username is null, empty or user with given name doesn't exist
    */
   public Feed constructFeed(String username, long beforeTimestamp, boolean onlyForUser) throws IllegalArgumentException {    
+    validateTimestamp(beforeTimestamp);
     User user = getUser(username);
     List<String> authors = getListOfAuthors(user, onlyForUser);
     Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampLessThan(authors, new Timestamp(beforeTimestamp), before);
@@ -64,10 +66,12 @@ public class FeedConstructor {
    * Returned Kluchs are sorted from newest to oldest. 
    * @param username cannot be null
    * @param afterTimestamp returned Kluchs were posted after this epoch millis value
+   * @param onlyForUser true if feed should contain only this user's Kluchs
    * @return
-   * @throws IllegalArgumentException if username is null or user with given name doesn't exist
+   * @throws IllegalArgumentException if username is null, empty or user with given name doesn't exist
    */
-  public Feed constructFeedAfter(String username, long afterTimestamp, boolean onlyForUser) throws IllegalArgumentException{
+  public Feed constructFeedAfter(String username, long afterTimestamp, boolean onlyForUser) throws IllegalArgumentException {
+    validateTimestamp(afterTimestamp);
     User user = getUser(username);
     List<String> authors = getListOfAuthors(user, onlyForUser);
     Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), after);
@@ -78,12 +82,13 @@ public class FeedConstructor {
   
   /**
    * Checks if there exist Kluchs posted after (later) given timestamp (in epoch millis).
-   * @param username cannot be null
+   * @param username
    * @param afterTimestamp returned Kluchs were posted after this epoch millis value
    * @return true if there are Kluchs posted after given timestamp (in epoch millis)
-   * @throws IllegalArgumentException if username is null or user with given name doesn't exist
+   * @throws IllegalArgumentException if username is null, empty or user with given name doesn't exist
    */
   public boolean existsFeedAfter(String username, long afterTimestamp, boolean onlyForUser) throws IllegalArgumentException {
+    validateTimestamp(afterTimestamp);
     User user = getUser(username);
     List<String> authors = getListOfAuthors(user, onlyForUser);
     Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), exists);
@@ -92,20 +97,31 @@ public class FeedConstructor {
   }
   
   /**
-   * Validates username and checks if user exists. If it does, eturns the User.
+   * Validates username and checks if user exists. If it does, returns the User.
    * @param username
    * @return
-   * @throws IllegalArgumentException if username is null or user with given name doesn't exist
+   * @throws IllegalArgumentException if username is null, empty or user with given name doesn't exist
    */
   private User getUser(String username) throws IllegalArgumentException {
-    if(username == null) {
-      throw new IllegalArgumentException("Username cannot be null for feed construction.");
+    if(username == null || username.isEmpty()) {
+      throw new IllegalArgumentException("Username cannot be null or empty for feed construction.");
     }
     User user = userDao.findOne(username);
     if(user == null) {
       throw new IllegalArgumentException("There is no user named " + username);
     }
     return user;
+  }
+  
+  /**
+   * Validates timestamp value.
+   * @param timestamp
+   * @throws IllegalArgumentException if timestamp is negative
+   */
+  private void validateTimestamp(long timestamp) throws IllegalArgumentException {
+    if(timestamp < 0) {
+      throw new IllegalArgumentException("Timestamp cannot be negative.");
+    }
   }
   
   /**

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping("/")
 public class FrontController {
 
-  
   @RequestMapping(method = RequestMethod.GET)
   public String getFrontPage(Authentication authentication) {
     if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
@@ -18,7 +17,5 @@ public class FrontController {
     }
     return "front";
   }
-  
-  
-  
+
 }

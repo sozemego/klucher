@@ -1,10 +1,9 @@
 package com.soze.feed.controller;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.soze.common.exceptions.HttpException;
 import com.soze.feed.model.Feed;
 import com.soze.feed.service.FeedConstructor;
 
@@ -32,17 +32,13 @@ public class FeedController {
   @RequestMapping(value = "/feed/poll", method = RequestMethod.GET)
   @ResponseBody
   public Boolean pollFeed(Authentication authentication,
-      HttpServletResponse response, @RequestParam Long timestamp)
+      @RequestParam(required = true) Long timestamp)
       throws Exception {
     if (authentication == null) {
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-          "You are not logged in.");
-      return false;
+      throw new HttpException("Not logged in.", HttpStatus.UNAUTHORIZED);
     }
     if(timestamp == null) {
-      response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-          "Timestamp cannot be null.");
-      return false;
+      throw new HttpException("Timestamp cannot be null when polling.", HttpStatus.BAD_REQUEST);
     }
     String username = authentication.getName();
     boolean existsAfter = feedConstructor.existsFeedAfter(username, timestamp, false);
@@ -60,12 +56,10 @@ public class FeedController {
   @RequestMapping(value = "/feed", method = RequestMethod.GET)
   @ResponseBody
   public Feed getFeed(Authentication authentication,
-      HttpServletResponse response, @RequestParam Long timestamp,
+      @RequestParam Long timestamp,
       @RequestParam(required = false) String direction) throws Exception {
     if (authentication == null) {
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-          "You are not logged in.");
-      return null;
+      throw new HttpException("Not logged in.", HttpStatus.UNAUTHORIZED);
     }
     if (timestamp == null) {
       timestamp = Long.MAX_VALUE;
@@ -88,7 +82,8 @@ public class FeedController {
   @RequestMapping(value = "/feed/{username}", method = RequestMethod.GET)
   @ResponseBody
   public Feed getFeed(@RequestParam Long timestamp,
-      @RequestParam(required = false) String direction, @PathVariable String username) throws Exception {
+      @RequestParam(required = false) String direction,
+      @PathVariable String username) throws Exception {
     if (timestamp == null) {
       timestamp = Long.MAX_VALUE;
     }

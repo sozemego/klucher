@@ -1,11 +1,7 @@
 package com.soze.register.service;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.HashMap;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,82 +29,52 @@ public class RegisterServiceTest {
   @Autowired
   private UserDao userDao;
   
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testEmptyFields() {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(0));
     form.setPassword(generateString(0));
-    HashMap<String, String> errors = new HashMap<>();
-    registerService.register(form, errors);
-    assertTrue(!errors.isEmpty());
-    assertTrue(errors.containsKey("password_error"));
-    assertTrue(errors.containsKey("username_error"));
-    assertFalse(errors.containsKey("general"));    
+    registerService.register(form);   
   }
   
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testShortFields() {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(3));
     form.setPassword(generateString(5));
-    HashMap<String, String> errors = new HashMap<>();
-    registerService.register(form, errors);
-    assertTrue(!errors.isEmpty());
-    assertTrue(errors.containsKey("password_error"));
-    assertTrue(errors.containsKey("username_error"));
-    assertFalse(errors.containsKey("general"));    
+    registerService.register(form);
   }
   
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testValidUsernameInvalidPassword() {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(4));
     form.setPassword(generateString(5));
-    HashMap<String, String> errors = new HashMap<>();
-    registerService.register(form, errors);
-    assertTrue(!errors.isEmpty());
-    assertTrue(errors.containsKey("password_error"));
-    assertFalse(errors.containsKey("username_error"));
-    assertFalse(errors.containsKey("general"));
+    registerService.register(form);
   }
   
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testInvalidUsernameValidPassword() {
     RegisterForm form = new RegisterForm();
-    form.setUsername(generateString(3));
+    form.setUsername(generateString(0));
     form.setPassword(generateString(6));
-    HashMap<String, String> errors = new HashMap<>();
-    registerService.register(form, errors);
-    assertTrue(!errors.isEmpty());
-    assertFalse(errors.containsKey("password_error"));
-    assertTrue(errors.containsKey("username_error"));
-    assertFalse(errors.containsKey("general"));
+    registerService.register(form);
   }
   
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testTooLongFields() {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(65));
     form.setPassword(generateString(65));
-    HashMap<String, String> errors = new HashMap<>();
-    registerService.register(form, errors);
-    assertTrue(!errors.isEmpty());
-    assertTrue(errors.containsKey("password_error"));
-    assertTrue(errors.containsKey("username_error"));
-    assertFalse(errors.containsKey("general"));
+    registerService.register(form);
   }
   
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testWayTooLongFields() {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(65000));
     form.setPassword(generateString(65000));
-    HashMap<String, String> errors = new HashMap<>();
-    registerService.register(form, errors);
-    assertTrue(!errors.isEmpty());
-    assertTrue(errors.containsKey("password_error"));
-    assertTrue(errors.containsKey("username_error"));
-    assertFalse(errors.containsKey("general"));
+    registerService.register(form);
   }
   
   @Test
@@ -116,45 +82,26 @@ public class RegisterServiceTest {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(6));
     form.setPassword(generateString(6));
-    HashMap<String, String> errors = new HashMap<>();
     assertThat(userDao.count(), equalTo(0l));
-    registerService.register(form, errors);
-    assertTrue(errors.isEmpty());
-    assertFalse(errors.containsKey("password_error"));
-    assertFalse(errors.containsKey("username_error"));
-    assertFalse(errors.containsKey("general"));
+    registerService.register(form);
     assertThat(userDao.count(), equalTo(1l));
   }
   
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testUserAlreadyExists() {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(4));
     form.setPassword(generateString(6));
-    HashMap<String, String> errors = new HashMap<>();
-    registerService.register(form, errors);
-    assertTrue(errors.isEmpty());
-    assertFalse(errors.containsKey("password_error"));
-    assertFalse(errors.containsKey("username_error"));
-    assertFalse(errors.containsKey("general"));
-    registerService.register(form, errors);
-    assertTrue(!errors.isEmpty());
-    assertFalse(errors.containsKey("password_error"));
-    assertFalse(errors.containsKey("username_error"));
-    assertFalse(!errors.containsKey("general"));
+    registerService.register(form);
+    registerService.register(form);
   }
   
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testNullValues() {
     RegisterForm form = new RegisterForm();
     form.setUsername(null);
     form.setPassword(null);
-    HashMap<String, String> errors = new HashMap<>();
-    registerService.register(form, errors);
-    assertTrue(!errors.isEmpty());
-    assertTrue(errors.containsKey("password_error"));
-    assertTrue(errors.containsKey("username_error"));
-    assertFalse(errors.containsKey("general"));    
+    registerService.register(form);  
   }
   
   private String generateString(int length) {

@@ -1,8 +1,5 @@
 package com.soze.login.service;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.Klucher;
 import com.soze.TestWithUserBase;
+import com.soze.common.exceptions.HttpException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Klucher.class)
@@ -26,44 +24,38 @@ public class LoginServiceTest extends TestWithUserBase {
   @Autowired
   private LoginService loginService;
 
-  @Test
-  public void testUserDoesNotExist() {
-    boolean loginSuccessful = loginService.manualLogin("invalid username",
-        "invalid password", new MockHttpServletRequest());
-    assertFalse(loginSuccessful);
+  @Test(expected = HttpException.class)
+  public void testUserDoesNotExist() throws Exception {
+    loginService.manualLogin("invalid username", "invalid password", new MockHttpServletRequest());
   }
 
   @Test
-  public void testUserExists() {
+  public void testUserExists() throws Exception {
     String username = "username";
     String password = "password";
     addUserToDb(username, password);
-    boolean loginSuccessful = loginService.manualLogin(username, password,
+    loginService.manualLogin(username, password,
         new MockHttpServletRequest());
-    assertTrue(loginSuccessful);
   }
 
-  @Test
-  public void testUserExistsPasswordInvalid() {
+  @Test(expected = HttpException.class)
+  public void testUserExistsPasswordInvalid() throws Exception {
     String username = "username";
     String password = "password";
     addUserToDb(username, password);
-    boolean loginSuccessful = loginService.manualLogin(username,
+    loginService.manualLogin(username,
         "wrong password", new MockHttpServletRequest());
-    assertFalse(loginSuccessful);
   }
 
   @Test
-  public void testUserAlreadyLoggedIn() {
+  public void testUserAlreadyLoggedIn() throws Exception {
     String username = "username";
     String password = "password";
     addUserToDb(username, password);
-    boolean loginSuccessful = loginService.manualLogin(username, password,
+    loginService.manualLogin(username, password,
         new MockHttpServletRequest());
-    assertTrue(loginSuccessful);
-    loginSuccessful = loginService.manualLogin(username, password,
+    loginService.manualLogin(username, password,
         new MockHttpServletRequest());
-    assertTrue(loginSuccessful);
   }
 
 }

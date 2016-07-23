@@ -4,7 +4,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -65,11 +64,7 @@ public class RegisterControllerTest extends TestWithUserBase {
         .param("username", generateString(0))
         .param("password", generateString(0)))
     .andDo(print())
-    .andExpect(status().isOk())
-    .andExpect(view().name("register"))
-    .andExpect(model().attributeExists("username_error"))
-    .andExpect(model().attributeExists("password_error"))
-    .andExpect(model().attributeDoesNotExist("general"));
+    .andExpect(status().is(400));
   }
   
   @Test
@@ -80,11 +75,7 @@ public class RegisterControllerTest extends TestWithUserBase {
         .param("username", generateString(3))
         .param("password", generateString(3)))
     .andDo(print())
-    .andExpect(status().isOk())
-    .andExpect(view().name("register"))
-    .andExpect(model().attributeExists("username_error"))
-    .andExpect(model().attributeExists("password_error"))
-    .andExpect(model().attributeDoesNotExist("general"));
+    .andExpect(status().is(400));
   }
   
   @Test
@@ -95,11 +86,7 @@ public class RegisterControllerTest extends TestWithUserBase {
         .param("username", generateString(4))
         .param("password", generateString(3)))
     .andDo(print())
-    .andExpect(status().isOk())
-    .andExpect(view().name("register"))
-    .andExpect(model().attributeDoesNotExist("username_error"))
-    .andExpect(model().attributeExists("password_error"))
-    .andExpect(model().attributeDoesNotExist("general"));
+    .andExpect(status().is(400));
   }
   
   @Test
@@ -107,14 +94,10 @@ public class RegisterControllerTest extends TestWithUserBase {
     mvc.perform(MockMvcRequestBuilders.post("/register")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .param("username", generateString(3))
+        .param("username", generateString(0))
         .param("password", generateString(6)))
     .andDo(print())
-    .andExpect(status().isOk())
-    .andExpect(view().name("register"))
-    .andExpect(model().attributeExists("username_error"))
-    .andExpect(model().attributeDoesNotExist("password_error"))
-    .andExpect(model().attributeDoesNotExist("general"));
+    .andExpect(status().is(400));
   }
   
   @Test
@@ -125,11 +108,7 @@ public class RegisterControllerTest extends TestWithUserBase {
         .param("username", generateString(65))
         .param("password", generateString(65)))
     .andDo(print())
-    .andExpect(status().isOk())
-    .andExpect(view().name("register"))
-    .andExpect(model().attributeExists("username_error"))
-    .andExpect(model().attributeExists("password_error"))
-    .andExpect(model().attributeDoesNotExist("general"));
+    .andExpect(status().is(400));
   }
   
   @Test
@@ -140,11 +119,7 @@ public class RegisterControllerTest extends TestWithUserBase {
         .param("username", generateString(6500))
         .param("password", generateString(6500)))
     .andDo(print())
-    .andExpect(status().isOk())
-    .andExpect(view().name("register"))
-    .andExpect(model().attributeExists("username_error"))
-    .andExpect(model().attributeExists("password_error"))
-    .andExpect(model().attributeDoesNotExist("general"));
+    .andExpect(status().is(400));
   }
   
   @Test
@@ -173,8 +148,7 @@ public class RegisterControllerTest extends TestWithUserBase {
         .param("username", username)
         .param("password", password))
     .andDo(print())
-    .andExpect(status().isOk())
-    .andExpect(model().attributeExists("general"));
+    .andExpect(status().is(400));
     assertThat(userDao.count(), equalTo(1l));
   }
   

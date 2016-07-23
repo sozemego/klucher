@@ -9,30 +9,30 @@
 <body>
 Welcome to dev console!
 
-<form action = "dev/post" id = "post" method = "POST">
+<form action = "post" id = "post" method = "POST">
 <table>
 	<tr>
 		<td>Username</td>
-		<td><input type = "text" name = "username"></td>
+		<td><input type = "text" id = "username" name = "username"></td>
 	</tr>
 	<tr>
 		<td>Number</td>
-		<td><input type = "text" name = "number"></td>
+		<td><input type = "text" id = "number" name = "number"></td>
 	</tr>
 	<tr>
 		<td>Millis</td>
-		<td><input type = "text" name = "millis"></td>
+		<td><input type = "text" id = "millis" name = "millis"></td>
 	</tr>
 	<tr>
 		<td>FastMode</td>
-		<td><input type = "checkbox" name = "fastMode"></td>
+		<td><input type = "checkbox" id = "fastMode" name = "fastMode"></td>
 	</tr>
 	<tr>
 		<td>Mode</td>
-		<td><select name = "mode">
-			<option value = "id">id</option>
-			<option value = "timestamp">timestamp</option>
-			<option value = "random text">random text</option>
+		<td><select name = "mode" id = "mode">
+			<option>id</option>
+			<option>timestamp</option>
+			<option>random</option>
 		</select></td>
 	</tr>
 	<tr>
@@ -46,7 +46,7 @@ Welcome to dev console!
 
 ${error}	
 <script>
-
+$(onDevLoad());
 </script>	
 </body>
 </html>

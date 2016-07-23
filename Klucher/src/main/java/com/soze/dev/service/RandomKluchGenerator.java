@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
+@Profile("dev")
 public class RandomKluchGenerator {
 
   private final List<String> randomKluchs = new ArrayList<>();
@@ -34,7 +36,7 @@ public class RandomKluchGenerator {
 
   @PostConstruct
   public void init() {
-    for (int i = 0; i < 200; i++) {
+    for (int i = 0; i < 10000; i++) {
       randomKluchs.add(generateRandomKluchText());
     }
   }

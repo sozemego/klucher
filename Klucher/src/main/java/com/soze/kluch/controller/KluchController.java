@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.soze.kluch.model.KluchResult;
+import com.soze.common.exceptions.HttpException;
 import com.soze.kluch.service.KluchService;
 import com.soze.ratelimiter.service.RateLimiter;
 
@@ -26,17 +26,17 @@ public class KluchController {
   }
 
   @RequestMapping(value = "/kluch", method = RequestMethod.POST)
-  public ResponseEntity<String> postKluch(Authentication authentication, @RequestParam String kluch) {
+  public ResponseEntity<String> postKluch(Authentication authentication, @RequestParam String kluch) throws Exception {
     if(authentication == null) {
-      return new ResponseEntity<String>(HttpStatus.UNAUTHORIZED);
+      throw new HttpException("Not logged in.", HttpStatus.UNAUTHORIZED);
     }
     String username = authentication.getName();
     boolean canInteract = rateLimiter.interact(username);
-    if(canInteract) {
-      KluchResult result = kluchService.post(username, kluch);
-      return new ResponseEntity<String>(result.getMessage(), result.getStatus());
+    if(!canInteract) {
+      throw new HttpException("Too many requests.", HttpStatus.TOO_MANY_REQUESTS);
     }
-    return new ResponseEntity<String>(HttpStatus.TOO_MANY_REQUESTS);
+    kluchService.post(username, kluch);
+    return new ResponseEntity<String>(HttpStatus.OK);
   }
   
 }

@@ -29,6 +29,9 @@ import com.soze.kluch.model.Kluch;
 @ActiveProfiles("test")
 public class FeedConstructorTest extends TestWithUserBase {
 
+  private final int beforeKluchsPerRequest = 30;
+  private final int afterKluchsPerRequest = 30;
+  
   @Autowired
   private FeedConstructor constructor;
   @Autowired
@@ -50,7 +53,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     Feed feed = constructor.constructFeed("test", 0, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
-        equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
+        equalTo(beforeKluchsPerRequest));
     assertThat(kluchs.getTotalElements(), equalTo(0L));
     assertThat(kluchs.getNumberOfElements(), equalTo(0));
   }
@@ -63,7 +66,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
-        equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
+        equalTo(beforeKluchsPerRequest));
     assertThat(kluchs.getTotalElements(), equalTo(kluchsToAdd));
     assertThat(kluchs.getNumberOfElements(), equalTo(25));
   }
@@ -76,7 +79,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     Feed feed = constructor.constructFeed("test", 0, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
-        equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
+        equalTo(beforeKluchsPerRequest));
     assertThat(kluchs.getTotalElements(), equalTo(0L));
     assertThat(kluchs.getNumberOfElements(), equalTo(0));
   }
@@ -89,10 +92,10 @@ public class FeedConstructorTest extends TestWithUserBase {
     Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
-        equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
+        equalTo(beforeKluchsPerRequest));
     assertThat(kluchs.getTotalElements(), equalTo(kluchsToAdd));
     assertThat(kluchs.getNumberOfElements(),
-        equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
+        equalTo(beforeKluchsPerRequest));
   }
 
   @Test
@@ -103,19 +106,19 @@ public class FeedConstructorTest extends TestWithUserBase {
     Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
-        equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
+        equalTo(beforeKluchsPerRequest));
     assertThat(kluchs.getTotalElements(), equalTo(kluchsToAdd));
     assertThat(kluchs.getNumberOfElements(),
-        equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
+        equalTo(beforeKluchsPerRequest));
     long oldestTimestamp = getOldestTimestamp(kluchs);
     Feed secondFeed = constructor.constructFeed("test", oldestTimestamp, false);
     Page<Kluch> secondKluchs = secondFeed.getKluchs();
     assertThat(secondKluchs.getSize(),
-        equalTo(FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
+        equalTo(beforeKluchsPerRequest));
     assertThat(secondKluchs.getTotalElements(),
-        equalTo(kluchsToAdd - FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
+        equalTo(kluchsToAdd - beforeKluchsPerRequest));
     assertThat(secondKluchs.getNumberOfElements(),
-        equalTo((int) kluchsToAdd - FeedConstructor.BEFORE_KLUCHS_PER_REQUEST));
+        equalTo((int) kluchsToAdd - beforeKluchsPerRequest));
   }
 
   @Test
@@ -126,7 +129,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     Feed feed = constructor.constructFeedAfter("test", 0, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
-        equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
+        equalTo(afterKluchsPerRequest));
     assertThat(kluchs.getTotalElements(), equalTo(kluchsToAdd));
     assertThat(kluchs.getNumberOfElements(), equalTo(25));
   }
@@ -139,7 +142,7 @@ public class FeedConstructorTest extends TestWithUserBase {
     Feed feed = constructor.constructFeedAfter("test", Long.MAX_VALUE, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
-        equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
+        equalTo(afterKluchsPerRequest));
     assertThat(kluchs.getTotalElements(), equalTo(0L));
     assertThat(kluchs.getNumberOfElements(), equalTo(0));
   }
@@ -152,10 +155,10 @@ public class FeedConstructorTest extends TestWithUserBase {
     Feed feed = constructor.constructFeedAfter("test", 0, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
-        equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
+        equalTo(afterKluchsPerRequest));
     assertThat(kluchs.getTotalElements(), equalTo(kluchsToAdd));
     assertThat(kluchs.getNumberOfElements(),
-        equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
+        equalTo(afterKluchsPerRequest));
   }
 
   @Test
@@ -166,19 +169,19 @@ public class FeedConstructorTest extends TestWithUserBase {
     Feed feed = constructor.constructFeedAfter("test", 0, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
-        equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
+        equalTo(afterKluchsPerRequest));
     assertThat(kluchs.getTotalElements(), equalTo(kluchsToAdd));
     assertThat(kluchs.getNumberOfElements(),
-        equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
+        equalTo(afterKluchsPerRequest));
     long earliestTimestamp = getEarliestTimestamp(kluchs);
     Feed secondFeed = constructor.constructFeedAfter("test", earliestTimestamp, false);
     Page<Kluch> secondKluchs = secondFeed.getKluchs();
     assertThat(secondKluchs.getSize(),
-        equalTo(FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
+        equalTo(afterKluchsPerRequest));
     assertThat(secondKluchs.getTotalElements(),
-        equalTo(kluchsToAdd - FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
+        equalTo(kluchsToAdd - afterKluchsPerRequest));
     assertThat(secondKluchs.getNumberOfElements(),
-        equalTo((int) kluchsToAdd - FeedConstructor.AFTER_KLUCHS_PER_REQUEST));
+        equalTo((int) kluchsToAdd - afterKluchsPerRequest));
   }
 
   @Test

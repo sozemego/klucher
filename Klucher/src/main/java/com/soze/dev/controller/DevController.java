@@ -11,9 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,56 +32,12 @@ public class DevController {
     this.kluchGenerator = kluchGenerator;
   }
   
-  @RequestMapping("/dev/genKluchs/random/{username}")
-  public String genKluchsRandom(@PathVariable String username,
-      @RequestParam(required = true) Integer number, @RequestParam(required = false) Integer millis,
-      @RequestParam(defaultValue = "false") Boolean fastMode) {
-    validateInput(number, millis, fastMode);
-    log.info("Adding random [{}] posts for user [{}], fastMode [{}]", number, username, fastMode);
-    if(fastMode) {
-      postFastMode(username, number, kluchGenerator::getRandomKluch);
-    } else {
-      postFixedRate(username, number, millis, kluchGenerator::getRandomKluch);
-    }
-    return "dev";
-  }
-
-  @RequestMapping("/dev/genKluchs/timestamp/{username}")
-  public String genKluchsTimestamp(@PathVariable String username,
-      @RequestParam(required = true) Integer number, @RequestParam(required = false) Integer millis,
-      @RequestParam(defaultValue = "false") Boolean fastMode) {
-    validateInput(number, millis, fastMode);
-    log.info("Adding timestamp [{}] posts for user [{}], fastMode [{}]", number, username,
-        fastMode);
-    if(fastMode) {
-      postFastMode(username, number, kluchGenerator::getCurrentTimestamp);
-    } else {
-      postFixedRate(username, number, millis, kluchGenerator::getCurrentTimestamp);
-    }
-    return "dev";
-  }
-
-  @RequestMapping("/dev/genKluchs/id/{username}")
-  public String genKluchsId(@PathVariable String username,
-      @RequestParam(required = true) Integer number, @RequestParam(required = false) Integer millis,
-      @RequestParam(defaultValue = "false") Boolean fastMode) {
-    validateInput(number, millis, fastMode);
-    log.info("Adding timestamp [{}] posts for user [{}], fastMode [{}]", number, username,
-        fastMode);
-    if(fastMode) {
-      postFastMode(username, number, kluchGenerator::getUniqueIdAsText);
-    } else {
-      postFixedRate(username, number, millis, kluchGenerator::getUniqueIdAsText);
-    }
-    return "dev";
-  }
-  
   @RequestMapping(value = "dev/post", method = RequestMethod.POST)
   public String postDev(@RequestParam(required = true) String username,
       @RequestParam(required = true) Integer number,
       @RequestParam(defaultValue = "250") Integer millis,
       @RequestParam(defaultValue = "false") Boolean fastMode,
-      @RequestParam(defaultValue = "id") String mode) {
+      @RequestParam(defaultValue = "id") String mode) throws Exception {
     validateInput(number, millis, fastMode);
     post(username, number, millis, fastMode, mode);
     return "dev";
@@ -94,7 +47,7 @@ public class DevController {
   public String dev() {
     return "dev";
   }
-  
+   
   private void validateInput(int number, int millis, boolean fastMode) {
     if(number < 0) {
       throw new IllegalArgumentException("Number of Kluchs to post cannot be negative.");
@@ -122,12 +75,6 @@ public class DevController {
     } else {
       postFixedRate(username, number, millis, supplier);
     }
-  }
-  
-  @ExceptionHandler(IllegalArgumentException.class)
-  public String handleException(IllegalArgumentException ex, Model model) {
-    model.addAttribute("error", ex.getMessage());
-    return "dev";
   }
   
   private void postFixedRate(String username, Integer number, Integer millis, Supplier<String> supplier) {
