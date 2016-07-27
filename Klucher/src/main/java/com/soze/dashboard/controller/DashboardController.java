@@ -23,7 +23,7 @@ public class DashboardController {
   public String getDashboard(Authentication authentication, Model model) {
     String username = authentication.getName();
     User user = userDao.findOne(username);
-    model.addAttribute("user", user);
+    model.addAttribute("username", user.getUsername());
     return "dashboard";
   }
 

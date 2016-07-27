@@ -1,5 +1,7 @@
 package com.soze.follow.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,8 @@ import com.soze.follow.service.FollowService;
 @Controller
 public class FollowController {
   
+  
+  private static final Logger log = LoggerFactory.getLogger(FollowController.class);
   private final FollowService followService;
 
   @Autowired
@@ -34,6 +38,7 @@ public class FollowController {
     if(username.equals(follow)) {
       throw new HttpException("You cannot follow yourself.", HttpStatus.BAD_REQUEST);
     }
+    log.info("User [{}] tried to follow [{}]", username, follow);
     followService.follow(username, follow);
     return new ResponseEntity<String>(HttpStatus.OK);
   }
@@ -50,6 +55,7 @@ public class FollowController {
     if(username.equals(follow)) {
       throw new HttpException("You cannot unfollow yourself.", HttpStatus.BAD_REQUEST);
     }
+    log.info("User [{}] tried to unfollow [{}]", username, follow);
     followService.unfollow(username, follow);
     return new ResponseEntity<String>(HttpStatus.OK);
   }

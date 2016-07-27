@@ -35,10 +35,12 @@ public class FeedController {
       @RequestParam(required = true) Long timestamp)
       throws Exception {
     if (authentication == null) {
-      throw new HttpException("Not logged in.", HttpStatus.UNAUTHORIZED);
+      log.info("Anonymous user polled a feed.");
+      return false; //TODO omg this cannot be like this
     }
     if(timestamp == null) {
-      throw new HttpException("Timestamp cannot be null when polling.", HttpStatus.BAD_REQUEST);
+      log.info("User [{}] tried to poll feed but did not supply a timestamp.", authentication.getName());
+      return false;
     }
     String username = authentication.getName();
     boolean existsAfter = feedConstructor.existsFeedAfter(username, timestamp, false);
@@ -50,7 +52,9 @@ public class FeedController {
   @ResponseBody
   public Boolean pollFeed(@RequestParam Long timestamp, @PathVariable String username)
       throws Exception {
-    return feedConstructor.existsFeedAfter(username, timestamp, true);
+    boolean existsAfter = feedConstructor.existsFeedAfter(username, timestamp, true);
+    log.info("Someone polled their feed, with timestamp [{}] and feed constructor returned [{}].", timestamp, existsAfter);
+    return existsAfter;
   }
 
   @RequestMapping(value = "/feed", method = RequestMethod.GET)

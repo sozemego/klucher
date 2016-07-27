@@ -11,22 +11,19 @@
 <div class = "bottomBorder">
 <c:import url="header.jsp"></c:import>
 </div>
-<div class = "content">
-<form method = "POST" action = "kluch" id = "kluchForm">
-<div class = "dashboardInputContainer">
-	<div class = "boxContainer">
-		
-		<textarea class = "dashboardTextInput" id = "kluchTextArea" placeholder = "Don't be shy, tell us what you're thinking."  name = "kluch"></textarea>
-			<div class = "underInput">
-				<span class = "charactersLeft centerText" id = "charactersLeft">250</span>
-				<span class = "submitButton centerText" id = "submitButton">share</span>
-			</div>
-	</div>
-	
-</div>
-</form>
-<div class = "newKluch centerText" id = "newKluch"></div>
-<c:import url="feed.jsp"></c:import>
+<div class="content">
+		<table width = "100%">
+			<tr>
+				<td class = "verticalAlignTop" width = "33%"><c:import url = "userinfo.jsp"></c:import></td>
+				<td width = "33%">
+					<c:import url="kluchInput.jsp"></c:import>
+					<div class="newKluch centerText" id="newKluch"></div>
+					<c:import url="feed.jsp"></c:import>
+				</td>
+				<td width = "33%"></td>
+			</tr>
+		</table>
+
 </div>
 <script>
 $(dashboardOnLoad());
