@@ -1,5 +1,7 @@
 package com.soze.register.service;
 
+import java.util.regex.Pattern;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +14,11 @@ import com.soze.user.model.User;
 
 @Service
 public class RegisterService {
-
+  
   private static final int MAX_USERNAME_LENGTH = 32;
   private static final int MIN_PASSWORD_LENGTH = 6;
   private static final int MAX_PASSWORD_LENGTH = 64;
+  private static final Pattern WHITE_SPACE = Pattern.compile("\\s");
   private static final Logger log = LoggerFactory.getLogger(RegisterService.class);
 
   private final UserDao userDao;
@@ -58,6 +61,10 @@ public class RegisterService {
       throw new IllegalArgumentException(
           "Username should not be longer than " + MAX_USERNAME_LENGTH + " characters.");
     }
+    if(hasWhiteSpace(username)) {
+      throw new IllegalArgumentException(
+          "Username cannot contain white space characters.");
+    }
   }
 
   private void validatePassword(String password) throws IllegalArgumentException {
@@ -73,10 +80,18 @@ public class RegisterService {
       throw new IllegalArgumentException(
           "Password should not be shorter than " + MIN_PASSWORD_LENGTH + " characters.");
     }
+    if(hasWhiteSpace(password)) {
+      throw new IllegalArgumentException(
+          "Username cannot contain white space characters.");
+    }
   }
 
   public boolean isAvailable(String username) {
     return !userDao.exists(username);
+  }
+  
+  private boolean hasWhiteSpace(String text) {
+    return WHITE_SPACE.matcher(text).find();
   }
 
 }

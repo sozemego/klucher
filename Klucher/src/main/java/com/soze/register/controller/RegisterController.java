@@ -39,7 +39,7 @@ public class RegisterController {
   @RequestMapping(method = RequestMethod.GET)
   public String getRegister(Authentication authentication) {
     if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-      return "redirect:/dashboard";
+      //return "redirect:/dashboard";
     }
     return "register";
   }

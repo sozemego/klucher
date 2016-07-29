@@ -17,7 +17,7 @@ function checkAvailibility(lastUsername) {
 	}
 	$.ajax({
 		type: "GET",
-		url: "register/available/" + currentUsername,
+		url: "/register/available/" + currentUsername,
 		error: function(xhr, status, error) {	
 			setTimeout(checkAvailibility, 2500, currentUsername);
 		},
@@ -70,15 +70,19 @@ function validateUsername() {
 	var username = usernameElement.val();
 	var isTooShort = isUsernameTooShort(username);
 	var isTooLong = isUsernameTooLong(username);
-	if(isTooShort || isTooLong) {
+	var whiteSpace = hasWhiteSpace(username);
+	if(isTooShort || isTooLong || whiteSpace) {
 		usernameElement.removeClass("validImg");
 		usernameElement.addClass("invalidImg");
 	}
 	if(isTooShort) {
-		$("#errorTable").append(createTableRowWithText("Username should be at least 4 characters long."));
+		$("#errorTable").append(createTableRowWithText("Username should be at least 1 character long."));
 	}
 	if(isTooLong) {
 		$("#errorTable").append(createTableRowWithText("Username should not be longer than 32 characters."));
+	}
+	if(whiteSpace) {
+		$("#errorTable").append(createTableRowWithText("Username cannot contain white space."));
 	}
 }
 
@@ -86,10 +90,11 @@ function validatePassword() {
 	var passwordElement = $("#password");
 	passwordElement.removeClass("invalidImg");
 	passwordElement.addClass("validImg");
-	var username = passwordElement.val();
-	var isTooShort = isPasswordTooShort(username);
-	var isTooLong = isPasswordTooLong(username);
-	if(isTooShort || isTooLong) {
+	var password = passwordElement.val();
+	var isTooShort = isPasswordTooShort(password);
+	var isTooLong = isPasswordTooLong(password);
+	var whiteSpace = hasWhiteSpace(password);
+	if(isTooShort || isTooLong || whiteSpace) {
 		passwordElement.removeClass("validImg");
 		passwordElement.addClass("invalidImg");
 	}
@@ -98,6 +103,9 @@ function validatePassword() {
 	}
 	if(isTooLong) {
 		$("#errorTable").append(createTableRowWithText("Password should not be longer than 64 characters."));
+	}
+	if(whiteSpace) {
+		$("#errorTable").append(createTableRowWithText("Password cannot contain white space."));
 	}
 }
 
@@ -112,7 +120,7 @@ function createTableRowWithText(text) {
 }
 
 function isUsernameTooShort(username) {
-	return username.length < 4;
+	return username.length == 0;
 }
 
 function isUsernameTooLong(username) {
@@ -125,6 +133,11 @@ function isPasswordTooShort(password) {
 
 function isPasswordTooLong(password) {
 	return password.length > 64;
+}
+
+function hasWhiteSpace(text) {
+	var toReturn = /\s/g.test(text);
+	return toReturn;
 }
 
 function dashboardOnLoad() {
