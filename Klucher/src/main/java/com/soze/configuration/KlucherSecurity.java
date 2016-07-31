@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
@@ -53,9 +54,11 @@ public class KlucherSecurity extends WebSecurityConfigurerAdapter {
       .antMatchers("/info/**").hasRole("ADMIN")
     .and()
       .formLogin()
-      .defaultSuccessUrl("/dashboard", true)
+      .defaultSuccessUrl("/dashboard", false)
       .loginPage("/login")
-      .loginProcessingUrl("/login").permitAll()
+      .loginProcessingUrl("/login")
+      .successHandler(getAuthenticationSuccessHandler())
+      .permitAll()
     .and()
       .rememberMe()
       .authenticationSuccessHandler(authenticationSuccessHandler())
@@ -92,6 +95,13 @@ public class KlucherSecurity extends WebSecurityConfigurerAdapter {
   public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
     auth.userDetailsService(userDetailsService);
     auth.authenticationProvider(getAuthenticationProvider());
+  }
+  
+  @Bean
+  public AuthenticationSuccessHandler getAuthenticationSuccessHandler() {
+    SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler();
+    handler.setUseReferer(true);
+    return handler;
   }
   
 }

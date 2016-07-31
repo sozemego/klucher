@@ -55,54 +55,8 @@
 			value="${_csrf.token}" />
 	</form>
 	</div>
-	<div class = "form">		
-		<form action="register" method="POST" modelAttribute="registerForm">
-		<table class = "roundedCorners frontForm" id = "registerTable">
-			<tr>
-				<td class = "welcome centerText" colspan = "2">New to Klucher?</td>				
-			</tr>
-			<tr>
-				<td>username</td>
-				<td><input id = "username" class = "available myInput" name="username" type="text" size="50" maxlength="64" value = "${username}"></td>				
-			</tr>
-			<tr>
-				<td>password</td>
-				<td><input id = "password" class = "myInput" name="password" type="password" size="50" maxlength="64 value = "${password}"></td>
-			</tr>
-			<tr>
-				<td>
-				<td align="right"><input type="submit" value="become a member"/></td>
-			</tr>
-			<tr>
-				<td colspan = "2" align = "center">
-				<table id = "errorTable">	
-			<c:if test="${not empty general}">
-				<tr>
-					<td align = "center">${general}</td>
-				</tr>
-			</c:if>
-			<c:if test="${not empty username_error}">
-				<tr>
-					<td align = "center">${username_error}</td>
-				</tr>
-			</c:if>
-			<c:if test="${not empty password_error}">
-				<tr>
-					<td align = "center">${password_error}</td>
-				</tr>
-			</c:if>			
-			</table>		
-				</td>
-			</tr>		
-		</table>
-		<input type="hidden" name="${_csrf.parameterName}"
-			value="${_csrf.token}" />
-	</form>
-	</div>
+	<c:import url = "registerElement.jsp"></c:import>
 </div>
-</div>		
-<script>
-$(document).ready(registerOnLoad());
-</script>	
+</div>			
 </body>
 </html>

@@ -53,7 +53,7 @@ public class FeedController {
   public Boolean pollFeed(@RequestParam Long timestamp, @PathVariable String username)
       throws Exception {
     boolean existsAfter = feedConstructor.existsFeedAfter(username, timestamp, true);
-    log.info("Someone polled their feed, with timestamp [{}] and feed constructor returned [{}].", timestamp, existsAfter);
+    log.info("Someone polled feed for user [{}], with timestamp [{}] and feed constructor returned [{}].", username, timestamp, existsAfter);
     return existsAfter;
   }
 

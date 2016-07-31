@@ -1,9 +1,8 @@
 function registerOnLoad() {
 	checkAvailibility(null);
 	validateStart();
+	attachSubmitRegisterListener();
 }
-
-var usernameAvailable = true;
 
 function checkAvailibility(lastUsername) {
 	var currentUsername = $("#username").val();
@@ -23,7 +22,6 @@ function checkAvailibility(lastUsername) {
 		},
 		success: function(data) {
 			var currentUsernameElement = $("#username");
-			usernameAvailable = data;
 			if(data) {
 				currentUsernameElement.removeClass("unavailable");
 				currentUsernameElement.addClass("available");				
@@ -31,7 +29,7 @@ function checkAvailibility(lastUsername) {
 				currentUsernameElement.removeClass("available");
 				currentUsernameElement.addClass("unavailable");			
 			}
-			addUsernameAvailableMessage();
+			addUsernameAvailableMessage(data);
 			setTimeout(checkAvailibility, 1000, currentUsername);			
 		}
 	});
@@ -52,9 +50,21 @@ function validateStart() {
 	});
 }
 
+function attachSubmitRegisterListener() {
+	$("#registerForm").submit(function(event) {
+		validateRegisterForm();
+		var errors = $("#errorTable").children().length;
+		if(errors > 0) {
+			event.preventDefault();
+			return false;
+		}
+		$("#registerForm").submit();
+		
+	});
+}
+
 function validateRegisterForm() {
 	clearErrorTable();
-	addUsernameAvailableMessage();
 	validateUsername();
 	validatePassword();
 }
@@ -109,8 +119,8 @@ function validatePassword() {
 	}
 }
 
-function addUsernameAvailableMessage() {
-	if(!usernameAvailable) {
+function addUsernameAvailableMessage(bool) {
+	if(!bool) {
 		$("#errorTable").prepend(createTableRowWithText("Username exists already."));
 	}
 }
@@ -711,8 +721,6 @@ function attachMouseOverOutListenersToLoginElement() {
 		$("#loginTable").removeClass("active");
 	});
 }
-
-
 
 function toggleLoginTableActiveClass() {
 	$("#loginTable").toggleClass("active");
