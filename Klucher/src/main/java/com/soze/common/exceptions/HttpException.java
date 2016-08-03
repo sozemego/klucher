@@ -24,8 +24,8 @@ public class HttpException extends Exception {
     this.status = status;
   }
 
-  public ResponseEntity<String> getResponseEntity() {
-    return new ResponseEntity<String>(this.getMessage(), status);
+  public ResponseEntity<Object> getResponseEntity() {
+    return new ResponseEntity<Object>(this.getMessage(), status);
   }
 
 }
