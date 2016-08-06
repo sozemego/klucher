@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -87,6 +88,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
       String error = "No handler found for " + ex.getHttpMethod() + " at " + ex.getRequestURL();
       ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND, ex.getLocalizedMessage(), error);
+      return new ResponseEntity<Object>(response, new HttpHeaders(), response.getStatus());
+  }
+  
+  @Override
+  protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
+    HttpRequestMethodNotSupportedException ex, 
+    HttpHeaders headers, 
+    HttpStatus status, 
+    WebRequest request) {
+      StringBuilder builder = new StringBuilder();
+      builder.append(ex.getMethod() + " method is not supported for this request. Supported methods are ");
+      ex.getSupportedHttpMethods().forEach(t -> builder.append(t + " "));
+   
+      ErrorResponse response = new ErrorResponse(HttpStatus.METHOD_NOT_ALLOWED, 
+        ex.getLocalizedMessage(), builder.toString());
       return new ResponseEntity<Object>(response, new HttpHeaders(), response.getStatus());
   }
   

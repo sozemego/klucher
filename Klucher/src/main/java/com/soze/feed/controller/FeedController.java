@@ -36,10 +36,6 @@ public class FeedController {
       throws Exception {
     if (authentication == null) {
       log.info("Anonymous user polled a feed.");
-      return false; //TODO omg this cannot be like this
-    }
-    if(timestamp == null) {
-      log.info("User [{}] tried to poll feed but did not supply a timestamp.", authentication.getName());
       return false;
     }
     String username = authentication.getName();
@@ -60,13 +56,10 @@ public class FeedController {
   @RequestMapping(value = "/feed", method = RequestMethod.GET)
   @ResponseBody
   public Feed getFeed(Authentication authentication,
-      @RequestParam Long timestamp,
+      @RequestParam(required = true) Long timestamp,
       @RequestParam(required = false) String direction) throws Exception {
     if (authentication == null) {
       throw new HttpException("Not logged in.", HttpStatus.UNAUTHORIZED);
-    }
-    if (timestamp == null) {
-      timestamp = Long.MAX_VALUE;
     }
     if (direction == null || direction.isEmpty()) {
       direction = "after";
@@ -74,13 +67,7 @@ public class FeedController {
     String username = authentication.getName();
     log.info("Trying to construct a feed for user [{}]. timestamp = [{}], direction = [{}]",
         username, timestamp, direction);
-    Feed feed = null;
-    if (direction.equalsIgnoreCase("after")) {
-      feed = feedConstructor.constructFeed(username, timestamp, false);
-    } else if (direction.equals("before")) {
-      feed = feedConstructor.constructFeedAfter(username, timestamp, false);
-    }
-    return feed;
+    return feedConstructor.constructFeed(username, timestamp, false, direction);
   }
   
   @RequestMapping(value = "/feed/{username}", method = RequestMethod.GET)
@@ -95,13 +82,7 @@ public class FeedController {
       direction = "after";
     }
     log.info("Trying to construct feed of user [{}] with direction [{}] and timestamp [{}]", username, direction, timestamp);
-    Feed feed = null;
-    if (direction.equalsIgnoreCase("after")) {
-      feed = feedConstructor.constructFeed(username, timestamp, true);
-    } else if (direction.equals("before")) {
-      feed = feedConstructor.constructFeedAfter(username, timestamp, true);
-    }
-    return feed;
+    return feedConstructor.constructFeed(username, timestamp, true, direction);
   }
 
 }

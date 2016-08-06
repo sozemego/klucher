@@ -2,6 +2,7 @@ package com.soze.feed.service;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,30 @@ public class FeedConstructor {
   public FeedConstructor(KluchDao kluchDao, UserDao userDao) {
     this.kluchDao = kluchDao;
     this.userDao = userDao;
+  }
+  
+  /**
+   * Returns a feed for a given user. This method simply returns a finite amount of kluchs
+   * for this user, all posted before (earlier than) or after (later than) a given
+   * <code>timestamp</code> (millis after epoch start). If onlyForUser is true,
+   * returns only this user's Kluchs, otherwise it includes all users they follow too.
+   * @param username
+   * @param timestamp
+   * @param onlyForUser
+   * @param direction
+   * @return
+   * @throws IllegalArgumentException 
+   */
+  public Feed constructFeed(String username, long timestamp, boolean onlyForUser, String direction) throws IllegalArgumentException {
+    if(!"after".equalsIgnoreCase(direction) && !"before".equalsIgnoreCase(direction)) {
+      throw new IllegalArgumentException("Direction has to be either 'after' or 'before'.");
+    }
+    if (direction.equalsIgnoreCase("before")) {
+      return constructFeed(username, timestamp, onlyForUser); 
+    } else if (direction.equalsIgnoreCase("after")) {
+      return constructFeedAfter(username, timestamp, onlyForUser);
+    }
+    return new Feed();
   }
   
   /**
@@ -92,7 +117,7 @@ public class FeedConstructor {
     User user = getUser(username);
     List<String> authors = getListOfAuthors(user, onlyForUser);
     Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), exists);
-    boolean exists = kluchs.hasContent() ? !kluchs.getContent().isEmpty() : false;
+    boolean exists = kluchs.hasContent() || !kluchs.getContent().isEmpty();
     return exists;
   }
   
@@ -127,14 +152,16 @@ public class FeedConstructor {
   /**
    * Returns a list of authors this user would see kluchs of (so this user's kluchs and their followers' kluchs).
    * @param user
+   * @param onlyForUser whether the list of authors should include only the user or also users they follow
    * @return
    */
   private List<String> getListOfAuthors(User user, boolean onlyForUser) {
+    if(onlyForUser) {
+      return Arrays.asList(user.getUsername());
+    }
     List<String> authors = new ArrayList<>();
     authors.add(user.getUsername());
-    if(!onlyForUser) {
-      authors.addAll(user.getFollowing());
-    }
+    authors.addAll(user.getFollowing());
     return authors;
   }
   

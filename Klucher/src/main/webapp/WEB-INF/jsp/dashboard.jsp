@@ -7,7 +7,7 @@
 <script src="/resources/js/klucher.js"></script>
 </head>
 <body>
-<input type = "hidden" id = "data" data-username = "${user.username}" data-page = "0" data-last-timestamp="9007199254740991" data-first-timestamp = "0">
+<input type = "hidden" id = "data" data-username = "${user.username}" data-page = "0" data-last-timestamp="0" data-first-timestamp = "9007199254740991">
 <div class = "bottomBorder">
 <c:import url="header.jsp"></c:import>
 </div>

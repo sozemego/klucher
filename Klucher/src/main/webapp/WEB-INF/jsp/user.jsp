@@ -10,8 +10,7 @@
 <body>
 <c:import url = "loginElement.jsp"></c:import>
 	<input type="hidden" id="data" data-username="${username}"
-		data-page="0" data-last-timestamp="9007199254740991"
-		data-first-timestamp="0" data-logged-in="${loggedIn}" data-follows = "${follows}">
+		data-page="0" data-last-timestamp="0" data-first-timestamp = "9007199254740991" data-logged-in="${loggedIn}" data-follows = "${follows}">
 	<div class="bottomBorder">
 		<c:import url="header.jsp"></c:import>
 	</div>

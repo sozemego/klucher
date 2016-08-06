@@ -151,7 +151,7 @@ function hasWhiteSpace(text) {
 }
 
 function dashboardOnLoad() {
-	getFeed("after");
+	getFeed("before", Number.MAX_SAFE_INTEGER, true);
 	attachInputListener();
 	attachShareKluchListener();
 	attachInfiniteScrollingListener();
@@ -215,56 +215,25 @@ function ajaxPostKluch() {
 	focusInputArea();
 }
 
-function getFeed() {
+function getFeed(direction, timestamp, append) {
 	var isGettingFeed = $("#data").attr("data-getting-feed");
 	if(isGettingFeed == 1) {
 		return;
 	}
-	var page = $("#data").attr("data-page");
-	if(page == -1) {
-		return;
-	}
 	setGettingFeed(1);
-	var timestamp = parseInt($("#data").attr("data-last-timestamp"));	
 	$.ajax({
 		dataType: "json",
 		type: "GET",
 		url: "/feed",
 		data: {
 			"timestamp" : timestamp,
-			"direction" : "after"
+			"direction" : direction
 		},
 		error: function(xhr, status, error) {	
 			setGettingFeed(0);			
 		},
 		success: function(data, status, xhr) {
-			addKluchsToFeed(data.kluchs.content, true);
-			setPage(data);
-			setGettingFeed(0);
-		}
-	});
-}
-
-function getFeedBefore() {
-	var isGettingFeed = $("#data").attr("data-getting-feed");
-	if(isGettingFeed == 1) {
-		return;
-	}
-	setGettingFeed(1);
-	var timestamp = parseInt($("#data").attr("data-first-timestamp"));	
-	$.ajax({
-		dataType: "json",
-		type: "GET",
-		url: "/feed",
-		data: {
-			"timestamp" : timestamp,
-			"direction" : "before"
-		},
-		error: function(xhr, status, error) {	
-			setGettingFeed(0);			
-		},
-		success: function(data, status, xhr) {
-			addKluchsToFeed(data.kluchs.content, false);
+			addKluchsToFeed(data.kluchs.content, append);
 			setGettingFeed(0);
 		}
 	});
@@ -284,38 +253,39 @@ function clearTextArea() {
 function addKluchsToFeed(kluchs, append) {
 	for(var i = 0; i < kluchs.length; i++) {
 		var kluch = kluchs[i];		
-		addKluchToFeed(kluch.author, millisToText(kluch.timestamp), kluch.text, append);
-	}
-	if(kluchs.length > 0) {	
-		if(append) {
-			setLastTimestamp(kluchs[kluchs.length - 1].timestamp);
-			setFirstTimestamp(kluchs[0].timestamp);
-		} else {
-			setLastTimestamp(kluchs[0].timestamp);
-			setFirstTimestamp(kluchs[kluchs.length - 1].timestamp);
-		}
+		addKluchToFeed(kluch, append);
 	}
 }
 
-function addKluchToFeed(author, timeText, text, append) {
-	text = escapeHtml(text);
-	if(typeof author === "undefined") {
-		return;
-	}
+function addKluchToFeed(kluch, append) {
+	var escapedText = escapeHtml(kluch.text);
 	var outerDiv = document.createElement("div");
 	append ? $("#kluchFeed").append(outerDiv) : $("#kluchFeed").prepend(outerDiv);
 	outerDiv.classList.toggle("kluch");
 	outerDiv.classList.toggle("opacityAnimation");
 	var authorDiv = document.createElement("div");
 	authorDiv.classList.toggle("authorDiv");
-	$("<span class = 'author'>" + author + "</span>").appendTo(authorDiv);
-	$("<span class = 'dashboardTime'>" + timeText + "</span>").appendTo(authorDiv);
+	$("<span class = 'author'>" + kluch.author + "</span>").appendTo(authorDiv);
+	$("<span class = 'dashboardTime'>" + millisToText(kluch.timestamp) + "</span>").appendTo(authorDiv);
 	$(authorDiv).appendTo(outerDiv);
 	var textAreaDiv = document.createElement("div");
 	textAreaDiv.classList.toggle("kluchTextArea");
 	textAreaDiv.classList.toggle("preWrap");
-	$("<span>" +  text + "</span>").appendTo(textAreaDiv);
+	$("<span>" + escapedText + "</span>").appendTo(textAreaDiv);
 	$(textAreaDiv).appendTo(outerDiv);
+	assignTimestamps(kluch);
+}
+
+function assignTimestamps(kluch) {
+	var timestamp = kluch.timestamp;
+	var currentLastTimestamp = parseInt($("#data").attr("data-last-timestamp"));
+	if(timestamp > currentLastTimestamp) {
+		$("#data").attr("data-last-timestamp", timestamp);
+	}
+	var currentFirstTimestamp = parseInt($("#data").attr("data-first-timestamp"));
+	if(timestamp < currentFirstTimestamp) {
+		$("#data").attr("data-first-timestamp", timestamp);
+	}
 }
 
 function escapeHtml(text) {
@@ -334,7 +304,7 @@ function attachInfiniteScrollingListener() {
 		var scrollY = window.scrollY;
 		var bodyHeight = document.body.offsetHeight;
 	    if ((windowInnerHeight + scrollY) >= bodyHeight * 0.9) {
-	        getFeed();
+	        getFeed("before", parseInt($("#data").attr("data-first-timestamp")), true);
 	    }
 	    displayLastPageMessage();
 	});
@@ -346,14 +316,14 @@ function setGettingFeed(data) {
 
 function setLastTimestamp(millis) {
 	var currentLastTimestamp = parseInt($("#data").attr("data-last-timestamp"));
-	if(currentLastTimestamp > millis) {
+	if(currentLastTimestamp < millis) {
 		$("#data").attr("data-last-timestamp", millis);
 	}
 }
 
 function setFirstTimestamp(millis) {
 	var currentFirstTimestamp = parseInt($("#data").attr("data-first-timestamp"));
-	if(currentFirstTimestamp < millis) {
+	if(currentFirstTimestamp > millis) {
 		$("#data").attr("data-first-timestamp", millis);
 	}
 }
@@ -364,7 +334,7 @@ function pollFeed() {
 		setTimeout(pollFeed, 5000);
 		return;
 	}
-	var timestamp = $("#data").attr("data-first-timestamp");
+	var timestamp = $("#data").attr("data-last-timestamp");
 	if(timestamp == null) {
 		setTimeout(pollFeed, 5000);
 	}
@@ -409,12 +379,12 @@ function focusInputArea() {
 
 function clickNewKluchs() {
 	hideNewKluchElement();
-	getFeedBefore();
+	getFeed("after", parseInt($("#data").attr("data-last-timestamp")), false);
 }
 
 function clickNewKluchsUnauthorized() {
 	hideNewKluchElement();
-	getFeedUnauthorizedBefore();
+	getFeedUnauthorized("after", parseInt($("#data").attr("data-last-timestamp")), false);
 }
 
 function hideNewKluchElement() {
@@ -477,7 +447,7 @@ function daysPassed(hours) {
 }
 
 function userOnLoad() {
-	getFeedUnauthorizedBefore();
+	getFeedUnauthorized("before", Number.MAX_SAFE_INTEGER, true);
 	attachInfiniteScrollingListener();
 	pollFeedUnauthorized();	
 	createUserButtonContainer();
@@ -493,7 +463,7 @@ function pollFeedUnauthorized() {
 		return;
 	}
 	var username = $("#data").attr("data-username");
-	var timestamp = $("#data").attr("data-first-timestamp");
+	var timestamp = $("#data").attr("data-last-timestamp");
 	if(timestamp == null) {
 		setTimeout(pollFeed, 5000);
 	}
@@ -517,13 +487,12 @@ function pollFeedUnauthorized() {
 	});
 }
 
-function getFeedUnauthorizedBefore() {
+function getFeedUnauthorized(direction, timestamp, append) {
 	var isGettingFeed = $("#data").attr("data-getting-feed");
 	if(isGettingFeed == 1) {
 		return;
 	}
 	setGettingFeed(1);
-	var timestamp = parseInt($("#data").attr("data-first-timestamp"));	
 	var username = $("#data").attr("data-username");
 	$.ajax({
 		dataType: "json",
@@ -531,13 +500,13 @@ function getFeedUnauthorizedBefore() {
 		url: "/feed" + "/" + username,
 		data: {
 			"timestamp" : timestamp,
-			"direction" : "before"
+			"direction" : direction
 		},
 		error: function(xhr, status, error) {	
 			setGettingFeed(0);			
 		},
 		success: function(data, status, xhr) {
-			addKluchsToFeed(data.kluchs.content, false);
+			addKluchsToFeed(data.kluchs.content, append);
 			setGettingFeed(0);
 		}
 	});
