@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class RateLimiter {
 
   private final static int REQUESTS_PER_MINUTE = 30;
-  private final static long MINUTE_SECONDS = 60;
+  private final static long MINUTE_IN_SECONDS = 60;
   private final Map<String, List<Long>> pastRequests = new ConcurrentHashMap<>();
   
   /**
@@ -39,7 +39,7 @@ public class RateLimiter {
     }  
     long currentTime = Instant.now().getEpochSecond();
     save(username, currentTime);
-    int requestsSince = requestsSince(username, currentTime, MINUTE_SECONDS);
+    int requestsSince = requestsSince(username, currentTime, MINUTE_IN_SECONDS);
     if (requestsSince > REQUESTS_PER_MINUTE) {
       return false;
     }  

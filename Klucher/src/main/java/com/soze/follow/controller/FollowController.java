@@ -13,31 +13,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.soze.common.exceptions.HttpException;
 import com.soze.follow.service.FollowService;
+import com.soze.ratelimiter.service.RateLimiter;
 
 @Controller
 public class FollowController {
   
-  
   private static final Logger log = LoggerFactory.getLogger(FollowController.class);
   private final FollowService followService;
+  private final RateLimiter rateLimiter;
 
   @Autowired
-  public FollowController(FollowService followService) {
+  public FollowController(FollowService followService, RateLimiter rateLimiter) {
     this.followService = followService;
+    this.rateLimiter = rateLimiter;
   }
   
   @RequestMapping(value = "/user/follow", method = RequestMethod.POST)
-  public ResponseEntity<String> follow(Authentication authentication, @RequestParam String follow) throws Exception {
-    if(authentication == null) {
-      throw new HttpException("Not logged in.", HttpStatus.UNAUTHORIZED);
-    }
-    if(follow == null) {
-      throw new HttpException("Username to follow not specified.", HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<String> follow(Authentication authentication, @RequestParam String follow) throws Exception {  
+    validate(authentication, follow);
     String username = authentication.getName();
-    if(username.equals(follow)) {
-      throw new HttpException("You cannot follow yourself.", HttpStatus.BAD_REQUEST);
-    }
     log.info("User [{}] tried to follow [{}]", username, follow);
     followService.follow(username, follow);
     return new ResponseEntity<String>(HttpStatus.OK);
@@ -45,19 +39,25 @@ public class FollowController {
   
   @RequestMapping(value = "/user/unfollow", method = RequestMethod.POST)
   public ResponseEntity<String> unfollow(Authentication authentication, @RequestParam String follow) throws Exception {
-    if(authentication == null) {
-      throw new HttpException("Not logged in.", HttpStatus.UNAUTHORIZED);
-    }
-    if(follow == null) {
-      throw new HttpException("Username to unfollow not specified.", HttpStatus.BAD_REQUEST);
-    }
+    validate(authentication, follow);
     String username = authentication.getName();
-    if(username.equals(follow)) {
-      throw new HttpException("You cannot unfollow yourself.", HttpStatus.BAD_REQUEST);
-    }
     log.info("User [{}] tried to unfollow [{}]", username, follow);
     followService.unfollow(username, follow);
     return new ResponseEntity<String>(HttpStatus.OK);
+  }
+
+  private void validate(Authentication authentication, String follow)
+      throws HttpException {
+    if(authentication == null) {
+      throw new HttpException("Not logged in.", HttpStatus.UNAUTHORIZED);
+    }
+    String username = authentication.getName();
+    if(!rateLimiter.interact(username)) {
+      throw new HttpException("Too many requests.", HttpStatus.TOO_MANY_REQUESTS);
+    }
+    if(username.equals(follow)) {
+      throw new HttpException("You cannot unfollow yourself.", HttpStatus.BAD_REQUEST);
+    }
   }
   
 }

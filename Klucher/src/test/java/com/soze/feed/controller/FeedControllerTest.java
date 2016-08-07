@@ -58,7 +58,7 @@ public class FeedControllerTest extends TestWithUserBase {
   @Test
   public void testAuthorizedButInvalidTimestampParameter() throws Exception {
     addUserToDbAndLogin("test", "password");
-    mvc.perform(MockMvcRequestBuilders.get("/feed")
+    mvc.perform(MockMvcRequestBuilders.get("/feed/test")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
     .andDo(print())
@@ -73,7 +73,7 @@ public class FeedControllerTest extends TestWithUserBase {
   @Test
   public void testAuthorizedAndValidTimestamp() throws Exception {
     addUserToDbAndLogin("test", "password");
-    mvc.perform(MockMvcRequestBuilders.get("/feed")
+    mvc.perform(MockMvcRequestBuilders.get("/feed/test")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
         .param("timestamp", "0"))
@@ -83,16 +83,6 @@ public class FeedControllerTest extends TestWithUserBase {
     .andExpect(jsonPath("$.kluchs.last", equalTo(true)))
     .andExpect(jsonPath("$.kluchs.first", equalTo(true)))
     .andExpect(jsonPath("$.kluchs.size", equalTo(30)));
-  }
-  
-  @Test
-  public void testPollUnauthorized() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/feed/poll")
-        .accept(MediaType.APPLICATION_JSON)
-        .contentType(MediaType.APPLICATION_JSON)
-        .param("timestamp", "0"))
-    .andDo(print())
-    .andExpect(status().isOk());
   }
   
   @Test
@@ -113,7 +103,7 @@ public class FeedControllerTest extends TestWithUserBase {
   @Test
   public void testPollAuthorizedAndValidTimestamp() throws Exception {
     addUserToDbAndLogin("test", "password");
-    mvc.perform(MockMvcRequestBuilders.get("/feed")
+    mvc.perform(MockMvcRequestBuilders.get("/feed/test")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
         .param("timestamp", "0"))

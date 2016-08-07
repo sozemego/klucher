@@ -207,12 +207,16 @@ function ajaxPostKluch() {
 			var currentTimestamp = Date.now();
 			setFirstTimestamp(currentTimestamp);
 			clearTextArea();
-			addKluchToFeed(getUsername(), millisToText(currentTimestamp), kluchText, false);
+			addKluchToFeed(getKluch(getUsername(), currentTimestamp, kluchText), false);
 			checkCharacterCount();	
 			setGettingFeed(0);
 		}
 	});
 	focusInputArea();
+}
+
+function getKluch(username, timestamp, text) {
+	return {author : username, timestamp : timestamp, text : text};
 }
 
 function getFeed(direction, timestamp, append) {
@@ -221,10 +225,11 @@ function getFeed(direction, timestamp, append) {
 		return;
 	}
 	setGettingFeed(1);
+	var username = getUsername();
 	$.ajax({
 		dataType: "json",
 		type: "GET",
-		url: "/feed",
+		url: "/feed/" + username,
 		data: {
 			"timestamp" : timestamp,
 			"direction" : direction
@@ -338,10 +343,11 @@ function pollFeed() {
 	if(timestamp == null) {
 		setTimeout(pollFeed, 5000);
 	}
+	var username = getUsername();
 	$.ajax({
 		dataType: "json",
 		type: "GET",
-		url: "/feed/poll",
+		url: "/feed/poll/" + username,
 		data: {
 			"timestamp" : timestamp,
 			"direction" : "after"
@@ -380,11 +386,6 @@ function focusInputArea() {
 function clickNewKluchs() {
 	hideNewKluchElement();
 	getFeed("after", parseInt($("#data").attr("data-last-timestamp")), false);
-}
-
-function clickNewKluchsUnauthorized() {
-	hideNewKluchElement();
-	getFeedUnauthorized("after", parseInt($("#data").attr("data-last-timestamp")), false);
 }
 
 function hideNewKluchElement() {
@@ -447,69 +448,13 @@ function daysPassed(hours) {
 }
 
 function userOnLoad() {
-	getFeedUnauthorized("before", Number.MAX_SAFE_INTEGER, true);
+	getFeed("before", Number.MAX_SAFE_INTEGER, true);
 	attachInfiniteScrollingListener();
-	pollFeedUnauthorized();	
+	pollFeed();	
 	createUserButtonContainer();
 	addFollowButton();
 	showLoginPage(false);
 	attachMouseOverOutListenersToLoginElement();
-}
-
-function pollFeedUnauthorized() {
-	var isGettingFeed = $("#data").attr("data-getting-feed");
-	if(isGettingFeed == 1) {
-		setTimeout(pollFeedUnauthorized, 5000);
-		return;
-	}
-	var username = $("#data").attr("data-username");
-	var timestamp = $("#data").attr("data-last-timestamp");
-	if(timestamp == null) {
-		setTimeout(pollFeed, 5000);
-	}
-	$.ajax({
-		dataType: "json",
-		type: "GET",
-		url: "/feed/poll/" + username,
-		data: {
-			"timestamp" : timestamp,
-			"direction" : "after"
-		},
-		error: function(xhr, status, error) {	
-			setTimeout(pollFeedUnauthorized, 5000);
-		},
-		success: function(data, status, xhr) {
-			setTimeout(pollFeedUnauthorized, 5000);
-			if(data) {
-				displayNewKluchElement(clickNewKluchsUnauthorized);
-			}
-		}
-	});
-}
-
-function getFeedUnauthorized(direction, timestamp, append) {
-	var isGettingFeed = $("#data").attr("data-getting-feed");
-	if(isGettingFeed == 1) {
-		return;
-	}
-	setGettingFeed(1);
-	var username = $("#data").attr("data-username");
-	$.ajax({
-		dataType: "json",
-		type: "GET",
-		url: "/feed" + "/" + username,
-		data: {
-			"timestamp" : timestamp,
-			"direction" : direction
-		},
-		error: function(xhr, status, error) {	
-			setGettingFeed(0);			
-		},
-		success: function(data, status, xhr) {
-			addKluchsToFeed(data.kluchs.content, append);
-			setGettingFeed(0);
-		}
-	});
 }
 
 function createUserButtonContainer() {

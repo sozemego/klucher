@@ -19,8 +19,7 @@ import com.soze.feed.service.FeedConstructor;
 @Controller
 public class FeedController {
 
-  private static final Logger log = LoggerFactory
-      .getLogger(FeedController.class);
+  private static final Logger log = LoggerFactory.getLogger(FeedController.class);
 
   private final FeedConstructor feedConstructor;
 
@@ -29,60 +28,38 @@ public class FeedController {
     this.feedConstructor = feedConstructor;
   }
 
-  @RequestMapping(value = "/feed/poll", method = RequestMethod.GET)
-  @ResponseBody
-  public Boolean pollFeed(Authentication authentication,
-      @RequestParam(required = true) Long timestamp)
-      throws Exception {
-    if (authentication == null) {
-      log.info("Anonymous user polled a feed.");
-      return false;
-    }
-    String username = authentication.getName();
-    boolean existsAfter = feedConstructor.existsFeedAfter(username, timestamp, false);
-    log.info("User [{}] polled their feed, with timestamp [{}] and feed constructor returned [{}].", username, timestamp, existsAfter);
-    return existsAfter;
-  }
-  
   @RequestMapping(value = "/feed/poll/{username}", method = RequestMethod.GET)
   @ResponseBody
-  public Boolean pollFeed(@RequestParam Long timestamp, @PathVariable String username)
+  public Boolean pollFeed(Authentication authentication,
+      @RequestParam(required = true) Long timestamp, @PathVariable String username)
       throws Exception {
-    boolean existsAfter = feedConstructor.existsFeedAfter(username, timestamp, true);
-    log.info("Someone polled feed for user [{}], with timestamp [{}] and feed constructor returned [{}].", username, timestamp, existsAfter);
+    boolean onlyForUser = true;
+    String authenticatedUsername = authentication == null ? null : authentication.getName();
+    if (authentication != null && username.equals(authenticatedUsername)) {
+      onlyForUser = false;
+    }
+    boolean existsAfter = feedConstructor.existsFeedAfter(username, timestamp, onlyForUser);
+    log.info("User [{}] polled their feed, with timestamp [{}] and feed constructor returned [{}].",
+        authenticatedUsername, timestamp, existsAfter);
     return existsAfter;
   }
 
-  @RequestMapping(value = "/feed", method = RequestMethod.GET)
-  @ResponseBody
-  public Feed getFeed(Authentication authentication,
-      @RequestParam(required = true) Long timestamp,
-      @RequestParam(required = false) String direction) throws Exception {
-    if (authentication == null) {
-      throw new HttpException("Not logged in.", HttpStatus.UNAUTHORIZED);
-    }
-    if (direction == null || direction.isEmpty()) {
-      direction = "after";
-    }
-    String username = authentication.getName();
-    log.info("Trying to construct a feed for user [{}]. timestamp = [{}], direction = [{}]",
-        username, timestamp, direction);
-    return feedConstructor.constructFeed(username, timestamp, false, direction);
-  }
-  
   @RequestMapping(value = "/feed/{username}", method = RequestMethod.GET)
   @ResponseBody
-  public Feed getFeed(@RequestParam Long timestamp,
-      @RequestParam(required = false) String direction,
-      @PathVariable String username) throws Exception {
-    if (timestamp == null) {
-      timestamp = Long.MAX_VALUE;
+  public Feed getFeed(Authentication authentication, @PathVariable String username,
+      @RequestParam(required = true) Long timestamp,
+      @RequestParam(required = false) String direction) throws Exception {
+    boolean onlyForUser = true;
+    String authenticatedUsername = authentication == null ? null : authentication.getName();
+    if (authentication != null && username.equals(authenticatedUsername)) {
+      onlyForUser = false;
     }
     if (direction == null || direction.isEmpty()) {
       direction = "after";
     }
-    log.info("Trying to construct feed of user [{}] with direction [{}] and timestamp [{}]", username, direction, timestamp);
-    return feedConstructor.constructFeed(username, timestamp, true, direction);
+    log.info("Trying to construct a feed for user [{}]. timestamp = [{}], direction = [{}]",
+        username, timestamp, direction);
+    return feedConstructor.constructFeed(username, timestamp, onlyForUser, direction);
   }
 
 }

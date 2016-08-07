@@ -25,7 +25,11 @@ public class UserPageController {
   }
   
   @RequestMapping(value = "/u/{username}", method = RequestMethod.GET)
-  public String userPage(Authentication authentication, @PathVariable String username, Model model) {    
+  public String userPage(Authentication authentication, @PathVariable String username, Model model) {
+    User user = userDao.findOne(username);
+    if(user == null) {
+      return "redirect:/front";
+    }
     boolean loggedIn = authentication != null && !(authentication instanceof AnonymousAuthenticationToken);
     if (loggedIn) {
       @SuppressWarnings("null")
@@ -33,17 +37,10 @@ public class UserPageController {
       if(authorizedUsername.equals(username)) {
         return "redirect:/dashboard";
       }
-    }
-    User user = userDao.findOne(username);
-    if(user == null) {
-      return "front";
-    }
-    if(loggedIn) {
-      String authorizedUsername = authentication.getName();
       model.addAttribute("follows", doesUsernameFollow(authorizedUsername, user));
-    }
+    }    
     model.addAttribute("username", username);
-    model.addAttribute("loggedIn", authentication != null);
+    model.addAttribute("loggedIn", loggedIn);
     
     return "user";
   }
