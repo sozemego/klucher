@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.soze.hashtag.service.HashtagService;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
 
@@ -28,11 +29,13 @@ public class KluchService {
   private final KluchDao kluchDao;
   private final KluchAssembler kluchAssembler;
   private final Map<String, String> pastKluchs = new ConcurrentHashMap<>();
+  private final HashtagService hashtagService;
 
   @Autowired
-  public KluchService(KluchDao kluchDao, KluchAssembler kluchAssembler) {
+  public KluchService(KluchDao kluchDao, KluchAssembler kluchAssembler, HashtagService hashtagService) {
     this.kluchDao = kluchDao;
     this.kluchAssembler = kluchAssembler;
+    this.hashtagService = hashtagService;
   }
 
   /**
@@ -49,6 +52,7 @@ public class KluchService {
     saveLastKluch(username, kluchText);
     log.info("User [{}] successfuly posted a Kluch with text [{}].", username,
         kluchText);
+    hashtagService.process(kluch);
   }
 
   private void checkAlreadyPosted(String username, String kluchText) {
