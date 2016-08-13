@@ -23,7 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class User implements UserDetails {
 
   @Id
-  @Size(min = 4, max = 32)
+  @Size(min = 1, max = 32)
   private String username;
   @NotNull
   private String hashedPassword;
