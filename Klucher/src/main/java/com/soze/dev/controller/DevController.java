@@ -64,8 +64,14 @@ public class DevController {
     if("timestamp".equalsIgnoreCase(mode)) {
       post(username, number, millis, fastMode, kluchGenerator::getCurrentTimestamp);
     }
-    if("random".equalsIgnoreCase(mode)) {
+    if("nohashtag".equalsIgnoreCase(mode)) {
       post(username, number, millis, fastMode, kluchGenerator::getRandomKluch);
+    }
+    if("somehashtag".equalsIgnoreCase(mode)) {
+      post(username, number, millis, fastMode, kluchGenerator::getRandomKluchWithSomeHashtags);
+    }
+    if("allhashtag".equalsIgnoreCase(mode)) {
+      post(username, number, millis, fastMode, kluchGenerator::getAllHashtagKluch);
     }
   }
   
@@ -141,9 +147,14 @@ public class DevController {
     }
     
     public void run() {
-      kluchService.post(username, supplier.get());
+      try {
+        kluchService.post(username, supplier.get());
+      } catch (IllegalArgumentException e) {
+        //do nothing
+      }
       timesRun++;
       if (timesRun >= timesToRun) {
+        log.info("FixedRatePoster posted [{}] kluchs.", timesRun);
         executor.shutdown();
       }
     }   
@@ -164,9 +175,14 @@ public class DevController {
     
     public void run() {
       while(timesRun < timesToRun) {
-        kluchService.post(username, supplier.get());
+        try {
+          kluchService.post(username, supplier.get());
+        } catch (IllegalArgumentException e) {
+          //do nothing
+        }
         timesRun++;       
       }
+      log.info("Poster posted [{}] kluchs.", timesRun);
     }   
   }
   

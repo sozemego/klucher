@@ -32,7 +32,9 @@ Welcome to dev console!
 		<td><select name = "mode" id = "mode">
 			<option>id</option>
 			<option>timestamp</option>
-			<option>random</option>
+			<option>nohashtag</option>
+			<option>somehashtag</option>
+			<option>allhashtag</option>
 		</select></td>
 	</tr>
 	<tr>

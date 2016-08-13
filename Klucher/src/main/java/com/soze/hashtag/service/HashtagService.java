@@ -1,6 +1,8 @@
 package com.soze.hashtag.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,7 +10,6 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.hashtag.model.Hashtag;
 import com.soze.hashtag.repository.HashtagRepository;
@@ -31,15 +32,14 @@ public class HashtagService {
     this.hashtagRepository = hashtagRepository;
   }
   
-  @Async
+  @Async("kluchProcessingExecutor")
   public void process(Kluch kluch) {
-    Set<String> hashtags = extractHashtags(kluch.getText());
-    if(hashtags.isEmpty()) {
+    Set<String> hashtagsTexts = extractHashtags(kluch.getText());
+    if(hashtagsTexts.isEmpty()) {
       return;
     }
-    for(String hashtag: hashtags) {
-      addHashtag(hashtag, kluch);
-    }
+    List<Hashtag> hashtags = getHashtags(hashtagsTexts, kluch);
+    saveHashtags(hashtags);
   }
   
   private Set<String> extractHashtags(String kluchText) {
@@ -52,17 +52,27 @@ public class HashtagService {
     return hashtags;
   }
   
-  @Transactional
-  private void addHashtag(String hashtagText, Kluch kluch) {
+
+  private List<Hashtag> getHashtags(Set<String> hashtagTexts, Kluch kluch) {
+    List<Hashtag> hashtags = new ArrayList<>();
+    for(String hashtag: hashtagTexts) {
+      hashtags.add(generateHashtag(hashtag, kluch));
+    }
+    return hashtags;
+  }
+  
+  private Hashtag generateHashtag(String hashtagText, Kluch kluch) {
     Hashtag hashtag = hashtagRepository.findOne(hashtagText);
     if(hashtag == null) {
       hashtag = new Hashtag();     
     }
     hashtag.setText(hashtagText);
     hashtag.getKluchs().add(kluch);
-    hashtagRepository.save(hashtag);
+    return hashtag;
   }
   
-  
-  
+  private void saveHashtags(List<Hashtag> hashtags) {
+    hashtagRepository.save(hashtags);
+  }
+ 
 }
