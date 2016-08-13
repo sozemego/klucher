@@ -8,9 +8,10 @@
 </head>
 <body>
 <input type = "hidden" id = "data" data-username = "${username}" data-page = "0" data-last-timestamp="0" data-first-timestamp = "9007199254740991">
-<div class = "bottomBorder">
+
 <c:import url="header.jsp"></c:import>
-</div>
+<c:import url="subheader.jsp"></c:import>
+
 <div class="content">
 		<table width = "100%">
 			<tr>

@@ -8,7 +8,7 @@ body {
 }
 
 .content {
-	padding-top: 100px;
+	padding-top: 125px;
 }
 
 .centerViewport {
@@ -160,6 +160,16 @@ body {
 
 .headerBackground {
 	background: white;
+}
+
+.headerBottomBrand {
+	background: url(../../resources/images/brand_color_background_thirds.png)  no-repeat center center fixed;
+	width: 100%;
+	height: 1px;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
 }
 
 .bottomBorder {
@@ -516,4 +526,47 @@ opacity
 	background-color: gray;
 	z-index: 5000;
 }
+
+.subheaderContainer {
+	position: fixed;
+	//padding-top: 25px;
+	height: 64px;
+	top: 21px;
+	right: 0;
+	left: 0;
+	z-index: 1001;
+}
+
+.subheaderTable {
+	width: 100%;
+	height: 64px;
+	align: center;
+}
+
+.logoutButtonImg {
+	width: 32px;
+	height: 32px;
+}
+
+.subheaderButton {
+	max-width: 128px;
+	width: 128px;
+	border: 1px solid #d0d0d0;
+	-webkit-transition-duration: 0.3s;
+	transition-duration: 0.3s;
+	-webkit-transition-property: border;
+	transition-property: border;	
+}
+
+a {
+	color: black;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.subheaderButton:hover {
+	border: 1px solid black;
+}
+
+
 

@@ -455,6 +455,7 @@ function userOnLoad() {
 	addFollowButton();
 	showLoginPage(false);
 	attachMouseOverOutListenersToLoginElement();
+	configureLogoutButton();
 }
 
 function createUserButtonContainer() {
@@ -638,6 +639,22 @@ function attachMouseOverOutListenersToLoginElement() {
 
 function toggleLoginTableActiveClass() {
 	$("#loginTable").toggleClass("active");
+}
+
+function configureLogoutButton() {
+	var loggedIn = isLoggedIn();
+	if(loggedIn) {
+		return;
+	}
+	var logoutSpan = $("#logoutButton .buttonText");
+	logoutSpan.text("login");
+	var logoutImg = $("#logoutButton .logoutButtonImg");
+	logoutImg.attr("src", "../../resources/images/login.png");
+	var logoutButtonElement = $("#logoutButton");
+	logoutButtonElement.attr("href", "#");
+	logoutButtonElement.click(function(event) {
+		showLoginPage(true);
+	});
 }
 
 

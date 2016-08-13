@@ -8,7 +8,7 @@
 </head>
 <body>
 <c:import url="header.jsp"></c:import>
-	<form action="register" method="POST" modelAttribute="registerForm">
+	<form id = "registerForm" action="register" method="POST" modelAttribute="registerForm">
 		<table class = "centerViewport roundedCorners" id = "registerTable">
 			<tr>
 				<td class = "welcome centerText" colspan = "2">welcome to Klucher</td>				
