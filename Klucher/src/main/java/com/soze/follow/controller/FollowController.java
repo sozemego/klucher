@@ -20,12 +20,10 @@ public class FollowController {
   
   private static final Logger log = LoggerFactory.getLogger(FollowController.class);
   private final FollowService followService;
-  private final RateLimiter rateLimiter;
 
   @Autowired
-  public FollowController(FollowService followService, RateLimiter rateLimiter) {
+  public FollowController(FollowService followService) {
     this.followService = followService;
-    this.rateLimiter = rateLimiter;
   }
   
   @RequestMapping(value = "/user/follow", method = RequestMethod.POST)
@@ -52,9 +50,6 @@ public class FollowController {
       throw new HttpException("Not logged in.", HttpStatus.UNAUTHORIZED);
     }
     String username = authentication.getName();
-    if(!rateLimiter.interact(username)) {
-      throw new HttpException("Too many requests.", HttpStatus.TOO_MANY_REQUESTS);
-    }
     if(username.equals(follow)) {
       throw new HttpException("You cannot unfollow yourself.", HttpStatus.BAD_REQUEST);
     }

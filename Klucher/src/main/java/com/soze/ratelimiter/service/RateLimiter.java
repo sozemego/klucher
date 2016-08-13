@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,9 +21,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class RateLimiter {
 
-  private final static int REQUESTS_PER_MINUTE = 30;
-  private final static long MINUTE_IN_SECONDS = 60;
-  private final Map<String, List<Long>> pastRequests = new ConcurrentHashMap<>();
+  private final static int REQUEST_LIMIT = 60;
+  //time in seconds after made requests expire and stop counting towards limit
+  private final static int REQUEST_TIME_PERIOD_IN_SECONDS = 60;
+  private final Map<String, LinkedList<Long>> requests = new ConcurrentHashMap<>();
   
   /**
    * Method used to signal that a user made a request at given time (defined as
@@ -33,31 +35,48 @@ public class RateLimiter {
    *         minute than allowed). false if username is null, empty or is valid
    *         but made too many requests
    */
-  public boolean interact(String username) {
-    if(username == null || username.isEmpty()) {
-      return false;
-    }  
+  public HttpHeaders interact(String username) { 
     long currentTime = Instant.now().getEpochSecond();
+    int requestsSince = requestsSince(username, currentTime);
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("X-Rate-Limit-Limit", "" + REQUEST_LIMIT);
+    int remaining = Math.max(0, (REQUEST_LIMIT - requestsSince));
+    headers.add("X-Rate-Limit-Remaining", "" + remaining);
+    long secondsUntilRequest = requestsSince < REQUEST_LIMIT ? 0L : secondsUntilRequest(username, currentTime);
+    headers.add("X-Rate-Limit-Reset", "" + secondsUntilRequest);
     save(username, currentTime);
-    int requestsSince = requestsSince(username, currentTime, MINUTE_IN_SECONDS);
-    if (requestsSince > REQUESTS_PER_MINUTE) {
-      return false;
-    }  
-    return true;
+    return headers;
+  }
+  
+  /**
+   * Returns time in seconds until a given user will be able to 
+   * make a request.
+   * @param username
+   * @param currentTime in seconds since UNIX epoch
+   * @param timeInPast 
+   * @return
+   */
+  private long secondsUntilRequest(String username, long currentTime) {
+    LinkedList<Long> pastRequests = getPastRequests(username);
+    //the list's size() should be larger than REQUEST_LIMIT at this point
+    Long timestamp = pastRequests.get(pastRequests.size() - REQUEST_LIMIT);
+    long differenceBetweenCurrentAndLimitTimestamp = currentTime - timestamp;
+    return REQUEST_TIME_PERIOD_IN_SECONDS - differenceBetweenCurrentAndLimitTimestamp;
+    
   }
   
   /**
    * Returns a number of requests made by this user in time period between current time
    * and however long in the past you want. E.g. pass current time in seconds since unix epoch
    * and a minute in seconds and this method will tell you how many requests were
-   * successful in the last minute.
+   * successful in the last minute. Requests before timeInPast will be removed.
    * @param username
-   * @param currentTime time of the request (seconds 
-   * @param timePastInSeconds how far in the past you want to go
+   * @param currentTime time of the request (seconds)
+   * @param timeInPast how far in the past you want to go (in seconds)
    * @return
    */
-  private int requestsSince(String username, long currentTime, long timeInPast) {
-    return purge(username, currentTime, timeInPast);
+  private int requestsSince(String username, long currentTime) {
+    return purge(username, currentTime);
   }
   
   /**
@@ -68,8 +87,8 @@ public class RateLimiter {
    * @param timeInPast
    * @return
    */
-  private int purge(String username, long currentTime, long timeInPast) {
-    long startPoint = currentTime - timeInPast;
+  private int purge(String username, long currentTime) {
+    long startPoint = currentTime - REQUEST_TIME_PERIOD_IN_SECONDS;
     long endPoint = currentTime;
     List<Long> pastRequests = getPastRequests(username);
     Iterator<Long> it = pastRequests.iterator();
@@ -82,22 +101,22 @@ public class RateLimiter {
     return pastRequests.size();
   }
   
-  private List<Long> getPastRequests(String username) {
+  private LinkedList<Long> getPastRequests(String username) {
     return createList(username);
   }
   
-  private List<Long> createList(String username) {
-    List<Long> list = pastRequests.get(username);
+  private LinkedList<Long> createList(String username) {
+    LinkedList<Long> list = requests.get(username);
     if(list == null) {
       list = new LinkedList<>();
-      pastRequests.put(username, list);
+      requests.put(username, list);
     }
     return list;
   }
   
-  private void save(String username, long millisCurrentTime) {
+  private void save(String username, long secondsCurrentTime) {
     List<Long> list = createList(username);
-    list.add(millisCurrentTime);
+    list.add(secondsCurrentTime);
   }
   
 }

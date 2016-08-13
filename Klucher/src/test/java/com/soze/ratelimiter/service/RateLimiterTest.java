@@ -5,15 +5,18 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+import org.springframework.http.HttpHeaders;
 
 public class RateLimiterTest {
-  
+
   @Test
   public void testOneInteraction() {
     RateLimiter rateLimiter = new RateLimiter();
     String username = "user";
-    boolean successful = rateLimiter.interact(username);
-    assertThat(successful, equalTo(true));
+    HttpHeaders headers = rateLimiter.interact(username);
+    assertThat(headers.get("X-Rate-Limit-Limit").get(0), equalTo("150"));
+    assertThat(headers.get("X-Rate-Limit-Remaining").get(0), equalTo("149"));
+    assertThat(headers.get("X-Rate-Limit-Reset").get(0), equalTo("0"));
   }
   
   @Test
@@ -24,44 +27,32 @@ public class RateLimiterTest {
     for(int i = 0; i < maxInteractionsPerMinute - 1; i++) {
       rateLimiter.interact(username);
     }
-    boolean successful = rateLimiter.interact(username);
-    assertThat(successful, equalTo(true));
+    HttpHeaders headers = rateLimiter.interact(username);
+    assertThat(headers.get("X-Rate-Limit-Limit").get(0), equalTo("150"));
+    assertThat(headers.get("X-Rate-Limit-Remaining").get(0), equalTo("120"));
+    assertThat(headers.get("X-Rate-Limit-Reset").get(0), equalTo("0"));
   }
   
   @Test
   public void testTooManyInteractions() {
     RateLimiter rateLimiter = new RateLimiter();
     String username = "user";
-    int interactions = 60;
+    int interactions = 150;
     for(int i = 0; i < interactions; i++) {
       rateLimiter.interact(username);
     }
-    boolean successful = rateLimiter.interact(username);
-    assertThat(successful, equalTo(false));
-  }
-  
-  @Test
-  public void testNullUsername() {
-    RateLimiter rateLimiter = new RateLimiter();
-    String username = null;
-    boolean successful = rateLimiter.interact(username);
-    assertThat(successful, equalTo(false));
-  }
-  
-  @Test
-  public void testEmptyUsername() {
-    RateLimiter rateLimiter = new RateLimiter();
-    String username = "";
-    boolean successful = rateLimiter.interact(username);
-    assertThat(successful, equalTo(false));
+    HttpHeaders headers = rateLimiter.interact(username);
+    assertThat(headers.get("X-Rate-Limit-Limit").get(0), equalTo("150"));
+    assertThat(headers.get("X-Rate-Limit-Remaining").get(0), equalTo("0"));
+    assertThat(headers.get("X-Rate-Limit-Reset").get(0), equalTo("60"));
   }
   
   @Test
   public void testTimePassed() {
     RateLimiter rateLimiter = new RateLimiter();
     String username = "user";
-    int maxInteractionsPerMinute = 30;
-    for(int i = 0; i < maxInteractionsPerMinute * 2; i++) {
+    int maxInteractionsPerMinute = 175;
+    for(int i = 0; i < maxInteractionsPerMinute; i++) {
       rateLimiter.interact(username);
     }
     try {
@@ -69,8 +60,10 @@ public class RateLimiterTest {
     } catch (Exception e) {
       fail("Waiting failed");
     }
-    boolean successful = rateLimiter.interact(username);
-    assertThat(successful, equalTo(true));
+    HttpHeaders headers = rateLimiter.interact(username);
+    assertThat(headers.get("X-Rate-Limit-Limit").get(0), equalTo("150"));
+    assertThat(headers.get("X-Rate-Limit-Remaining").get(0), equalTo("149"));
+    assertThat(headers.get("X-Rate-Limit-Reset").get(0), equalTo("0"));
   }
 
 }
