@@ -1,0 +1,2 @@
+/register, post, 10
+/login, post, 5
