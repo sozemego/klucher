@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.soze.hashtag.model.Hashtag;
 import com.soze.kluch.model.Kluch;
 
 public interface KluchDao {
@@ -49,5 +50,7 @@ public interface KluchDao {
   public Page<Kluch> findByAuthorInAndTimestampGreaterThan(Iterable<String> authors, Timestamp lessThan, Pageable pageRequest);
   
   public void deleteByAuthor(String author);
+  
+  public Page<Kluch> findByHashtagsInAndTimestampLessThan(Hashtag hashtag, Timestamp lessThan, Pageable pageRequest);
   
 }

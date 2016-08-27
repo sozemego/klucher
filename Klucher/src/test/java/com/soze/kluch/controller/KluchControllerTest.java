@@ -24,8 +24,8 @@ import com.soze.kluch.dao.KluchDao;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Transactional
 @ActiveProfiles("test")
+@Transactional
 public class KluchControllerTest extends TestWithUserBase {
   
   @Autowired
@@ -46,14 +46,14 @@ public class KluchControllerTest extends TestWithUserBase {
   public void testNullKluchText() throws Exception {
     mvc.perform(MockMvcRequestBuilders.post("/kluch"))
       .andDo(print())
-      .andExpect(status().isBadRequest());
+      .andExpect(status().isBadRequest());  
   }
   
   @Test
   public void testUnauthorized() throws Exception {
     assertThat(kluchDao.count(), equalTo(0L));
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
-        .param("kluch", "text"))
+        .param("kluchText", "text"))
     .andDo(print())
     .andExpect(status().isUnauthorized());
     assertThat(kluchDao.count(), equalTo(0L));
@@ -64,7 +64,7 @@ public class KluchControllerTest extends TestWithUserBase {
     addUserToDbAndLogin("username", "password");
     assertThat(kluchDao.count(), equalTo(0L));  
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
-        .param("kluch", "text"))
+        .param("kluchText", "text"))
     .andDo(print())
     .andExpect(status().isOk());
     assertThat(kluchDao.count(), equalTo(1L));
@@ -76,12 +76,12 @@ public class KluchControllerTest extends TestWithUserBase {
     assertThat(kluchDao.count(), equalTo(0L));
     String kluchText = generateString(50);
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
-        .param("kluch", kluchText))
+        .param("kluchText", kluchText))
     .andDo(print())
     .andExpect(status().isOk());
     assertThat(kluchDao.count(), equalTo(1L));
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
-        .param("kluch", kluchText))
+        .param("kluchText", kluchText))
     .andDo(print())
     .andExpect(status().isBadRequest());
     assertThat(kluchDao.count(), equalTo(1L));
@@ -92,7 +92,7 @@ public class KluchControllerTest extends TestWithUserBase {
     addUserToDbAndLogin("username", "password");
     assertThat(kluchDao.count(), equalTo(0L));  
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
-        .param("kluch", ""))
+        .param("kluchText", ""))
     .andDo(print())
     .andExpect(status().isBadRequest());
     assertThat(kluchDao.count(), equalTo(0L)); 
@@ -103,7 +103,7 @@ public class KluchControllerTest extends TestWithUserBase {
     addUserToDbAndLogin("username", "password");
     assertThat(kluchDao.count(), equalTo(0L));  
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
-        .param("kluch", generateString(251)))
+        .param("kluchText", generateString(251)))
     .andDo(print())
     .andExpect(status().isBadRequest());
     assertThat(kluchDao.count(), equalTo(0L)); 

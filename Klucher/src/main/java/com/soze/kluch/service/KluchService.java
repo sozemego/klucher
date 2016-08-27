@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.soze.hashtag.service.HashtagService;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
 
@@ -29,13 +29,11 @@ public class KluchService {
   private final KluchDao kluchDao;
   private final KluchAssembler kluchAssembler;
   private final Map<String, String> pastKluchs = new ConcurrentHashMap<>();
-  private final HashtagService hashtagService;
 
   @Autowired
-  public KluchService(KluchDao kluchDao, KluchAssembler kluchAssembler, HashtagService hashtagService) {
+  public KluchService(KluchDao kluchDao, KluchAssembler kluchAssembler) {
     this.kluchDao = kluchDao;
     this.kluchAssembler = kluchAssembler;
-    this.hashtagService = hashtagService;
   }
 
   /**
@@ -44,15 +42,16 @@ public class KluchService {
    * @param kluchText Kluch content, cannot be null or empty
    * @throws IllegalArgumentException if username is null or empty, or if kluch text is null, empty or too long
    */
-  public void post(String username, String kluchText) throws IllegalArgumentException {
+  @Transactional
+  public Kluch post(String username, String kluchText) throws IllegalArgumentException {
     validateInput(username, kluchText);
     checkAlreadyPosted(username, kluchText);
     Kluch kluch = kluchAssembler.assembleKluch(username, kluchText);
-    kluchDao.save(kluch);
+    kluch = kluchDao.save(kluch);
     saveLastKluch(username, kluchText);
     log.info("User [{}] successfuly posted a Kluch with text [{}].", username,
         kluchText);
-    hashtagService.process(kluch);
+    return kluch;
   }
 
   private void checkAlreadyPosted(String username, String kluchText) {

@@ -28,7 +28,7 @@ public class UserPageController {
   public String userPage(Authentication authentication, @PathVariable String username, Model model) {
     User user = userDao.findOne(username);
     if(user == null) {
-      return "redirect:/front";
+      return "redirect:/";
     }
     boolean loggedIn = authentication != null && !(authentication instanceof AnonymousAuthenticationToken);
     if (loggedIn) {

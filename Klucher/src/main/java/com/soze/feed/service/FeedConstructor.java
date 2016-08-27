@@ -14,6 +14,8 @@ import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 import com.soze.feed.model.Feed;
+import com.soze.hashtag.dao.HashtagDao;
+import com.soze.hashtag.model.Hashtag;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
 import com.soze.user.dao.UserDao;
@@ -21,6 +23,7 @@ import com.soze.user.model.User;
 
 /**
  * A service which is responsible for creating Feeds of kluch for users.
+ * This includes feeds of users' posts and feeds of Kluchs containing a certain hashtag.
  * @author sozek
  *
  */
@@ -34,24 +37,27 @@ public class FeedConstructor {
   private final PageRequest exists = new PageRequest(0, 1);
   private final KluchDao kluchDao;
   private final UserDao userDao;
+  private final HashtagDao hashtagDao;
   
   @Autowired
-  public FeedConstructor(KluchDao kluchDao, UserDao userDao) {
+  public FeedConstructor(KluchDao kluchDao, UserDao userDao, HashtagDao hashtagDao) {
     this.kluchDao = kluchDao;
     this.userDao = userDao;
+    this.hashtagDao = hashtagDao;
   }
   
   /**
-   * Returns a feed for a given user. This method simply returns a finite amount of kluchs
-   * for this user, all posted before (earlier than) or after (later than) a given
-   * <code>timestamp</code> (millis after epoch start). If onlyForUser is true,
-   * returns only this user's Kluchs, otherwise it includes all users they follow too.
+   * Returns a {@link Feed} for a given username. This method simply returns a finite (currently 30)
+   * amount of kluchs for this user, all posted before (earlier than) or after (later than) a given
+   * <code>timestamp</code> (milliseconds unix time). If onlyForUser is true,
+   * returns only this user's {@link Kluch}s, otherwise it includes all users they follow too.
+   * Returned Kluchs are sorted by timestamp depending on the direction (descending for before and ascending for after).
    * @param username
    * @param timestamp
    * @param onlyForUser
-   * @param direction
-   * @return
-   * @throws IllegalArgumentException 
+   * @param direction specifies whether you want to retrieve kluchs "after" or "before" timestamp
+   * @return <code>Feed</code> of <code>Kluchs</code>
+   * @throws IllegalArgumentException if either username (null or empty), timestamp (less than zero) or direction (not "before" or "after") are invalid
    */
   public Feed constructFeed(String username, long timestamp, boolean onlyForUser, String direction) throws IllegalArgumentException {
     if(!"after".equalsIgnoreCase(direction) && !"before".equalsIgnoreCase(direction)) {
@@ -66,14 +72,17 @@ public class FeedConstructor {
   }
   
   /**
-   * Returns a feed for a given user. This method simply returns a finite amount of kluchs
-   * for this user, all posted before (earlier than) a given <code>afterTimestamp</code> (millis after epoch start).
-   * Returned Kluchs are sorted from newest to oldest.
-   * @param username cannot be null
-   * @param beforeTimestamp returned Kluchs were posted before this epoch millis value
-   * @param onlyForUser true if feed should contain only this user's Kluchs
-   * @return
-   * @throws IllegalArgumentException if username is null, empty or user with given name doesn't exist
+   * Returns a {@link Feed} for a given username. This method simply returns a finite (currently 30)
+   * amount of kluchs for this user, all posted before (earlier than) a given
+   * <code>timestamp</code> (milliseconds unix time). If onlyForUser is true,
+   * returns only this user's {@link Kluch}s, otherwise it includes all users they follow too.
+   * Returned Kluchs are sorted by timestamp in descending order.
+   * @param username
+   * @param timestamp
+   * @param onlyForUser
+   * @param direction specifies whether you want to retrieve kluchs "after" or "before" timestamp
+   * @return <code>Feed</code> of <code>Kluchs</code>
+   * @throws IllegalArgumentException if either username (null or empty) or timestamp (less than zero) are invalid
    */
   public Feed constructFeed(String username, long beforeTimestamp, boolean onlyForUser) throws IllegalArgumentException {    
     validateTimestamp(beforeTimestamp);
@@ -86,14 +95,17 @@ public class FeedConstructor {
   }
   
   /**
-   * Returns a feed for a given user. This method simply returns a finite amount of kluchs
-   * for this user, all posted after (later than) given <code>afterTimestamp</code> (millis after epoch start).
-   * Returned Kluchs are sorted from newest to oldest. 
-   * @param username cannot be null
-   * @param afterTimestamp returned Kluchs were posted after this epoch millis value
-   * @param onlyForUser true if feed should contain only this user's Kluchs
-   * @return
-   * @throws IllegalArgumentException if username is null, empty or user with given name doesn't exist
+   * Returns a {@link Feed} for a given username. This method simply returns a finite (currently 30)
+   * amount of kluchs for this user, all posted after (later than) a given
+   * <code>timestamp</code> (milliseconds unix time). If onlyForUser is true,
+   * returns only this user's {@link Kluch}s, otherwise it includes all users they follow too.
+   * Returned Kluchs are sorted by timestamp in ascending order.
+   * @param username
+   * @param timestamp
+   * @param onlyForUser
+   * @param direction specifies whether you want to retrieve kluchs "after" or "before" timestamp
+   * @return <code>Feed</code> of <code>Kluchs</code>
+   * @throws IllegalArgumentException if either username (null or empty) or timestamp (less than zero) are invalid
    */
   public Feed constructFeedAfter(String username, long afterTimestamp, boolean onlyForUser) throws IllegalArgumentException {
     validateTimestamp(afterTimestamp);
@@ -122,6 +134,25 @@ public class FeedConstructor {
   }
   
   /**
+   * Returns a {@link Feed} of {@link Kluch}s containing this hashtag. 
+   * This method returns a finite (currently 30) number of Kluchs, all posted before (earlier than)
+   * given timestamp (millis unix time).
+   * Returned Kluchs are sorted by timestamp in descending order.
+   * @param hashtagText does not have to contain pound character as the first character (but it can)
+   * @param timestamp
+   * @return <code>Feed</code> of <code>Kluchs</code>
+   * @throws IllegalArgumentException if hashtagText is null, empty or given hashtag doesn't exist or timestamp is less than 0
+   */
+  public Feed constructHashtagFeed(String hashtagText, long timestamp) throws IllegalArgumentException {
+    validateTimestamp(timestamp);
+    Hashtag hashtag = getHashtag(hashtagText);
+    Page<Kluch> kluchs = kluchDao.findByHashtagsInAndTimestampLessThan(hashtag, new Timestamp(timestamp), before);
+    Feed feed = new Feed();
+    feed.setKluchs(kluchs);
+    return feed;
+  }
+  
+  /**
    * Validates username and checks if user exists. If it does, returns the User.
    * @param username
    * @return
@@ -136,6 +167,27 @@ public class FeedConstructor {
       throw new IllegalArgumentException("There is no user named " + username);
     }
     return user;
+  }
+  
+  /**
+   * Checks if given hashtagText is null or empty, and attempts to get a {@link Hashtag} with given text.
+   * @param hashtagText hashtagText with or without pound character as the first character
+   * @return
+   * @throws IllegalArgumentException if hashtagText is null, empty or this hashtag does not exist
+   */
+  private Hashtag getHashtag(String hashtagText) throws IllegalArgumentException {
+    if(hashtagText == null || hashtagText.isEmpty()) {
+      throw new IllegalArgumentException("Hashtag cannot be null or empty for feed construction.");
+    }
+    boolean hasPoundCharacter = hashtagText.charAt(0) == 163;
+    if(!hasPoundCharacter) {
+      hashtagText = "#" + hashtagText;
+    }
+    Hashtag hashtag = hashtagDao.findOne(hashtagText);
+    if(hashtag == null) {
+      throw new IllegalArgumentException(hashtagText + " does not exist.");
+    }
+    return hashtag;
   }
   
   /**

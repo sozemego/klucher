@@ -1,41 +1,47 @@
+/*jshint -W065 */
+
 function registerOnLoad() {
-	checkAvailibility(null);
-	validateStart();
+	checkAvailability(null);
+	attachValidationListeners();
 	attachSubmitRegisterListener();
 }
 
-function checkAvailibility(lastUsername) {
+//sends an Ajax request to check if given username is available
+function checkAvailability(lastUsername) {
+
 	var currentUsername = $("#username").val();
 	if(lastUsername === currentUsername) {
-		setTimeout(checkAvailibility, 2500, currentUsername);
+		setTimeout(checkAvailability, 2500, currentUsername);
 		return;
 	}
-	if(currentUsername == null || currentUsername === "") {
-		setTimeout(checkAvailibility, 2500, currentUsername);
+
+	if(currentUsername === null || currentUsername === "") {
+		setTimeout(checkAvailability, 2500, currentUsername);
 		return;
 	}
+
 	$.ajax({
 		type: "GET",
 		url: "/register/available/" + currentUsername,
-		error: function(xhr, status, error) {	
-			setTimeout(checkAvailibility, 2500, currentUsername);
+		error: function(xhr, status, error) {
+			setTimeout(checkAvailability, 2500, currentUsername);
 		},
 		success: function(data) {
 			var currentUsernameElement = $("#username");
 			if(data) {
 				currentUsernameElement.removeClass("unavailable");
-				currentUsernameElement.addClass("available");				
+				currentUsernameElement.addClass("available");
 			} else {
 				currentUsernameElement.removeClass("available");
-				currentUsernameElement.addClass("unavailable");			
+				currentUsernameElement.addClass("unavailable");
 			}
 			addUsernameAvailableMessage(data);
-			setTimeout(checkAvailibility, 1000, currentUsername);			
+			setTimeout(checkAvailability, 1000, currentUsername);
 		}
 	});
 }
 
-function validateStart() {
+function attachValidationListeners() {
 	$("#username").keyup(function() {
 		validateRegisterForm();
 	});
@@ -47,19 +53,6 @@ function validateStart() {
 	});
 	$("#password").blur(function() {
 		validateRegisterForm();
-	});
-}
-
-function attachSubmitRegisterListener() {
-	$("#registerForm").submit(function(event) {
-		validateRegisterForm();
-		var errors = $("#errorTable").children().length;
-		if(errors > 0) {
-			event.preventDefault();
-			return false;
-		}
-		$("#registerForm").submit();
-		
 	});
 }
 
@@ -75,16 +68,21 @@ function clearErrorTable() {
 
 function validateUsername() {
 	var usernameElement = $("#username");
+
 	usernameElement.removeClass("invalidImg");
 	usernameElement.addClass("validImg");
+
 	var username = usernameElement.val();
+
 	var isTooShort = isUsernameTooShort(username);
 	var isTooLong = isUsernameTooLong(username);
 	var whiteSpace = hasWhiteSpace(username);
+
 	if(isTooShort || isTooLong || whiteSpace) {
 		usernameElement.removeClass("validImg");
 		usernameElement.addClass("invalidImg");
 	}
+
 	if(isTooShort) {
 		$("#errorTable").append(createTableRowWithText("Username should be at least 1 character long."));
 	}
@@ -98,16 +96,20 @@ function validateUsername() {
 
 function validatePassword() {
 	var passwordElement = $("#password");
+
 	passwordElement.removeClass("invalidImg");
 	passwordElement.addClass("validImg");
+
 	var password = passwordElement.val();
 	var isTooShort = isPasswordTooShort(password);
 	var isTooLong = isPasswordTooLong(password);
 	var whiteSpace = hasWhiteSpace(password);
+
 	if(isTooShort || isTooLong || whiteSpace) {
 		passwordElement.removeClass("validImg");
 		passwordElement.addClass("invalidImg");
 	}
+
 	if(isTooShort) {
 		$("#errorTable").append(createTableRowWithText("Password should be at least 6 characters long."));
 	}
@@ -119,8 +121,21 @@ function validatePassword() {
 	}
 }
 
-function addUsernameAvailableMessage(bool) {
-	if(!bool) {
+function attachSubmitRegisterListener() {
+	$("#registerForm").submit(function(event) {
+		validateRegisterForm();
+		var errors = $("#errorTable").children().length;
+		if(errors > 0) {
+			event.preventDefault();
+			return false;
+		}
+		$("#registerForm").submit();
+	});
+}
+
+
+function addUsernameAvailableMessage(available) {
+	if(!available) {
 		$("#errorTable").prepend(createTableRowWithText("Username exists already."));
 	}
 }
@@ -130,7 +145,7 @@ function createTableRowWithText(text) {
 }
 
 function isUsernameTooShort(username) {
-	return username.length == 0;
+	return username.length === 0;
 }
 
 function isUsernameTooLong(username) {
@@ -146,20 +161,21 @@ function isPasswordTooLong(password) {
 }
 
 function hasWhiteSpace(text) {
-	var toReturn = /\s/g.test(text);
-	return toReturn;
+	return (/\s/g).test(text);
 }
 
 function dashboardOnLoad() {
+	// call getFeed with maximum (latest) allowable timestamp
 	getFeed("before", Number.MAX_SAFE_INTEGER, true);
-	attachInputListener();
+	attachCharacterCountListener();
 	attachShareKluchListener();
 	attachInfiniteScrollingListener();
-	pollFeed();
 	attachSubmitButtonListener();
+	attachNewKluchElementListener();
+	pollFeed();
 }
 
-function attachInputListener() {
+function attachCharacterCountListener() {
 	$("#kluchTextArea").keyup(function() {
 		checkCharacterCount();
 	});
@@ -185,7 +201,7 @@ function charactersRemaining(text, length) {
 function attachShareKluchListener() {
 	$("#kluchForm").submit(function(event) {
 		event.preventDefault();
-		ajaxPostKluch();		
+		ajaxPostKluch();
 	});
 }
 
@@ -198,9 +214,9 @@ function ajaxPostKluch() {
 	$.ajax({
 		type: "POST",
 		url: "/kluch",
-		data: {"kluch" : kluchText },
-		error: function(xhr, status, error) {	
-			var something = xhr.getAllResponseHeaders();
+		data: {"kluchText" : kluchText },
+		error: function(xhr, status, error) {
+			//TODO display actual error
 			setGettingFeed(0);
 		},
 		success: function(data, status, xhr) {
@@ -208,15 +224,23 @@ function ajaxPostKluch() {
 			setFirstTimestamp(currentTimestamp);
 			clearTextArea();
 			addKluchToFeed(getKluch(getUsername(), currentTimestamp, kluchText), false);
-			checkCharacterCount();	
+			checkCharacterCount();
 			setGettingFeed(0);
 		}
 	});
 	focusInputArea();
 }
 
+function focusInputArea() {
+	$("#kluchTextArea").focus();
+}
+
 function getKluch(username, timestamp, text) {
-	return {author : username, timestamp : timestamp, text : text};
+	return {
+		author : username,
+		timestamp : timestamp,
+		text : text
+	};
 }
 
 function getFeed(direction, timestamp, append) {
@@ -234,8 +258,8 @@ function getFeed(direction, timestamp, append) {
 			"timestamp" : timestamp,
 			"direction" : direction
 		},
-		error: function(xhr, status, error) {	
-			setGettingFeed(0);			
+		error: function(xhr, status, error) {
+			setGettingFeed(0);
 		},
 		success: function(data, status, xhr) {
 			addKluchsToFeed(data.kluchs.content, append);
@@ -244,11 +268,12 @@ function getFeed(direction, timestamp, append) {
 	});
 }
 
+// remembers if we've reached a Feed's last page
 function setPage(data) {
 	var page = data.kluchs;
 	if(page.last) {
 		$("#data").attr("data-page", -1);
-	} 
+	}
 }
 
 function clearTextArea() {
@@ -257,40 +282,50 @@ function clearTextArea() {
 
 function addKluchsToFeed(kluchs, append) {
 	for(var i = 0; i < kluchs.length; i++) {
-		var kluch = kluchs[i];		
+		var kluch = kluchs[i];
 		addKluchToFeed(kluch, append);
 	}
 }
 
 function addKluchToFeed(kluch, append) {
-	var escapedText = escapeHtml(kluch.text);
 	var outerDiv = document.createElement("div");
 	append ? $("#kluchFeed").append(outerDiv) : $("#kluchFeed").prepend(outerDiv);
+
 	outerDiv.classList.toggle("kluch");
 	outerDiv.classList.toggle("opacityAnimation");
+
 	var authorDiv = document.createElement("div");
 	authorDiv.classList.toggle("authorDiv");
-	$("<span class = 'author'>" + kluch.author + "</span>").appendTo(authorDiv);
+	$("<a class = 'author' href = '/u/" + kluch.author + "'>" + kluch.author + "</span>").appendTo(authorDiv);
 	$("<span class = 'dashboardTime'>" + millisToText(kluch.timestamp) + "</span>").appendTo(authorDiv);
 	$(authorDiv).appendTo(outerDiv);
+
 	var textAreaDiv = document.createElement("div");
+
+	var loggedIn = isLoggedIn();
+	if(loggedIn) {
+		var username = getUsername();
+		if(kluch.author == username) {
+			textAreaDiv.classList.toggle("ownKluch");
+		}
+	}
+
 	textAreaDiv.classList.toggle("kluchTextArea");
 	textAreaDiv.classList.toggle("preWrap");
-	$("<span>" + escapedText + "</span>").appendTo(textAreaDiv);
+
+	var processedKluchText = processKluchText(kluch.text);
+	$("<span>" + processedKluchText + "</span>").appendTo(textAreaDiv);
 	$(textAreaDiv).appendTo(outerDiv);
+
 	assignTimestamps(kluch);
 }
 
-function assignTimestamps(kluch) {
-	var timestamp = kluch.timestamp;
-	var currentLastTimestamp = parseInt($("#data").attr("data-last-timestamp"));
-	if(timestamp > currentLastTimestamp) {
-		$("#data").attr("data-last-timestamp", timestamp);
-	}
-	var currentFirstTimestamp = parseInt($("#data").attr("data-first-timestamp"));
-	if(timestamp < currentFirstTimestamp) {
-		$("#data").attr("data-first-timestamp", timestamp);
-	}
+function processKluchText(text) {
+	text = escapeHtml(text);
+	text = addLinks(text, /(?:^|\s)(@\w+)/g, getUserLinkStyle);
+	text = addLinks(text, /(?:^|\s)(#\w+)/g, getHashtagStyle);
+	text = addLinks(text, /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:;,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:;,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:;,.]*\)|[A-Z0-9+&@#\/%=~_|$])/ig, getLinkStyle);
+	return text;
 }
 
 function escapeHtml(text) {
@@ -299,8 +334,79 @@ function escapeHtml(text) {
 	return text;
 }
 
+/**
+* finds all matches given by regex and applies styleCallback to all matches
+* returns changed text
+*/
+function addLinks(text, regex, styleCallback) {
+	var result = regex.exec(text);
+
+	while(result !== null) {
+		/**
+		* since exec method returns a matched group and captured group
+		* but the resulting index field points to the matched group
+		* which here resulted in index field pointing to the space preceding the hashtag
+		*/
+		if(result.length > 1 && result[0] != result[1]) {
+			result.index += 1;
+		}
+
+		var replaced = styleCallback(text.substring(result.index, regex.lastIndex));
+		text = text.substring(0, result.index) + replaced + text.substring(regex.lastIndex, text.length);
+
+		//start the search after the inserted element, which invariably makes the text longer
+		regex.lastIndex += replaced.length - result[result.length - 1].length;
+		result = regex.exec(text);
+	}
+	return text;
+}
+
+function getHashtagStyle(hashtag) {
+	var toReturn = "<a class = 'hashtagLink' href = '/hashtag/" + hashtagWithoutPound(hashtag) + "'>" + hashtag + "</a>";
+	return toReturn;
+}
+
+function hashtagWithoutPound(hashtag) {
+	return hashtag.replace("#", "");
+}
+
+function getUserLinkStyle(user) {
+	var toReturn = "<a class = 'userLink' href = '/u/" + userWithoutAt(user) + "'>" + user + "</a>";
+	return toReturn;
+}
+
+function userWithoutAt(user) {
+	return user.replace("@", "");
+}
+
+function getLinkStyle(link) {
+	var toReturn = "<a class = 'linkInKluch' href = 'http://" + link + "'>" + link + "</a>";
+	return toReturn;
+}
+
 function getUsername() {
 	return $("#data").attr("data-username");
+}
+
+// sets values for last (latest) and first (earliest) timestamps
+function assignTimestamps(kluch) {
+	var timestamp = kluch.timestamp;
+	setLastTimestamp(timestamp);
+	setFirstTimestamp(timestamp);
+}
+
+function setLastTimestamp(millis) {
+	var currentLastTimestamp = parseInt($("#data").attr("data-last-timestamp"));
+	if(millis > currentLastTimestamp) {
+		$("#data").attr("data-last-timestamp", millis);
+	}
+}
+
+function setFirstTimestamp(millis) {
+	var currentFirstTimestamp = parseInt($("#data").attr("data-first-timestamp"));
+	if(millis < currentFirstTimestamp) {
+		$("#data").attr("data-first-timestamp", millis);
+	}
 }
 
 function attachInfiniteScrollingListener() {
@@ -308,93 +414,10 @@ function attachInfiniteScrollingListener() {
 		var windowInnerHeight = window.innerHeight;
 		var scrollY = window.scrollY;
 		var bodyHeight = document.body.offsetHeight;
-	    if ((windowInnerHeight + scrollY) >= bodyHeight * 0.9) {
-	        getFeed("before", parseInt($("#data").attr("data-first-timestamp")), true);
-	    }
-	    displayLastPageMessage();
-	});
-}
-
-function setGettingFeed(data) {
-	$("#data").attr("data-getting-feed", data);
-}
-
-function setLastTimestamp(millis) {
-	var currentLastTimestamp = parseInt($("#data").attr("data-last-timestamp"));
-	if(currentLastTimestamp < millis) {
-		$("#data").attr("data-last-timestamp", millis);
-	}
-}
-
-function setFirstTimestamp(millis) {
-	var currentFirstTimestamp = parseInt($("#data").attr("data-first-timestamp"));
-	if(currentFirstTimestamp > millis) {
-		$("#data").attr("data-first-timestamp", millis);
-	}
-}
-
-function pollFeed() {
-	var isGettingFeed = $("#data").attr("data-getting-feed");
-	if(isGettingFeed == 1) {
-		setTimeout(pollFeed, 5000);
-		return;
-	}
-	var timestamp = $("#data").attr("data-last-timestamp");
-	if(timestamp == null) {
-		setTimeout(pollFeed, 5000);
-	}
-	var username = getUsername();
-	$.ajax({
-		dataType: "json",
-		type: "GET",
-		url: "/feed/poll/" + username,
-		data: {
-			"timestamp" : timestamp,
-			"direction" : "after"
-		},
-		error: function(xhr, status, error) {	
-			setTimeout(pollFeed, 5000);
-		},
-		success: function(data, status, xhr) {
-			setTimeout(pollFeed, 5000);
-			if(data) {
-				displayNewKluchElement(clickNewKluchs);
-			}
+		if ((windowInnerHeight + scrollY) >= bodyHeight * 0.9) {
+			getFeed("before", parseInt($("#data").attr("data-first-timestamp")), true);
 		}
-	});
-}
-
-function displayNewKluchElement(newKluchCallback) {
-	var newKluchElement = $("#newKluch");
-	var hasChildren = newKluchElement.children().length != 0;
-	if(!hasChildren) {
-		$("<span id = 'newKluchText'>new kluchs available, click here to view!</span>").appendTo("#newKluch");
-		var newKluchText = $("#newKluchText");
-		newKluchText.addClass("opacityAnimation");
-		newKluchText.addClass("centerText");
-		newKluchText.addClass("roundedCorners");
-		newKluchText.addClass("verticalCenter");
-		newKluchText.addClass("cursorPointer");
-		newKluchText.click(newKluchCallback);	
-	}
-}
-
-function focusInputArea() {
-	$("#kluchTextArea").focus();
-}
-
-function clickNewKluchs() {
-	hideNewKluchElement();
-	getFeed("after", parseInt($("#data").attr("data-last-timestamp")), false);
-}
-
-function hideNewKluchElement() {
-	$("#newKluch").empty();
-}
-
-function attachSubmitButtonListener() {
-	$("#submitButton").click(function () {
-		$("#kluchForm").submit();
+		displayLastPageMessage();
 	});
 }
 
@@ -405,6 +428,64 @@ function displayLastPageMessage() {
 	}
 }
 
+function setGettingFeed(data) {
+	$("#data").attr("data-getting-feed", data);
+}
+
+function pollFeed() {
+	var isGettingFeed = $("#data").attr("data-getting-feed");
+	if(isGettingFeed == 1) {
+		setTimeout(pollFeed, 5000);
+		return;
+	}
+
+	var timestamp = $("#data").attr("data-last-timestamp");
+	var username = getUsername();
+
+	$.ajax({
+		dataType: "json",
+		type: "GET",
+		url: "/feed/poll/" + username,
+		data: {
+			"timestamp" : timestamp,
+			"direction" : "after"
+		},
+		error: function(xhr, status, error) {
+			setTimeout(pollFeed, 5000);
+		},
+		success: function(data, status, xhr) {
+			setTimeout(pollFeed, 5000);
+			if(data) {
+				displayNewKluchElement();
+			}
+		}
+	});
+}
+
+function attachNewKluchElementListener() {
+	$("#newKluch").click(clickNewKluchs);
+}
+
+function displayNewKluchElement() {
+	$("#newKluch").removeClass("invisible");
+}
+
+function clickNewKluchs() {
+	hideNewKluchElement();
+	getFeed("after", parseInt($("#data").attr("data-last-timestamp")), false);
+}
+
+function hideNewKluchElement() {
+	$("#newKluch").removeClass("invisible");
+}
+
+function attachSubmitButtonListener() {
+	$("#submitButton").click(function () {
+		$("#kluchForm").submit();
+	});
+}
+
+// converts millisecond (unix time) difference between now and given parameter to readable text
 function millisToText(millis) {
 	var date = new Date(millis);
 	var now = new Date();
@@ -414,7 +495,7 @@ function millisToText(millis) {
 	if(minutesPassed < 60) {
 		if(minutesPassed === 0) {
 			return "less than a minute ago";
-		} 
+		}
 		if(minutesPassed === 1) {
 			return "a minute ago";
 		}
@@ -450,12 +531,12 @@ function daysPassed(hours) {
 function userOnLoad() {
 	getFeed("before", Number.MAX_SAFE_INTEGER, true);
 	attachInfiniteScrollingListener();
-	pollFeed();	
+	pollFeed();
 	createUserButtonContainer();
 	addFollowButton();
 	showLoginPage(false);
 	attachMouseOverOutListenersToLoginElement();
-	configureLogoutButton();
+	configureSubheaderButtons();
 }
 
 function createUserButtonContainer() {
@@ -474,11 +555,15 @@ function addFollowButton() {
 			createUnfollowButton();
 		} else {
 			createFollowButton();
-		}		
+		}
 	}
 }
 
 function isLoggedIn() {
+	// users can get to this mapping only if they are authorised
+	if(window.location.pathname == "/dashboard") {
+		return true;
+	}
 	return $("#data").attr("data-logged-in") == "true";
 }
 
@@ -519,8 +604,8 @@ function followUserAjax() {
 		data: {
 			"follow" : username
 		},
-		error: function(xhr, status, error) {	
-					
+		error: function(xhr, status, error) {
+			//TODO display actual error message
 		},
 		success: function(data, status, xhr) {
 			createUnfollowButton();
@@ -562,8 +647,8 @@ function unfollowUserAjax() {
 		data: {
 			"follow" : username
 		},
-		error: function(xhr, status, error) {	
-					
+		error: function(xhr, status, error) {
+
 		},
 		success: function(data, status, xhr) {
 			createFollowButton();
@@ -600,7 +685,7 @@ function showLoginPage(bool) {
 		$("#loginTable").removeClass("hidden");
 		addOverlay();
 	}
-	
+
 }
 
 function addOverlay() {
@@ -620,10 +705,8 @@ function attachClickOutsideLoginElementListener() {
 		if(!isActive) {
 			showLoginPage(false);
 		}
- 	});
+	});
 }
-
-
 
 function detachClickOutsideLoginElementListener() {
 	$("body").off("click");
@@ -657,4 +740,56 @@ function configureLogoutButton() {
 	});
 }
 
+function hashtagOnLoad() {
+	attachInifiteScrollingListenerHashtag();
+	configureSubheaderButtons();
+	showLoginPage(false);
+	attachMouseOverOutListenersToLoginElement();
+	getHashtagFeed(parseInt($("#data").attr("data-first-timestamp")), true);
+}
 
+function attachInifiteScrollingListenerHashtag() {
+	$(window).scroll(function(ev) {
+		var windowInnerHeight = window.innerHeight;
+		var scrollY = window.scrollY;
+		var bodyHeight = document.body.offsetHeight;
+			if ((windowInnerHeight + scrollY) >= bodyHeight * 0.9) {
+				getHashtagFeed(parseInt($("#data").attr("data-first-timestamp")), true);
+			}
+	});
+}
+
+function getHashtagFeed(timestamp, append) {
+	var isGettingFeed = $("#data").attr("data-getting-feed");
+	if(isGettingFeed == 1) {
+		return;
+	}
+	setGettingFeed(1);
+	var hashtag = $("#data").attr("data-hashtag");
+	$.ajax({
+		dataType: "json",
+		type: "GET",
+		url: "/hashtag/feed/" + hashtag,
+		data: {
+			"timestamp" : timestamp
+		},
+		error: function(xhr, status, error) {
+			setGettingFeed(0);
+		},
+		success: function(data, status, xhr) {
+			addKluchsToFeed(data.kluchs.content, append);
+			setGettingFeed(0);
+		}
+	});
+}
+
+// configures dashboard/messages/settings buttons. basically, hides them if the user is not logged in
+function configureSubheaderButtons() {
+	configureLogoutButton();
+	var loggedIn = isLoggedIn();
+	if(!loggedIn) {
+		$("#dashboardButton").toggleClass("invisible");
+		$("#messagesButton").toggleClass("invisible");
+		$("#settingsButton").toggleClass("invisible");
+	}
+}

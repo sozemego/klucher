@@ -40,7 +40,7 @@ public class RateLimiter {
     int requestsSince = requestsSince(username, currentTime);
     HttpHeaders headers = new HttpHeaders();
     headers.add("X-Rate-Limit-Limit", "" + REQUEST_LIMIT);
-    int remaining = Math.max(0, (REQUEST_LIMIT - requestsSince));
+    int remaining = Math.max(0, (REQUEST_LIMIT - requestsSince) - 1);
     headers.add("X-Rate-Limit-Remaining", "" + remaining);
     long secondsUntilRequest = requestsSince < REQUEST_LIMIT ? 0L : secondsUntilRequest(username, currentTime);
     headers.add("X-Rate-Limit-Reset", "" + secondsUntilRequest);

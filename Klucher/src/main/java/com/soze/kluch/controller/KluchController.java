@@ -23,12 +23,12 @@ public class KluchController {
   }
 
   @RequestMapping(value = "/kluch", method = RequestMethod.POST)
-  public ResponseEntity<String> postKluch(Authentication authentication, @RequestParam String kluch) throws Exception {
+  public ResponseEntity<String> postKluch(Authentication authentication, @RequestParam String kluchText) throws Exception {
     if(authentication == null) {
       throw new HttpException("Not logged in.", HttpStatus.UNAUTHORIZED);
     }
     String username = authentication.getName();
-    kluchService.post(username, kluch);
+    kluchService.post(username, kluchText);
     return new ResponseEntity<String>(HttpStatus.OK);
   }
   

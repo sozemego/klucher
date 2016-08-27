@@ -76,6 +76,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     return new ResponseEntity<Object>(response, new HttpHeaders(), response.getStatus());
   }
   
+  @SuppressWarnings("unused")
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex, WebRequest request) {
     String error = ex.getName() + " is required to be of type " + ex.getRequiredType().getName();
@@ -107,7 +108,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   }
   
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<Object> handleFallBack() {
+  public ResponseEntity<Object> handleFallBack(Exception e) {
+    log.info("Some exception [{}] was thrown.", e);
     return new ResponseEntity<Object>("error", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 

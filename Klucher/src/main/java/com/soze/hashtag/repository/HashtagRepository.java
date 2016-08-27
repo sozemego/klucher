@@ -1,9 +1,10 @@
+
 package com.soze.hashtag.repository;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.soze.hashtag.model.Hashtag;
 
-public interface HashtagRepository extends CrudRepository<Hashtag, String>{
+public interface HashtagRepository extends JpaRepository<Hashtag, String>{
 
 }

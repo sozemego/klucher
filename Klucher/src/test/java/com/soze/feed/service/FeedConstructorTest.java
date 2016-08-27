@@ -212,7 +212,7 @@ public class FeedConstructorTest extends TestWithUserBase {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testNonExistedUsername() {
+  public void testNonExistentUsername() {
     constructor.constructFeed("iDontExist", 0, false);
   }
 

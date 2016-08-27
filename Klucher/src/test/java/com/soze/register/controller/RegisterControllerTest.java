@@ -47,6 +47,7 @@ public class RegisterControllerTest extends TestWithUserBase {
   
   @Test
   public void testGetRegister() throws Exception {
+    assertThat(userDao.count(), equalTo(0L));
     mvc.perform(MockMvcRequestBuilders.get("/register"))
       .andDo(print())
       .andExpect(status().isOk())
@@ -55,6 +56,7 @@ public class RegisterControllerTest extends TestWithUserBase {
   
   @Test
   public void testEmptyFields() throws Exception {
+    assertThat(userDao.count(), equalTo(0L));
     mvc.perform(MockMvcRequestBuilders.post("/register")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -66,6 +68,7 @@ public class RegisterControllerTest extends TestWithUserBase {
   
   @Test
   public void testShortFields() throws Exception {
+    assertThat(userDao.count(), equalTo(0L));
     mvc.perform(MockMvcRequestBuilders.post("/register")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -77,6 +80,7 @@ public class RegisterControllerTest extends TestWithUserBase {
   
   @Test
   public void testValidUsernameInvalidPassword() throws Exception {
+    assertThat(userDao.count(), equalTo(0L));
     mvc.perform(MockMvcRequestBuilders.post("/register")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -88,6 +92,7 @@ public class RegisterControllerTest extends TestWithUserBase {
   
   @Test
   public void testInvalidUsernameValidPassword() throws Exception {
+    assertThat(userDao.count(), equalTo(0L));
     mvc.perform(MockMvcRequestBuilders.post("/register")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -99,6 +104,7 @@ public class RegisterControllerTest extends TestWithUserBase {
   
   @Test
   public void testTooLongFields() throws Exception {
+    assertThat(userDao.count(), equalTo(0L));
     mvc.perform(MockMvcRequestBuilders.post("/register")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -110,6 +116,7 @@ public class RegisterControllerTest extends TestWithUserBase {
   
   @Test
   public void testWayTooLongFields() throws Exception {
+    assertThat(userDao.count(), equalTo(0L));
     mvc.perform(MockMvcRequestBuilders.post("/register")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -135,6 +142,7 @@ public class RegisterControllerTest extends TestWithUserBase {
   
   @Test
   public void testUserAlreadyExists() throws Exception {
+    assertThat(userDao.count(), equalTo(0L));
     String username = "username";
     String password = "password";
     addUserToDb(username, password);

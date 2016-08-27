@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.soze.hashtag.model.Hashtag;
 import com.soze.kluch.model.Kluch;
 import com.soze.kluch.repository.KluchRepository;
 
@@ -120,5 +121,14 @@ public class KluchDatabase implements KluchDao {
   public void deleteByAuthor(String author) {
     kluchRepository.deleteByAuthor(author);
   }
+
+  @Override
+  public Page<Kluch> findByHashtagsInAndTimestampLessThan(Hashtag hashtag, Timestamp lessThan,
+      Pageable pageRequest) {
+    return kluchRepository.findByHashtagsInAndTimestampLessThan(hashtag, lessThan, pageRequest);
+  }
+
+  
+  
    
 }

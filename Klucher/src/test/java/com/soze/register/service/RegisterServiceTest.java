@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.register.model.RegisterForm;
 import com.soze.user.dao.UserDao;
+import com.soze.user.model.User;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -32,14 +33,6 @@ public class RegisterServiceTest {
     form.setUsername(generateString(0));
     form.setPassword(generateString(0));
     registerService.register(form);   
-  }
-  
-  @Test(expected = IllegalArgumentException.class)
-  public void testShortFields() {
-    RegisterForm form = new RegisterForm();
-    form.setUsername(generateString(3));
-    form.setPassword(generateString(5));
-    registerService.register(form);
   }
   
   @Test(expected = IllegalArgumentException.class)
@@ -79,6 +72,10 @@ public class RegisterServiceTest {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(6));
     form.setPassword(generateString(6));
+    Iterable<User> wtf = userDao.findAll();
+    if(wtf.iterator().hasNext()) {
+      int x = 5;
+    }
     assertThat(userDao.count(), equalTo(0l));
     registerService.register(form);
     assertThat(userDao.count(), equalTo(1l));

@@ -38,6 +38,10 @@ Welcome to dev console!
 		</select></td>
 	</tr>
 	<tr>
+		<td>Delete first?</td>
+		<td><input type = "checkbox" id = "deleteFirst" name = "deleteFirst"></td>
+	</tr>
+	<tr>
 		<td colspan = "2">
 			<input type = "submit">
 		</td>

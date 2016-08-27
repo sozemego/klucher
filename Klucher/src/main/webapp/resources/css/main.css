@@ -568,5 +568,28 @@ a {
 	border: 1px solid black;
 }
 
+a.hashtagLink {
+	color: #1c8baf;
+	text-decoration: none;
+	cursor: pointer;
+}
 
+a.userLink {
+	color: #b71664;
+	text-decoration: none;
+	cursor: pointer;
+}
 
+.invisible {
+	visibility: hidden;
+}
+
+.ownKluch {
+	background: #f6f6f6;
+}
+
+a.linkInKluch {
+	color: #1c8baf;
+	text-decoration: none;
+	cursor: pointer;
+}

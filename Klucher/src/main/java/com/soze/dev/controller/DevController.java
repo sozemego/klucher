@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,8 +38,12 @@ public class DevController {
       @RequestParam(required = true) Integer number,
       @RequestParam(defaultValue = "250") Integer millis,
       @RequestParam(defaultValue = "false") Boolean fastMode,
-      @RequestParam(defaultValue = "id") String mode) throws Exception {
+      @RequestParam(defaultValue = "id") String mode,
+      @RequestParam(defaultValue = "false") Boolean deleteFirst) throws Exception {
     validateInput(number, millis, fastMode);
+    if(deleteFirst) {
+      kluchService.deleteAll(username);
+    }
     post(username, number, millis, fastMode, mode);
     return "dev";
   }
@@ -121,9 +126,14 @@ public class DevController {
   
   
   @RequestMapping(value = "/dev/delete", method = RequestMethod.DELETE)
-  public void deleteKluchs(@RequestParam(required = true) String username) {
+  public void deleteKluchs(@RequestParam(required = true) String username,
+      @RequestParam(required = false) Integer id) {
     log.info("Removing all posts for user [{}]", username);
-    kluchService.deleteAll(username);
+    if(id == null) {
+      kluchService.deleteAll(username);
+    } else {
+      kluchService.deleteKluch(id);
+    }
   }
   
   /**
@@ -145,7 +155,7 @@ public class DevController {
       this.executor = executor;
       this.supplier = supplier;
     }
-    
+       
     public void run() {
       try {
         kluchService.post(username, supplier.get());

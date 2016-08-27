@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.soze.common.exceptions.HttpException;
 import com.soze.follow.service.FollowService;
-import com.soze.ratelimiter.service.RateLimiter;
 
 @Controller
 public class FollowController {

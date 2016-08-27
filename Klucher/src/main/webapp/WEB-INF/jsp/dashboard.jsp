@@ -18,7 +18,10 @@
 				<td class = "verticalAlignTop" width = "33%"><c:import url = "userinfo.jsp"></c:import></td>
 				<td width = "33%">
 					<c:import url="kluchInput.jsp"></c:import>
-					<div class="newKluch centerText" id="newKluch"></div>
+					<div class="newKluch centerText" id="newKluch">
+						<span class = "invisible opacityAnimation centerText roundedCorners verticalCenter cursorPointer"
+						 id = 'newKluchText'>new kluchs available, click here to view!</span>
+					</div>
 					<c:import url="feed.jsp"></c:import>
 				</td>
 				<td width = "33%"></td>

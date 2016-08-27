@@ -1,6 +1,7 @@
 package com.soze.hashtag.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,40 +9,48 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.soze.hashtag.dao.HashtagDao;
 import com.soze.hashtag.model.Hashtag;
-import com.soze.hashtag.repository.HashtagRepository;
 import com.soze.kluch.model.Kluch;
 
 /**
- * A service which looks for hashtags in kluchs and
- * adds entries to DB with hashtags and Kluch id's.
+ * A service which extracts {@link Hashtag}s from
+ * {@link Kluch}s and adds these <code>Hashtags</code> to <code>Kluch</code> entity.
  * @author sozek
  *
  */
 @Service
 public class HashtagService {
 
-  private final HashtagRepository hashtagRepository;
-  private final Pattern hashtagExtractor = Pattern.compile("(#\\w+)");
+  private static final List<Hashtag> EMPTY_LIST = Arrays.asList();
+  private final HashtagDao hashtagDao;
+  private final Pattern hashtagExtractor = Pattern.compile("(?:^|\\s)(#\\w+)");
   
   @Autowired
-  public HashtagService(HashtagRepository hashtagRepository) {
-    this.hashtagRepository = hashtagRepository;
+  public HashtagService(HashtagDao hashtagDao) {
+    this.hashtagDao = hashtagDao;
   }
   
-  @Async("kluchProcessingExecutor")
-  public void process(Kluch kluch) {
+  /**
+   * Extracts hashtags from a Kluch and saves them in it.
+   * @param kluch
+   * @return extracted <code>Hashtags</code> from this <code>Kluch</code>
+   */
+  public List<Hashtag> process(Kluch kluch) {
     Set<String> hashtagsTexts = extractHashtags(kluch.getText());
     if(hashtagsTexts.isEmpty()) {
-      return;
+      return EMPTY_LIST;
     }
-    List<Hashtag> hashtags = getHashtags(hashtagsTexts, kluch);
-    saveHashtags(hashtags);
+    return getHashtags(hashtagsTexts, kluch);
   }
   
+  /**
+   * Matches regions of text which are hashtags and returns them as a Set.
+   * @param kluchText
+   * @return
+   */
   private Set<String> extractHashtags(String kluchText) {
     Matcher matcher = hashtagExtractor.matcher(kluchText);
     Set<String> hashtags = new HashSet<>();
@@ -52,27 +61,37 @@ public class HashtagService {
     return hashtags;
   }
   
-
+  /**
+   * Assembles {@link Hashtag} objects from a Set of strings
+   * which represent hashtags (e.g. "#ad"). Saves all <code>Hashtags</code>
+   * in the Kluch.
+   * @param hashtagTexts
+   * @param kluch
+   * @return
+   */
   private List<Hashtag> getHashtags(Set<String> hashtagTexts, Kluch kluch) {
     List<Hashtag> hashtags = new ArrayList<>();
     for(String hashtag: hashtagTexts) {
-      hashtags.add(generateHashtag(hashtag, kluch));
+      hashtags.add(generateHashtag(hashtag.toLowerCase(), kluch));
     }
     return hashtags;
   }
   
+  /**
+   * Assembles a single {@link Hashtag} from text and saves
+   * <code>Hashtag</code> entity in a <code>Kluch</code>.
+   * @param hashtagText
+   * @param kluch
+   * @return
+   */
   private Hashtag generateHashtag(String hashtagText, Kluch kluch) {
-    Hashtag hashtag = hashtagRepository.findOne(hashtagText);
+    Hashtag hashtag = hashtagDao.findOne(hashtagText);
     if(hashtag == null) {
-      hashtag = new Hashtag();     
+      hashtag = new Hashtag(hashtagText);
     }
-    hashtag.setText(hashtagText);
     hashtag.getKluchs().add(kluch);
+    //kluch.getHashtags().add(hashtag);
     return hashtag;
-  }
-  
-  private void saveHashtags(List<Hashtag> hashtags) {
-    hashtagRepository.save(hashtags);
   }
  
 }
