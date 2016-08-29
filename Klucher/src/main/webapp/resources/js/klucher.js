@@ -220,10 +220,8 @@ function ajaxPostKluch() {
 			setGettingFeed(0);
 		},
 		success: function(data, status, xhr) {
-			var currentTimestamp = Date.now();
-			setFirstTimestamp(currentTimestamp);
 			clearTextArea();
-			addKluchToFeed(getKluch(getUsername(), currentTimestamp, kluchText), false);
+			addKluchToFeed(data, false);
 			checkCharacterCount();
 			setGettingFeed(0);
 		}
