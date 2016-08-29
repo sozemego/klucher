@@ -22,14 +22,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.soze.TestWithUserBase;
+import com.soze.TestWithRealUsers;
 import com.soze.user.dao.UserDao;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-public class RegisterControllerTest extends TestWithUserBase {
+public class RegisterControllerTest extends TestWithRealUsers {
 
   @Autowired
   private WebApplicationContext webApplicationContext;
@@ -145,7 +145,7 @@ public class RegisterControllerTest extends TestWithUserBase {
     assertThat(userDao.count(), equalTo(0L));
     String username = "username";
     String password = "password";
-    addUserToDb(username, password);
+    addUser(username, password);
     assertThat(userDao.count(), equalTo(1L));
     mvc.perform(MockMvcRequestBuilders.post("/register")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)

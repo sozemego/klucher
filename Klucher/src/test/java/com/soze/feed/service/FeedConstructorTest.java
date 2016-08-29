@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.soze.TestWithUserBase;
+import com.soze.TestWithMockUsers;
 import com.soze.feed.model.Feed;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
@@ -24,7 +24,7 @@ import com.soze.kluch.model.Kluch;
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
-public class FeedConstructorTest extends TestWithUserBase {
+public class FeedConstructorTest extends TestWithMockUsers {
 
   private final int beforeKluchsPerRequest = 30;
   private final int afterKluchsPerRequest = 30;
@@ -46,7 +46,7 @@ public class FeedConstructorTest extends TestWithUserBase {
 
   @Test
   public void testNoKluchs() {
-    addUserToDb("test", "password");
+    mockUser("test", "password");
     Feed feed = constructor.constructFeed("test", 0, false);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs.getSize(),
@@ -57,7 +57,7 @@ public class FeedConstructorTest extends TestWithUserBase {
 
   @Test
   public void testLessThanPageKluchs() {
-    addUserToDb("test", "password");
+    mockUser("test", "password");
     long kluchsToAdd = 25;
     addKluchsForUser("test", kluchsToAdd);
     Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false);
@@ -70,7 +70,7 @@ public class FeedConstructorTest extends TestWithUserBase {
 
   @Test
   public void testKluchsExistButNotBeforeTimestamp() {
-    addUserToDb("test", "password");
+    mockUser("test", "password");
     long kluchsToAdd = 25;
     addKluchsForUser("test", kluchsToAdd);
     Feed feed = constructor.constructFeed("test", 0, false);
@@ -83,7 +83,7 @@ public class FeedConstructorTest extends TestWithUserBase {
 
   @Test
   public void testPaginatedKluchsGetOnce() {
-    addUserToDb("test", "password");
+    mockUser("test", "password");
     long kluchsToAdd = 35;
     addKluchsForUser("test", kluchsToAdd);
     Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false);
@@ -97,7 +97,7 @@ public class FeedConstructorTest extends TestWithUserBase {
 
   @Test
   public void testPaginatedKluchsGetTwice() {
-    addUserToDb("test", "password");
+    mockUser("test", "password");
     long kluchsToAdd = 35;
     addKluchsForUser("test", kluchsToAdd);
     Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false);
@@ -120,7 +120,7 @@ public class FeedConstructorTest extends TestWithUserBase {
 
   @Test
   public void testLessThanPageAfterKluchs() {
-    addUserToDb("test", "password");
+    mockUser("test", "password");
     long kluchsToAdd = 25;
     addKluchsForUser("test", kluchsToAdd);
     Feed feed = constructor.constructFeedAfter("test", 0, false);
@@ -133,7 +133,7 @@ public class FeedConstructorTest extends TestWithUserBase {
 
   @Test
   public void testKluchsExistButNotAfterTimestamp() {
-    addUserToDb("test", "password");
+    mockUser("test", "password");
     long kluchsToAdd = 25;
     addKluchsForUser("test", kluchsToAdd);
     Feed feed = constructor.constructFeedAfter("test", Long.MAX_VALUE, false);
@@ -146,7 +146,7 @@ public class FeedConstructorTest extends TestWithUserBase {
 
   @Test
   public void testPaginatedAfterKluchsGetOnce() {
-    addUserToDb("test", "password");
+    mockUser("test", "password");
     long kluchsToAdd = 35;
     addKluchsForUser("test", kluchsToAdd);
     Feed feed = constructor.constructFeedAfter("test", 0, false);
@@ -160,7 +160,7 @@ public class FeedConstructorTest extends TestWithUserBase {
 
   @Test
   public void testPaginatedAfterKluchsGetTwice() {
-    addUserToDb("test", "password");
+    mockUser("test", "password");
     long kluchsToAdd = 35;
     addKluchsForUser("test", kluchsToAdd);
     Feed feed = constructor.constructFeedAfter("test", 0, false);
@@ -183,14 +183,14 @@ public class FeedConstructorTest extends TestWithUserBase {
 
   @Test
   public void testExistAfterNoKluchs() {
-    addUserToDb("test", "password");
+    mockUser("test", "password");
     boolean exists = constructor.existsFeedAfter("test", 0, false);
     assertThat(exists, equalTo(false));
   }
 
   @Test
   public void testExistsKluchs() {
-    addUserToDb("test", "password");
+    mockUser("test", "password");
     long kluchsToAdd = 120;
     addKluchsForUser("test", kluchsToAdd);
     boolean exists = constructor.existsFeedAfter("test", 0, false);
@@ -199,7 +199,7 @@ public class FeedConstructorTest extends TestWithUserBase {
 
   @Test
   public void testDoNotExistsKluchs() {
-    addUserToDb("test", "password");
+    mockUser("test", "password");
     long kluchsToAdd = 120;
     addKluchsForUser("test", kluchsToAdd);
     boolean exists = constructor.existsFeedAfter("test", Long.MAX_VALUE, false);

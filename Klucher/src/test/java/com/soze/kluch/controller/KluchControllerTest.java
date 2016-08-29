@@ -19,14 +19,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.soze.TestWithUserBase;
+import com.soze.TestWithMockUsers;
 import com.soze.kluch.dao.KluchDao;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-public class KluchControllerTest extends TestWithUserBase {
+public class KluchControllerTest extends TestWithMockUsers {
   
   @Autowired
   private KluchDao kluchDao;
@@ -61,7 +61,7 @@ public class KluchControllerTest extends TestWithUserBase {
   
   @Test
   public void testValidKluch() throws Exception {
-    addUserToDbAndLogin("username", "password");
+    mockUser("username", "password", true);
     assertThat(kluchDao.count(), equalTo(0L));  
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
         .param("kluchText", "text"))
@@ -72,7 +72,7 @@ public class KluchControllerTest extends TestWithUserBase {
   
   @Test
   public void testAlreadyPosted() throws Exception {
-    addUserToDbAndLogin("username", "password");
+    mockUser("username", "password", true);
     assertThat(kluchDao.count(), equalTo(0L));
     String kluchText = generateString(50);
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
@@ -89,7 +89,7 @@ public class KluchControllerTest extends TestWithUserBase {
   
   @Test
   public void testEmptyText() throws Exception {
-    addUserToDbAndLogin("username", "password");
+    mockUser("username", "password", true);
     assertThat(kluchDao.count(), equalTo(0L));  
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
         .param("kluchText", ""))
@@ -100,7 +100,7 @@ public class KluchControllerTest extends TestWithUserBase {
   
   @Test
   public void testTooLongKluch() throws Exception {
-    addUserToDbAndLogin("username", "password");
+    mockUser("username", "password", true);
     assertThat(kluchDao.count(), equalTo(0L));  
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
         .param("kluchText", generateString(251)))

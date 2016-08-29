@@ -22,13 +22,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.soze.TestWithUserBase;
+import com.soze.TestWithMockUsers;
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
-public class HashtagControllerTest extends TestWithUserBase {
+public class HashtagControllerTest extends TestWithMockUsers {
 
   @Autowired
   private WebApplicationContext webApplicationContext;
@@ -77,7 +78,7 @@ public class HashtagControllerTest extends TestWithUserBase {
   
   @Test
   public void loggedIn() throws Exception {
-    addUserToDbAndLogin("test", "password");
+    mockUser("test", "password", true);
     mvc.perform(MockMvcRequestBuilders.get("/hashtag/dupa"))
       .andDo(print())
       .andExpect(status().isOk())

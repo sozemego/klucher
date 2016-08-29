@@ -47,7 +47,7 @@ public class KlucherAuthenticationProvider implements AuthenticationProvider {
       grantedAuths.add(ga);
     }
     Authentication auth = new UsernamePasswordAuthenticationToken(username,
-        password, grantedAuths);
+        user.getHashedPassword(), grantedAuths);
     return auth;
   }
 

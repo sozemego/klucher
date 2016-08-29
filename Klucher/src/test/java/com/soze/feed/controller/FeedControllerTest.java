@@ -23,14 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.NestedServletException;
 
-import com.soze.TestWithUserBase;
+import com.soze.TestWithMockUsers;
 import com.soze.common.exceptions.HttpException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
-public class FeedControllerTest extends TestWithUserBase {
+public class FeedControllerTest extends TestWithMockUsers {
 
   @Autowired
   private WebApplicationContext webApplicationContext;
@@ -57,7 +57,7 @@ public class FeedControllerTest extends TestWithUserBase {
   
   @Test
   public void testAuthorizedButInvalidTimestampParameter() throws Exception {
-    addUserToDbAndLogin("test", "password");
+    mockUser("test", "password", true);
     mvc.perform(MockMvcRequestBuilders.get("/feed/test")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -72,7 +72,7 @@ public class FeedControllerTest extends TestWithUserBase {
    */
   @Test
   public void testAuthorizedAndValidTimestamp() throws Exception {
-    addUserToDbAndLogin("test", "password");
+    mockUser("test", "password", true);
     mvc.perform(MockMvcRequestBuilders.get("/feed/test")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +87,7 @@ public class FeedControllerTest extends TestWithUserBase {
   
   @Test
   public void testPollAuthorizedButInvalidTimestampParameter() throws Exception {
-    addUserToDbAndLogin("test", "password");
+    mockUser("test", "password", true);
     mvc.perform(MockMvcRequestBuilders.get("/feed/poll")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -102,7 +102,7 @@ public class FeedControllerTest extends TestWithUserBase {
    */
   @Test
   public void testPollAuthorizedAndValidTimestamp() throws Exception {
-    addUserToDbAndLogin("test", "password");
+    mockUser("test", "password", true);
     mvc.perform(MockMvcRequestBuilders.get("/feed/test")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)

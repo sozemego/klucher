@@ -21,13 +21,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.soze.TestWithUserBase;
+import com.soze.TestWithMockUsers;
+
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
-public class DashboardControllerTest extends TestWithUserBase {
+public class DashboardControllerTest extends TestWithMockUsers {
 
   @Autowired
   private WebApplicationContext webApplicationContext;
@@ -36,6 +38,7 @@ public class DashboardControllerTest extends TestWithUserBase {
   
   @Before
   public void setUp() throws Exception {
+    super.setUp();
     mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
         .apply(springSecurity()).build();
   }
@@ -51,7 +54,7 @@ public class DashboardControllerTest extends TestWithUserBase {
   
   @Test
   public void testDashboard() throws Exception {
-    addUserToDbAndLogin("user", "password");
+    mockUser("user", "password", true);
     mvc.perform(MockMvcRequestBuilders.get("/dashboard")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED))

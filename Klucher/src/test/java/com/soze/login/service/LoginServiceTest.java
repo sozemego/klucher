@@ -9,14 +9,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.soze.TestWithUserBase;
+import com.soze.TestWithMockUsers;
 import com.soze.common.exceptions.HttpException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
-public class LoginServiceTest extends TestWithUserBase {
+public class LoginServiceTest extends TestWithMockUsers {
 
   @Autowired
   private LoginService loginService;
@@ -30,7 +30,7 @@ public class LoginServiceTest extends TestWithUserBase {
   public void testUserExists() throws Exception {
     String username = "username";
     String password = "password";
-    addUserToDb(username, password);
+    mockUser(username, password);
     loginService.manualLogin(username, password,
         new MockHttpServletRequest());
   }
@@ -39,7 +39,7 @@ public class LoginServiceTest extends TestWithUserBase {
   public void testUserExistsPasswordInvalid() throws Exception {
     String username = "username";
     String password = "password";
-    addUserToDb(username, password);
+    mockUser(username, password);
     loginService.manualLogin(username,
         "wrong password", new MockHttpServletRequest());
   }
@@ -48,7 +48,7 @@ public class LoginServiceTest extends TestWithUserBase {
   public void testUserAlreadyLoggedIn() throws Exception {
     String username = "username";
     String password = "password";
-    addUserToDb(username, password);
+    mockUser(username, password);
     loginService.manualLogin(username, password,
         new MockHttpServletRequest());
     loginService.manualLogin(username, password,

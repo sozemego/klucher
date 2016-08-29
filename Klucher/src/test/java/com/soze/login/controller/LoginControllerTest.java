@@ -20,13 +20,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.soze.TestWithUserBase;
+import com.soze.TestWithMockUsers;
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
-public class LoginControllerTest extends TestWithUserBase {
+public class LoginControllerTest extends TestWithMockUsers {
 
   @Autowired
   private WebApplicationContext webApplicationContext;
@@ -51,7 +52,7 @@ public class LoginControllerTest extends TestWithUserBase {
   
   @Test
   public void alreadyLoggedInTest() throws Exception {
-    addUserToDbAndLogin("user", "password");
+    mockUser("user", "password", true);
     mvc.perform(MockMvcRequestBuilders.get("/login")
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -64,7 +65,7 @@ public class LoginControllerTest extends TestWithUserBase {
   public void testValidLogin() throws Exception {
     String username = "user";
     String password = "password";
-    addUserToDb(username, password);
+    mockUser(username, password);
     mvc.perform(MockMvcRequestBuilders.post("/login")
         .param("username", username)
         .param("password", password)
@@ -78,7 +79,7 @@ public class LoginControllerTest extends TestWithUserBase {
   @Test
   public void testWrongPasswordLogin() throws Exception {
     String username = "user";
-    addUserToDb(username, "password");
+    mockUser(username, "password");
     mvc.perform(MockMvcRequestBuilders.post("/login")
         .param("username", username)
         .param("password", "wrong password")
