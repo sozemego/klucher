@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -32,6 +33,7 @@ public class FeedConstructor {
 
   private static final int BEFORE_KLUCHS_PER_REQUEST = 30;
   private static final int AFTER_KLUCHS_PER_REQUEST = 30;
+  private final Feed emptyFeed = new Feed(new PageImpl<Kluch>(new ArrayList<>()));
   private final PageRequest before = new PageRequest(0, BEFORE_KLUCHS_PER_REQUEST, new Sort(new Order(Direction.DESC, "timestamp")));
   private final PageRequest after = new PageRequest(0, AFTER_KLUCHS_PER_REQUEST, new Sort(new Order(Direction.ASC, "timestamp")));
   private final PageRequest exists = new PageRequest(0, 1);
@@ -68,7 +70,7 @@ public class FeedConstructor {
     } else if (direction.equalsIgnoreCase("after")) {
       return constructFeedAfter(username, timestamp, onlyForUser);
     }
-    return new Feed();
+    return emptyFeed;
   }
   
   /**
@@ -146,8 +148,11 @@ public class FeedConstructor {
   public Feed constructHashtagFeed(String hashtagText, long timestamp) throws IllegalArgumentException {
     validateTimestamp(timestamp);
     Hashtag hashtag = getHashtag(hashtagText);
-    Page<Kluch> kluchs = kluchDao.findByHashtagsInAndTimestampLessThan(hashtag, new Timestamp(timestamp), before);
     Feed feed = new Feed();
+    if(hashtag == null) {
+      return emptyFeed;
+    }
+    Page<Kluch> kluchs = kluchDao.findByHashtagsInAndTimestampLessThan(hashtag, new Timestamp(timestamp), before);   
     feed.setKluchs(kluchs);
     return feed;
   }
@@ -179,15 +184,11 @@ public class FeedConstructor {
     if(hashtagText == null || hashtagText.isEmpty()) {
       throw new IllegalArgumentException("Hashtag cannot be null or empty for feed construction.");
     }
-    boolean hasPoundCharacter = hashtagText.charAt(0) == 163;
+    boolean hasPoundCharacter = hashtagText.startsWith("#");
     if(!hasPoundCharacter) {
       hashtagText = "#" + hashtagText;
     }
-    Hashtag hashtag = hashtagDao.findOne(hashtagText);
-    if(hashtag == null) {
-      throw new IllegalArgumentException(hashtagText + " does not exist.");
-    }
-    return hashtag;
+    return hashtagDao.findOne(hashtagText);
   }
   
   /**

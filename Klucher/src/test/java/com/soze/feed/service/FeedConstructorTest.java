@@ -31,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.TestWithMockUsers;
 import com.soze.feed.model.Feed;
+import com.soze.hashtag.dao.HashtagDao;
+import com.soze.hashtag.model.Hashtag;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
 
@@ -53,6 +55,9 @@ public class FeedConstructorTest extends TestWithMockUsers {
 
   @MockBean
   private KluchDao kluchDao;
+  
+  @MockBean
+  private HashtagDao hashtagDao;
 
   @Before
   public void setUp() throws Exception {
@@ -191,6 +196,69 @@ public class FeedConstructorTest extends TestWithMockUsers {
   public void testNonExistentUsername() {
     constructor.constructFeed("iDontExist", 0, false);
   }
+  
+  @Test
+  public void testHashtagFeedNotExistent() {
+    String hashtagText = "#hashtag";
+    when(kluchDao.findByHashtagsInAndTimestampLessThan(
+        eq(new Hashtag(hashtagText)),
+        eq(new Timestamp(0)),
+        eq(before)))
+    .thenReturn(new PageImpl<Kluch>(Arrays.asList()));
+    Feed feed = constructor.constructHashtagFeed(hashtagText, 0);
+    assertThat(feed, notNullValue());
+    Page<Kluch> kluchs = feed.getKluchs();
+    assertThat(kluchs.getTotalElements(), equalTo(0L));
+    assertThat(kluchs.getNumberOfElements(), equalTo(0));
+  }
+  
+  @Test
+  public void testHashtagNotExistentNoPoundSign() {
+    String hashtagText = "hashtag";
+    when(kluchDao.findByHashtagsInAndTimestampLessThan(
+        eq(new Hashtag(hashtagText)),
+        eq(new Timestamp(0)),
+        eq(before)))
+    .thenReturn(new PageImpl<Kluch>(Arrays.asList()));
+    Feed feed = constructor.constructHashtagFeed(hashtagText, 0);
+    assertThat(feed, notNullValue());
+    Page<Kluch> kluchs = feed.getKluchs();
+    assertThat(kluchs.getTotalElements(), equalTo(0L));
+    assertThat(kluchs.getNumberOfElements(), equalTo(0));
+  }
+  
+  @Test
+  public void testHashtagFeedValid() {
+    String hashtagText = "#hashtag";
+    when(kluchDao.findByHashtagsInAndTimestampLessThan(
+        eq(new Hashtag(hashtagText)),
+        eq(new Timestamp(0)),
+        eq(before)))
+    .thenReturn(new PageImpl<Kluch>(Arrays.asList(new Kluch())));
+    when(hashtagDao.findOne(hashtagText)).thenReturn(new Hashtag(hashtagText));
+    Feed feed = constructor.constructHashtagFeed(hashtagText, 0);
+    assertThat(feed, notNullValue());
+    Page<Kluch> kluchs = feed.getKluchs();
+    assertThat(kluchs.getTotalElements(), equalTo(1L));
+    assertThat(kluchs.getNumberOfElements(), equalTo(1));
+  }
+  
+  @Test
+  public void testHashtagFeedValidManyKluchs() {
+    String hashtagText = "#hashtag";
+    when(kluchDao.findByHashtagsInAndTimestampLessThan(
+        eq(new Hashtag(hashtagText)),
+        eq(new Timestamp(0)),
+        eq(before)))
+    .thenReturn(new PageImpl<Kluch>(getRandomKluchs(666)));
+    when(hashtagDao.findOne(hashtagText)).thenReturn(new Hashtag(hashtagText));
+    Feed feed = constructor.constructHashtagFeed(hashtagText, 0);
+    assertThat(feed, notNullValue());
+    Page<Kluch> kluchs = feed.getKluchs();
+    assertThat(kluchs.getTotalElements(), equalTo(666L));
+  }
+  
+  
   
   private List<Kluch> getRandomKluchs(int number) {
     List<Kluch> kluchs = new ArrayList<>();

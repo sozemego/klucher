@@ -95,7 +95,7 @@ public class HashtagControllerTest extends TestWithMockUsers {
       .andExpect(jsonPath("$.kluchs.content", hasSize(0))) // we mostly care about page size here, not actual Kluchs
       .andExpect(jsonPath("$.kluchs.last", equalTo(true)))
       .andExpect(jsonPath("$.kluchs.first", equalTo(true)))
-      .andExpect(jsonPath("$.kluchs.size", equalTo(30)));
+      .andExpect(jsonPath("$.kluchs.size", equalTo(0)));
   }
   
   @Test
