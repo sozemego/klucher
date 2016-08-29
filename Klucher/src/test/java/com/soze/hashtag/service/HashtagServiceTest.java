@@ -1,15 +1,18 @@
 package com.soze.hashtag.service;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,14 +30,19 @@ public class HashtagServiceTest {
   @Autowired
   private HashtagService hashtagService;
   
-  @Autowired
+  @MockBean
   private HashtagDao hashtagDao;
+  
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
+  }
   
   @Test
   public void testOneValidHashtag() throws Exception {
     String hashtagText = "#hashtag";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(1));
     assertThat(hashtags.get(0).getText(), equalTo(hashtagText));
@@ -44,8 +52,8 @@ public class HashtagServiceTest {
   @Test
   public void testAnotherValidHashtag() throws Exception {
     String hashtagText = "#hashtagsuperhashtag";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(1));
     assertThat(hashtags.get(0).getText(), equalTo(hashtagText));
@@ -55,9 +63,9 @@ public class HashtagServiceTest {
   @Test
   public void testHashtagWithUnderScore() throws Exception {
     String hashtagText = "#hashtag_superhashtag";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
-    List<Hashtag> hashtags = hashtagService.process(kluch);
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
+    List<Hashtag> hashtags = hashtagService.process(kluch);  
     assertThat(hashtags.size(), equalTo(1));
     assertThat(hashtags.get(0).getText(), equalTo(hashtagText));
     assertThat(hashtags.get(0).getKluchs().size(), equalTo(1));
@@ -66,8 +74,8 @@ public class HashtagServiceTest {
   @Test
   public void testAllDigitHashtag() throws Exception {
     String hashtagText = "#12333441255533990";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(1));
     assertThat(hashtags.get(0).getText(), equalTo(hashtagText));
@@ -77,8 +85,8 @@ public class HashtagServiceTest {
   @Test
   public void testAllWeirdCharactersHashtag() throws Exception {
     String hashtagText = "#$%%@@#$&&^%%^&&%^&&%%^&";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(0));
   }
@@ -86,8 +94,8 @@ public class HashtagServiceTest {
   @Test
   public void testMultipleHashtags() throws Exception {
     String hashtagText = "#one #two #three";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(3));
     assertThat(hashtags.contains(new Hashtag("#one")), equalTo(true));
@@ -101,8 +109,8 @@ public class HashtagServiceTest {
   @Test
   public void testMultipleHashtagsNoSpace() throws Exception {
     String hashtagText = "#one#two#three";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(1));
     assertThat(hashtags.contains(new Hashtag("#one")), equalTo(true));
@@ -114,8 +122,8 @@ public class HashtagServiceTest {
   @Test
   public void testAnotherSetOfHashtags() throws Exception {
     String hashtagText = "#bla #123334444 #gleblegle";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(3));
     assertThat(hashtags.contains(new Hashtag("#bla")), equalTo(true));
@@ -129,8 +137,8 @@ public class HashtagServiceTest {
   @Test
   public void testJustPoundCharacter() throws Exception {
     String hashtagText = "#";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(0));
   }
@@ -138,8 +146,8 @@ public class HashtagServiceTest {
   @Test
   public void testMultiplePoundCharacters() throws Exception {
     String hashtagText = "### # # text";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(0));
   }
@@ -147,8 +155,8 @@ public class HashtagServiceTest {
   @Test
   public void testInvalidHashtagsBetweenPounds() throws Exception {
     String hashtagText = "##oh# # # text";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(0));
     assertThat(hashtags.contains(new Hashtag("#oh")), equalTo(false));
@@ -157,8 +165,8 @@ public class HashtagServiceTest {
   @Test
   public void testMultipleOfSameHashtag() throws Exception {
     String hashtagText = "#bla #bla";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(1));
     assertThat(hashtags.contains(new Hashtag("#bla")), equalTo(true));
@@ -168,8 +176,8 @@ public class HashtagServiceTest {
   @Test
   public void testTwoMultipleOfSameHashtag() throws Exception {
     String hashtagText = "#bla #bla #eh #eh";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(2));
     assertThat(hashtags.contains(new Hashtag("#bla")), equalTo(true));
@@ -180,8 +188,8 @@ public class HashtagServiceTest {
   @Test
   public void testNoHashtags() throws Exception {
     String hashtagText = "";
-    assertThat(hashtagDao.findOne(hashtagText), nullValue());
     Kluch kluch = getKluch(hashtagText + " rest of kluch");
+    when(hashtagDao.findOne(hashtagText)).thenReturn(null);
     List<Hashtag> hashtags = hashtagService.process(kluch);
     assertThat(hashtags.size(), equalTo(0));
   }

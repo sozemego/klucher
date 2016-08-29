@@ -1,12 +1,15 @@
 package com.soze.register.service;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +27,7 @@ public class RegisterServiceTest {
   @Autowired
   private RegisterService registerService;
   
-  @Autowired
+  @MockBean
   private UserDao userDao;
   
   @Test(expected = IllegalArgumentException.class)
@@ -70,23 +73,23 @@ public class RegisterServiceTest {
   @Test
   public void testValidFields() {
     RegisterForm form = new RegisterForm();
-    form.setUsername(generateString(6));
-    form.setPassword(generateString(6));
-    Iterable<User> wtf = userDao.findAll();
-    if(wtf.iterator().hasNext()) {
-      int x = 5;
-    }
-    assertThat(userDao.count(), equalTo(0l));
-    registerService.register(form);
-    assertThat(userDao.count(), equalTo(1l));
+    form.setUsername("user");
+    form.setPassword("password");
+    User user = getUser(form);
+    when(userDao.save(user)).thenReturn(user);
+    User registeredUser = registerService.register(form);
+    assertThat(registeredUser, notNullValue());
+    assertThat(registeredUser.getUsername(), equalTo("user"));
+    assertThat(registeredUser.getPassword(), equalTo("password"));
   }
   
   @Test(expected = IllegalArgumentException.class)
   public void testUserAlreadyExists() {
     RegisterForm form = new RegisterForm();
-    form.setUsername(generateString(4));
+    form.setUsername("user");
     form.setPassword(generateString(6));
     registerService.register(form);
+    when(userDao.exists("user")).thenReturn(true);
     registerService.register(form);
   }
   
@@ -96,6 +99,13 @@ public class RegisterServiceTest {
     form.setUsername(null);
     form.setPassword(null);
     registerService.register(form);  
+  }
+  
+  private User getUser(RegisterForm form) {
+    User user = new User();
+    user.setUsername(form.getUsername());
+    user.setHashedPassword(form.getPassword());
+    return user;
   }
   
   private String generateString(int length) {

@@ -125,10 +125,16 @@ public class User implements UserDetails {
   
   @Override
   public boolean equals(Object second) {
-      if (second instanceof User) {
-          return username.equals(((User) second).username);
-      }
+    if (second == null) {
       return false;
+    }
+    if (this == second) {
+      return true;
+    }
+    if (second instanceof User) {
+      return username.equals(((User) second).username);
+    }
+    return false;
   }
 
 }

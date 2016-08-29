@@ -2,6 +2,7 @@ package com.soze.kluch.model;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -77,6 +78,23 @@ public class Kluch {
   
   public Set<Hashtag> getHashtags() {
     return hashtags;
+  }
+  
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
+  
+  @Override
+  public boolean equals(Object two) {
+    if(two == null) {
+      return false;
+    }
+    if(this == two) {
+      return true;
+    }
+    Kluch second = (Kluch) two;
+    return getId() == second.getId();
   }
 
 }

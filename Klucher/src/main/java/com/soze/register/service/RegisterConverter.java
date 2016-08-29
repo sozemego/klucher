@@ -24,6 +24,13 @@ public class RegisterConverter {
     this.passwordEncoder = passwordEncoder;
   }
 
+  /**
+   * Accepts a {@link RegisterForm} and converts it to a {@link User}
+   * object which is ready to be persisted to a database.
+   * This method does NO validation. Sets user roles to contain only "ROLE_USER".
+   * @param form
+   * @return
+   */
   public User convertRegisterForm(RegisterForm form) {
     User user = new User();
     user.setUsername(form.getUsername());

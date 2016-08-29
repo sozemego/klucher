@@ -37,14 +37,14 @@ public class RegisterService {
    * @throws IllegalArgumentException if username is null, too long or empty, or if password is null, empty
    *    or too short/long or if username is not available
    */
-  public void register(RegisterForm form) throws IllegalArgumentException {
+  public User register(RegisterForm form) throws IllegalArgumentException {
     log.info("Attempting to register user with username [{}].", form.getUsername());
     validateInput(form);
     if (!isAvailable(form.getUsername())) {
       throw new IllegalArgumentException("User with given username already exists.");
     }
     User user = registerConverter.convertRegisterForm(form);
-    userDao.save(user);
+    return userDao.save(user);
   }
 
   private void validateInput(RegisterForm form) throws IllegalArgumentException {

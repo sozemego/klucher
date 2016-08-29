@@ -1,16 +1,30 @@
 package com.soze.feed.service;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,20 +34,32 @@ import com.soze.feed.model.Feed;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
 
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
 public class FeedConstructorTest extends TestWithMockUsers {
-
-  private final int beforeKluchsPerRequest = 30;
-  private final int afterKluchsPerRequest = 30;
+  
+  private static final int BEFORE_KLUCHS_PER_REQUEST = 30;
+  private static final int AFTER_KLUCHS_PER_REQUEST = 30;
+  private final PageRequest before = new PageRequest(0, BEFORE_KLUCHS_PER_REQUEST, new Sort(new Order(Direction.DESC, "timestamp")));
+  private final PageRequest after = new PageRequest(0, AFTER_KLUCHS_PER_REQUEST, new Sort(new Order(Direction.ASC, "timestamp")));
+  private final PageRequest exists = new PageRequest(0, 1);
   
   @Autowired
+  @InjectMocks
   private FeedConstructor constructor;
-  @Autowired
+
+  @MockBean
   private KluchDao kluchDao;
 
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+    MockitoAnnotations.initMocks(this);
+  }
+  
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidUser() {
     constructor.constructFeed("doesNotExist", 0, false);
@@ -47,143 +73,25 @@ public class FeedConstructorTest extends TestWithMockUsers {
   @Test
   public void testNoKluchs() {
     mockUser("test", "password");
+    when(kluchDao.findByAuthorInAndTimestampLessThan(
+        eq(Arrays.asList("test")),
+        eq(new Timestamp(0)),
+        eq(before)))
+    .thenReturn(new PageImpl<Kluch>(Arrays.asList()));
     Feed feed = constructor.constructFeed("test", 0, false);
     Page<Kluch> kluchs = feed.getKluchs();
-    assertThat(kluchs.getSize(),
-        equalTo(beforeKluchsPerRequest));
     assertThat(kluchs.getTotalElements(), equalTo(0L));
     assertThat(kluchs.getNumberOfElements(), equalTo(0));
-  }
-
-  @Test
-  public void testLessThanPageKluchs() {
-    mockUser("test", "password");
-    long kluchsToAdd = 25;
-    addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false);
-    Page<Kluch> kluchs = feed.getKluchs();
-    assertThat(kluchs.getSize(),
-        equalTo(beforeKluchsPerRequest));
-    assertThat(kluchs.getTotalElements(), equalTo(kluchsToAdd));
-    assertThat(kluchs.getNumberOfElements(), equalTo(25));
-  }
-
-  @Test
-  public void testKluchsExistButNotBeforeTimestamp() {
-    mockUser("test", "password");
-    long kluchsToAdd = 25;
-    addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeed("test", 0, false);
-    Page<Kluch> kluchs = feed.getKluchs();
-    assertThat(kluchs.getSize(),
-        equalTo(beforeKluchsPerRequest));
-    assertThat(kluchs.getTotalElements(), equalTo(0L));
-    assertThat(kluchs.getNumberOfElements(), equalTo(0));
-  }
-
-  @Test
-  public void testPaginatedKluchsGetOnce() {
-    mockUser("test", "password");
-    long kluchsToAdd = 35;
-    addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false);
-    Page<Kluch> kluchs = feed.getKluchs();
-    assertThat(kluchs.getSize(),
-        equalTo(beforeKluchsPerRequest));
-    assertThat(kluchs.getTotalElements(), equalTo(kluchsToAdd));
-    assertThat(kluchs.getNumberOfElements(),
-        equalTo(beforeKluchsPerRequest));
-  }
-
-  @Test
-  public void testPaginatedKluchsGetTwice() {
-    mockUser("test", "password");
-    long kluchsToAdd = 35;
-    addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false);
-    Page<Kluch> kluchs = feed.getKluchs();
-    assertThat(kluchs.getSize(),
-        equalTo(beforeKluchsPerRequest));
-    assertThat(kluchs.getTotalElements(), equalTo(kluchsToAdd));
-    assertThat(kluchs.getNumberOfElements(),
-        equalTo(beforeKluchsPerRequest));
-    long oldestTimestamp = getOldestTimestamp(kluchs);
-    Feed secondFeed = constructor.constructFeed("test", oldestTimestamp, false);
-    Page<Kluch> secondKluchs = secondFeed.getKluchs();
-    assertThat(secondKluchs.getSize(),
-        equalTo(beforeKluchsPerRequest));
-    assertThat(secondKluchs.getTotalElements(),
-        equalTo(kluchsToAdd - beforeKluchsPerRequest));
-    assertThat(secondKluchs.getNumberOfElements(),
-        equalTo((int) kluchsToAdd - beforeKluchsPerRequest));
-  }
-
-  @Test
-  public void testLessThanPageAfterKluchs() {
-    mockUser("test", "password");
-    long kluchsToAdd = 25;
-    addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeedAfter("test", 0, false);
-    Page<Kluch> kluchs = feed.getKluchs();
-    assertThat(kluchs.getSize(),
-        equalTo(afterKluchsPerRequest));
-    assertThat(kluchs.getTotalElements(), equalTo(kluchsToAdd));
-    assertThat(kluchs.getNumberOfElements(), equalTo(25));
-  }
-
-  @Test
-  public void testKluchsExistButNotAfterTimestamp() {
-    mockUser("test", "password");
-    long kluchsToAdd = 25;
-    addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeedAfter("test", Long.MAX_VALUE, false);
-    Page<Kluch> kluchs = feed.getKluchs();
-    assertThat(kluchs.getSize(),
-        equalTo(afterKluchsPerRequest));
-    assertThat(kluchs.getTotalElements(), equalTo(0L));
-    assertThat(kluchs.getNumberOfElements(), equalTo(0));
-  }
-
-  @Test
-  public void testPaginatedAfterKluchsGetOnce() {
-    mockUser("test", "password");
-    long kluchsToAdd = 35;
-    addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeedAfter("test", 0, false);
-    Page<Kluch> kluchs = feed.getKluchs();
-    assertThat(kluchs.getSize(),
-        equalTo(afterKluchsPerRequest));
-    assertThat(kluchs.getTotalElements(), equalTo(kluchsToAdd));
-    assertThat(kluchs.getNumberOfElements(),
-        equalTo(afterKluchsPerRequest));
-  }
-
-  @Test
-  public void testPaginatedAfterKluchsGetTwice() {
-    mockUser("test", "password");
-    long kluchsToAdd = 35;
-    addKluchsForUser("test", kluchsToAdd);
-    Feed feed = constructor.constructFeedAfter("test", 0, false);
-    Page<Kluch> kluchs = feed.getKluchs();
-    assertThat(kluchs.getSize(),
-        equalTo(afterKluchsPerRequest));
-    assertThat(kluchs.getTotalElements(), equalTo(kluchsToAdd));
-    assertThat(kluchs.getNumberOfElements(),
-        equalTo(afterKluchsPerRequest));
-    long earliestTimestamp = getEarliestTimestamp(kluchs);
-    Feed secondFeed = constructor.constructFeedAfter("test", earliestTimestamp, false);
-    Page<Kluch> secondKluchs = secondFeed.getKluchs();
-    assertThat(secondKluchs.getSize(),
-        equalTo(afterKluchsPerRequest));
-    assertThat(secondKluchs.getTotalElements(),
-        equalTo(kluchsToAdd - afterKluchsPerRequest));
-    assertThat(secondKluchs.getNumberOfElements(),
-        equalTo((int) kluchsToAdd - afterKluchsPerRequest));
   }
 
   @Test
   public void testExistAfterNoKluchs() {
     mockUser("test", "password");
+    when(kluchDao.findByAuthorInAndTimestampGreaterThan(
+        eq(Arrays.asList("test")),
+        eq(new Timestamp(0)),
+        eq(exists)))
+    .thenReturn(new PageImpl<Kluch>(Arrays.asList()));
     boolean exists = constructor.existsFeedAfter("test", 0, false);
     assertThat(exists, equalTo(false));
   }
@@ -191,8 +99,11 @@ public class FeedConstructorTest extends TestWithMockUsers {
   @Test
   public void testExistsKluchs() {
     mockUser("test", "password");
-    long kluchsToAdd = 120;
-    addKluchsForUser("test", kluchsToAdd);
+    when(kluchDao.findByAuthorInAndTimestampGreaterThan(
+        eq(Arrays.asList("test")),
+        eq(new Timestamp(0)),
+        eq(exists)))
+    .thenReturn(new PageImpl<Kluch>(Arrays.asList(new Kluch())));
     boolean exists = constructor.existsFeedAfter("test", 0, false);
     assertThat(exists, equalTo(true));
   }
@@ -200,10 +111,75 @@ public class FeedConstructorTest extends TestWithMockUsers {
   @Test
   public void testDoNotExistsKluchs() {
     mockUser("test", "password");
-    long kluchsToAdd = 120;
-    addKluchsForUser("test", kluchsToAdd);
+    when(kluchDao.findByAuthorInAndTimestampGreaterThan(
+        eq(Arrays.asList("test")),
+        eq(new Timestamp(Long.MAX_VALUE)),
+        eq(exists)))
+    .thenReturn(new PageImpl<Kluch>(Arrays.asList()));
     boolean exists = constructor.existsFeedAfter("test", Long.MAX_VALUE, false);
     assertThat(exists, equalTo(false));
+  }
+  
+  @Test
+  public void getOneKluchBefore() {
+    mockUser("test", "password");
+    when(kluchDao.findByAuthorInAndTimestampLessThan(
+        eq(Arrays.asList("test")),
+        eq(new Timestamp(Long.MAX_VALUE)),
+        eq(before)))
+    .thenReturn(new PageImpl<Kluch>(Arrays.asList(new Kluch())));
+    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false, "before");
+    Page<Kluch> kluchs = feed.getKluchs();
+    assertThat(kluchs, notNullValue());
+    assertThat(kluchs.getContent().size(), equalTo(1));
+    assertThat(kluchs.getNumber(), equalTo(0));
+    assertThat(kluchs.getTotalElements(), equalTo(1L));
+  }
+  
+  @Test
+  public void getManyKluchsBefore() {
+    mockUser("test", "password");
+    when(kluchDao.findByAuthorInAndTimestampLessThan(
+        eq(Arrays.asList("test")),
+        eq(new Timestamp(Long.MAX_VALUE)),
+        eq(before)))
+    .thenReturn(new PageImpl<Kluch>(getRandomKluchs(250)));
+    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false, "before");
+    Page<Kluch> kluchs = feed.getKluchs();
+    assertThat(kluchs, notNullValue());
+    assertThat(kluchs.getNumber(), equalTo(0));
+    assertThat(kluchs.getTotalElements(), equalTo(250L));
+  }
+  
+  @Test
+  public void getOneKluchAfter() {
+    mockUser("test", "password");
+    when(kluchDao.findByAuthorInAndTimestampGreaterThan(
+        eq(Arrays.asList("test")),
+        eq(new Timestamp(0)),
+        eq(after)))
+    .thenReturn(new PageImpl<Kluch>(Arrays.asList(new Kluch())));
+    Feed feed = constructor.constructFeed("test", 0, false, "after");
+    Page<Kluch> kluchs = feed.getKluchs();
+    assertThat(kluchs, notNullValue());
+    assertThat(kluchs.getContent().size(), equalTo(1));
+    assertThat(kluchs.getNumber(), equalTo(0));
+    assertThat(kluchs.getTotalElements(), equalTo(1L));
+  }
+  
+  @Test
+  public void getManyKluchsAfter() {
+    mockUser("test", "password");
+    when(kluchDao.findByAuthorInAndTimestampGreaterThan(
+        eq(Arrays.asList("test")),
+        eq(new Timestamp(0)),
+        eq(after)))
+    .thenReturn(new PageImpl<Kluch>(getRandomKluchs(250)));
+    Feed feed = constructor.constructFeed("test", 0, false, "after");
+    Page<Kluch> kluchs = feed.getKluchs();
+    assertThat(kluchs, notNullValue());
+    assertThat(kluchs.getNumber(), equalTo(0));
+    assertThat(kluchs.getTotalElements(), equalTo(250L));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -215,28 +191,13 @@ public class FeedConstructorTest extends TestWithMockUsers {
   public void testNonExistentUsername() {
     constructor.constructFeed("iDontExist", 0, false);
   }
-
-  private void addKluchsForUser(String username, long kluchsToAdd) {
-    for (int i = 0; i < kluchsToAdd; i++) {
-      kluchDao.save(createRandomKluchFor(username));
+  
+  private List<Kluch> getRandomKluchs(int number) {
+    List<Kluch> kluchs = new ArrayList<>();
+    for(int i = 0; i < number; i++) {
+      kluchs.add(new Kluch());
     }
-  }
-
-  private Kluch createRandomKluchFor(String username) {
-    Kluch kluch = new Kluch();
-    kluch.setAuthor(username);
-    kluch.setText("kluch_text");
-    kluch.setTimestamp(new Timestamp(System.nanoTime()));
-    return kluch;
-  }
-
-  private long getOldestTimestamp(Page<Kluch> page) {
-    List<Kluch> kluchs = page.getContent();
-    return page.getContent().get(kluchs.size() - 1).getTimestamp().getTime();
-  }
-
-  private long getEarliestTimestamp(Page<Kluch> page) {
-    return getOldestTimestamp(page);
+    return kluchs;
   }
 
 }
