@@ -76,7 +76,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     return new ResponseEntity<Object>(response, new HttpHeaders(), response.getStatus());
   }
   
-  @SuppressWarnings("unused")
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex, WebRequest request) {
     String error = ex.getName() + " is required to be of type " + ex.getRequiredType().getName();

@@ -18,17 +18,13 @@ public class ErrorResponse {
     this.errors = errors;
   }
   
-  public ErrorResponse(HttpStatus status, String message, String error) {
-    this.status = status;
-    this.message = message;
-    this.errors = Arrays.asList(error);
-  }
-  
-  public ErrorResponse(HttpStatus status, String message) {
-    this.status = status;
-    this.message = message;
-    this.errors = new ArrayList<>(0);
-  }
+	public ErrorResponse(HttpStatus status, String message, String error) {
+		this(status, message, Arrays.asList(error));
+	}
+
+	public ErrorResponse(HttpStatus status, String message) {
+		this(status, message, new ArrayList<>(0));
+	}
   
   public HttpStatus getStatus() {
     return status;

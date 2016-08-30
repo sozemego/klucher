@@ -11,7 +11,7 @@
 
 <c:import url="header.jsp"></c:import>
 <c:import url="subheader.jsp"></c:import>
-
+<c:import url="alertElement.jsp"></c:import>
 <div class="content">
 		<table width = "100%">
 			<tr>

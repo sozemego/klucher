@@ -24,7 +24,8 @@ function checkAvailability(lastUsername) {
 		type: "GET",
 		url: "/register/available/" + currentUsername,
 		error: function(xhr, status, error) {
-			setTimeout(checkAvailability, 2500, currentUsername);
+			// slow down the checks to let server breathe
+			setTimeout(checkAvailability, 10000, currentUsername);
 		},
 		success: function(data) {
 			var currentUsernameElement = $("#username");
@@ -216,7 +217,7 @@ function ajaxPostKluch() {
 		url: "/kluch",
 		data: {"kluchText" : kluchText },
 		error: function(xhr, status, error) {
-			//TODO display actual error
+			displayAlert(xhr.responseText);
 			setGettingFeed(0);
 		},
 		success: function(data, status, xhr) {
@@ -257,6 +258,7 @@ function getFeed(direction, timestamp, append) {
 			"direction" : direction
 		},
 		error: function(xhr, status, error) {
+			displayAlert(xhr.responseText);
 			setGettingFeed(0);
 		},
 		success: function(data, status, xhr) {
@@ -450,6 +452,7 @@ function pollFeed() {
 		},
 		error: function(xhr, status, error) {
 			setTimeout(pollFeed, 5000);
+			displayAlert(xhr.responseText);
 		},
 		success: function(data, status, xhr) {
 			setTimeout(pollFeed, 5000);
@@ -603,7 +606,7 @@ function followUserAjax() {
 			"follow" : username
 		},
 		error: function(xhr, status, error) {
-			//TODO display actual error message
+			displayAlert(xhr.responseText);
 		},
 		success: function(data, status, xhr) {
 			createUnfollowButton();
@@ -646,7 +649,7 @@ function unfollowUserAjax() {
 			"follow" : username
 		},
 		error: function(xhr, status, error) {
-
+			displayAlert(xhr.responseText);
 		},
 		success: function(data, status, xhr) {
 			createFollowButton();
@@ -773,6 +776,7 @@ function getHashtagFeed(timestamp, append) {
 		},
 		error: function(xhr, status, error) {
 			setGettingFeed(0);
+			displayAlert(xhr.responseText);
 		},
 		success: function(data, status, xhr) {
 			addKluchsToFeed(data.kluchs.content, append);
@@ -790,4 +794,30 @@ function configureSubheaderButtons() {
 		$("#messagesButton").toggleClass("invisible");
 		$("#settingsButton").toggleClass("invisible");
 	}
+}
+
+function displayAlert(text) {
+	$("#alertContent").text(text);
+	$("#alertElement").animate(
+		{
+			height: "120px"
+		},
+		150, attachHideAlert);
+}
+
+function attachHideAlert() {
+	$("body").click(animateAlertUp);
+}
+
+function animateAlertUp() {
+	removeAnimateAlertUp();
+	$("#alertElement").animate(
+		{
+			height: "-120px"
+		},
+		150);
+}
+
+function removeAnimateAlertUp() {
+	$("body").off("click", animateAlertUp);
 }
