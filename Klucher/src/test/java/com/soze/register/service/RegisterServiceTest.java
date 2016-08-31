@@ -14,6 +14,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.soze.common.exceptions.InvalidLengthException;
+import com.soze.common.exceptions.NullOrEmptyException;
+import com.soze.common.exceptions.UserAlreadyExistsException;
 import com.soze.register.model.RegisterForm;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
@@ -30,7 +33,7 @@ public class RegisterServiceTest {
   @MockBean
   private UserDao userDao;
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullOrEmptyException.class)
   public void testEmptyFields() {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(0));
@@ -38,7 +41,7 @@ public class RegisterServiceTest {
     registerService.register(form);   
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = InvalidLengthException.class)
   public void testValidUsernameInvalidPassword() {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(4));
@@ -46,7 +49,7 @@ public class RegisterServiceTest {
     registerService.register(form);
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullOrEmptyException.class)
   public void testInvalidUsernameValidPassword() {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(0));
@@ -54,7 +57,7 @@ public class RegisterServiceTest {
     registerService.register(form);
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = InvalidLengthException.class)
   public void testTooLongFields() {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(65));
@@ -62,7 +65,7 @@ public class RegisterServiceTest {
     registerService.register(form);
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = InvalidLengthException.class)
   public void testWayTooLongFields() {
     RegisterForm form = new RegisterForm();
     form.setUsername(generateString(65000));
@@ -83,7 +86,7 @@ public class RegisterServiceTest {
     assertThat(registeredUser.getPassword(), equalTo("password"));
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = UserAlreadyExistsException.class)
   public void testUserAlreadyExists() {
     RegisterForm form = new RegisterForm();
     form.setUsername("user");
@@ -93,7 +96,7 @@ public class RegisterServiceTest {
     registerService.register(form);
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullOrEmptyException.class)
   public void testNullValues() {
     RegisterForm form = new RegisterForm();
     form.setUsername(null);

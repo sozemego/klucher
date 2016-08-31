@@ -14,6 +14,9 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
+import com.soze.common.exceptions.InvalidTimestampException;
+import com.soze.common.exceptions.NullOrEmptyException;
+import com.soze.common.exceptions.UserDoesNotExistException;
 import com.soze.feed.model.Feed;
 import com.soze.hashtag.dao.HashtagDao;
 import com.soze.hashtag.model.Hashtag;
@@ -49,26 +52,26 @@ public class FeedConstructor {
   }
   
   /**
-   * Returns a {@link Feed} for a given username. This method simply returns a finite (currently 30)
+   * Returns a {@link Feed} for a given username. This method simply returns a finite (currently up to 30)
    * amount of kluchs for this user, all posted before (earlier than) or after (later than) a given
    * <code>timestamp</code> (milliseconds unix time). If onlyForUser is true,
    * returns only this user's {@link Kluch}s, otherwise it includes all users they follow too.
    * Returned Kluchs are sorted by timestamp depending on the direction (descending for before and ascending for after).
-   * @param username
-   * @param timestamp
-   * @param onlyForUser
+   * @param username name of the user for which we want to construct the feed
+   * @param timestamp unix milliseconds before (or after) which you want to construct the feed
+   * @param onlyForUser flag which specifies whether Kluchs in the feed should only be for a given user (true) or for their followers too (false)
    * @param direction specifies whether you want to retrieve kluchs "after" or "before" timestamp
    * @return <code>Feed</code> of <code>Kluchs</code>
-   * @throws IllegalArgumentException if either username (null or empty), timestamp (less than zero) or direction (not "before" or "after") are invalid
+   * @throws InvalidTimestampException if timestamp is less than 0
+   * @throws UserDoesNotExistException if user with given <code>username</code> does not exist
+   * @throws NullOrEmptyException if <code>username</code> is null or empty
    */
-  public Feed constructFeed(String username, long timestamp, boolean onlyForUser, String direction) throws IllegalArgumentException {
-    if(!"after".equalsIgnoreCase(direction) && !"before".equalsIgnoreCase(direction)) {
-      throw new IllegalArgumentException("Direction has to be either 'after' or 'before'.");
+  public Feed constructFeed(String username, long timestamp, boolean onlyForUser, FeedDirection direction) throws InvalidTimestampException, UserDoesNotExistException, NullOrEmptyException {
+    if (direction == FeedDirection.BEFORE) {
+      return constructFeed(username, timestamp, onlyForUser);
     }
-    if (direction.equalsIgnoreCase("before")) {
-      return constructFeed(username, timestamp, onlyForUser); 
-    } else if (direction.equalsIgnoreCase("after")) {
-      return constructFeedAfter(username, timestamp, onlyForUser);
+    if(direction == FeedDirection.AFTER) {
+    	return constructFeedAfter(username, timestamp, onlyForUser);
     }
     return emptyFeed;
   }
@@ -79,14 +82,15 @@ public class FeedConstructor {
    * <code>timestamp</code> (milliseconds unix time). If onlyForUser is true,
    * returns only this user's {@link Kluch}s, otherwise it includes all users they follow too.
    * Returned Kluchs are sorted by timestamp in descending order.
-   * @param username
-   * @param timestamp
-   * @param onlyForUser
-   * @param direction specifies whether you want to retrieve kluchs "after" or "before" timestamp
-   * @return <code>Feed</code> of <code>Kluchs</code>
-   * @throws IllegalArgumentException if either username (null or empty) or timestamp (less than zero) are invalid
+   * @param username name of the user for which we want to construct the feed
+   * @param timestamp unix milliseconds before (or after) which you want to construct the feed
+   * @param onlyForUser flag which specifies whether Kluchs in the feed should only be for a given user (true) or for their followers too (false)
+   * @return <code>Feed</code> of <code>Kluchs</code> sorted in descending order according to timestamp
+   * @throws InvalidTimestampException if timestamp is less than 0
+   * @throws UserDoesNotExistException if user with given <code>username</code> does not exist
+   * @throws NullOrEmptyException if <code>username</code> is null or empty
    */
-  public Feed constructFeed(String username, long beforeTimestamp, boolean onlyForUser) throws IllegalArgumentException {    
+  public Feed constructFeed(String username, long beforeTimestamp, boolean onlyForUser) throws InvalidTimestampException, UserDoesNotExistException, NullOrEmptyException {    
     validateTimestamp(beforeTimestamp);
     User user = getUser(username);
     List<String> authors = getListOfAuthors(user, onlyForUser);
@@ -102,14 +106,15 @@ public class FeedConstructor {
    * <code>timestamp</code> (milliseconds unix time). If onlyForUser is true,
    * returns only this user's {@link Kluch}s, otherwise it includes all users they follow too.
    * Returned Kluchs are sorted by timestamp in ascending order.
-   * @param username
-   * @param timestamp
-   * @param onlyForUser
-   * @param direction specifies whether you want to retrieve kluchs "after" or "before" timestamp
-   * @return <code>Feed</code> of <code>Kluchs</code>
-   * @throws IllegalArgumentException if either username (null or empty) or timestamp (less than zero) are invalid
+   * @param username name of the user for which we want to construct the feed
+   * @param timestamp unix milliseconds before (or after) which you want to construct the feed
+   * @param onlyForUser flag which specifies whether Kluchs in the feed should only be for a given user (true) or for their followers too (false)
+   * @return <code>Feed</code> of <code>Kluchs</code> sorted in ascending order according to timestamp
+   * @throws InvalidTimestampException if timestamp is less than 0
+   * @throws UserDoesNotExistException if user with given <code>username</code> does not exist
+   * @throws NullOrEmptyException if <code>username</code> is null or empty
    */
-  public Feed constructFeedAfter(String username, long afterTimestamp, boolean onlyForUser) throws IllegalArgumentException {
+  public Feed constructFeedAfter(String username, long afterTimestamp, boolean onlyForUser) throws InvalidTimestampException, UserDoesNotExistException, NullOrEmptyException {
     validateTimestamp(afterTimestamp);
     User user = getUser(username);
     List<String> authors = getListOfAuthors(user, onlyForUser);
@@ -121,12 +126,14 @@ public class FeedConstructor {
   
   /**
    * Checks if there exist Kluchs posted after (later) given timestamp (in epoch millis).
-   * @param username
+   * @param username name of the user for which we want to poll the feed
    * @param afterTimestamp returned Kluchs were posted after this epoch millis value
    * @return true if there are Kluchs posted after given timestamp (in epoch millis)
-   * @throws IllegalArgumentException if username is null, empty or user with given name doesn't exist
+   * @throws InvalidTimestampException if timestamp is less than 0
+   * @throws UserDoesNotExistException if user with given <code>username</code> does not exist
+   * @throws NullOrEmptyException if <code>username</code> is null or empty
    */
-  public boolean existsFeedAfter(String username, long afterTimestamp, boolean onlyForUser) throws IllegalArgumentException {
+  public boolean existsFeedAfter(String username, long afterTimestamp, boolean onlyForUser) throws InvalidTimestampException, UserDoesNotExistException, NullOrEmptyException {
     validateTimestamp(afterTimestamp);
     User user = getUser(username);
     List<String> authors = getListOfAuthors(user, onlyForUser);
@@ -137,15 +144,16 @@ public class FeedConstructor {
   
   /**
    * Returns a {@link Feed} of {@link Kluch}s containing this hashtag. 
-   * This method returns a finite (currently 30) number of Kluchs, all posted before (earlier than)
+   * This method returns a finite (currently up to 30) number of Kluchs, all posted before (earlier than)
    * given timestamp (millis unix time).
    * Returned Kluchs are sorted by timestamp in descending order.
    * @param hashtagText does not have to contain pound character as the first character (but it can)
    * @param timestamp
    * @return <code>Feed</code> of <code>Kluchs</code>
-   * @throws IllegalArgumentException if hashtagText is null, empty or given hashtag doesn't exist or timestamp is less than 0
+   * @throws InvalidTimestampException if timestamp is less than 0
+   * @throws NullOrEmptyException if <code>hashtagText</code> is null or empty
    */
-  public Feed constructHashtagFeed(String hashtagText, long timestamp) throws IllegalArgumentException {
+  public Feed constructHashtagFeed(String hashtagText, long timestamp) throws UserDoesNotExistException, NullOrEmptyException {
     validateTimestamp(timestamp);
     Hashtag hashtag = getHashtag(hashtagText);
     Feed feed = new Feed();
@@ -161,15 +169,16 @@ public class FeedConstructor {
    * Validates username and checks if user exists. If it does, returns the User.
    * @param username
    * @return
-   * @throws IllegalArgumentException if username is null, empty or user with given name doesn't exist
+   * @throws NullOrEmptyException if <code>username</code> is null or empty
+   * @throws UserDoesNotExistException if username with given <code>username</code> doesn't exist
    */
-  private User getUser(String username) throws IllegalArgumentException {
+  private User getUser(String username) throws UserDoesNotExistException, NullOrEmptyException {
     if(username == null || username.isEmpty()) {
-      throw new IllegalArgumentException("Username cannot be null or empty for feed construction.");
+      throw new NullOrEmptyException("Username");
     }
     User user = userDao.findOne(username);
     if(user == null) {
-      throw new IllegalArgumentException("There is no user named " + username);
+      throw new UserDoesNotExistException("There is no user named " + username);
     }
     return user;
   }
@@ -178,11 +187,11 @@ public class FeedConstructor {
    * Checks if given hashtagText is null or empty, and attempts to get a {@link Hashtag} with given text.
    * @param hashtagText hashtagText with or without pound character as the first character
    * @return
-   * @throws IllegalArgumentException if hashtagText is null, empty or this hashtag does not exist
+   * @throws NullOrEmptyException if <code>hashtagText</code> is null or empty
    */
-  private Hashtag getHashtag(String hashtagText) throws IllegalArgumentException {
+  private Hashtag getHashtag(String hashtagText) throws NullOrEmptyException {
     if(hashtagText == null || hashtagText.isEmpty()) {
-      throw new IllegalArgumentException("Hashtag cannot be null or empty for feed construction.");
+      throw new NullOrEmptyException("Hashtag");
     }
     boolean hasPoundCharacter = hashtagText.startsWith("#");
     if(!hasPoundCharacter) {
@@ -194,11 +203,11 @@ public class FeedConstructor {
   /**
    * Validates timestamp value.
    * @param timestamp
-   * @throws IllegalArgumentException if timestamp is negative
+   * @throws InvalidTimestampException if <code>timestamp</code> is negative
    */
-  private void validateTimestamp(long timestamp) throws IllegalArgumentException {
+  private void validateTimestamp(long timestamp) throws InvalidTimestampException {
     if(timestamp < 0) {
-      throw new IllegalArgumentException("Timestamp cannot be negative.");
+      throw new InvalidTimestampException();
     }
   }
   
@@ -216,6 +225,10 @@ public class FeedConstructor {
     authors.add(user.getUsername());
     authors.addAll(user.getFollowing());
     return authors;
+  }
+  
+  public enum FeedDirection {
+  	AFTER, BEFORE;
   }
   
 }

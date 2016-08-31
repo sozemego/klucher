@@ -30,5 +30,11 @@ public class InteractionResult {
   public int getSecondsUntilInteraction() {
     return secondsUntilInteraction;
   }
+  
+	@Override
+	public String toString() {
+		return "[limit: " + limit + ", remaining: " + remaining + ", secondsUntilInteraction: " + secondsUntilInteraction
+				+ ", interaction: " + interaction + "]";
+	}
 
 }

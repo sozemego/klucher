@@ -15,6 +15,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.soze.common.exceptions.InvalidLengthException;
+import com.soze.common.exceptions.KluchPreviouslyPostedException;
+import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
 
@@ -32,7 +35,7 @@ public class KluchServiceTest {
   private KluchService kluchService;
  
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = InvalidLengthException.class)
   public void testTooLongKluch() throws Exception {
     kluchService.post("author", generateString(251));
   }
@@ -49,27 +52,27 @@ public class KluchServiceTest {
     assertThat(firstKluch.getText(), equalTo(kluchText));
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullOrEmptyException.class)
   public void testEmptyKluch() throws Exception {
     kluchService.post("author", "");
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullOrEmptyException.class)
   public void testNullKluch() throws Exception {
     kluchService.post("author", null);
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullOrEmptyException.class)
   public void testNullAuthor() throws Exception {
     kluchService.post(null, generateString(50));
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullOrEmptyException.class)
   public void testEmptyAuthor() throws Exception {
     kluchService.post("", generateString(50));
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = KluchPreviouslyPostedException.class)
   public void testAlreadyPosted() throws Exception {
     String kluchText = generateString(50);
     kluchService.post("author", kluchText);

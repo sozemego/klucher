@@ -32,7 +32,6 @@ public class UserPageController {
     }
     boolean loggedIn = authentication != null && !(authentication instanceof AnonymousAuthenticationToken);
     if (loggedIn) {
-      @SuppressWarnings("null")
       String authorizedUsername = authentication.getName();
       if(authorizedUsername.equals(username)) {
         return "redirect:/dashboard";

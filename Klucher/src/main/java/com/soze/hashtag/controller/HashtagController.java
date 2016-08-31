@@ -26,12 +26,15 @@ public class HashtagController {
 
   @RequestMapping(value = "/hashtag/{hashtag}", method = RequestMethod.GET)
   public String getHashtag(@PathVariable String hashtag, Authentication authentication, Model model) {
+  	
     model.addAttribute("hashtag", hashtag.toLowerCase());
+    
     boolean loggedIn = authentication != null && !(authentication instanceof AnonymousAuthenticationToken);
     model.addAttribute("loggedIn", loggedIn);
     if(loggedIn) {
       model.addAttribute("username", authentication.getName());
     }
+    
     return "hashtag";
   }
   

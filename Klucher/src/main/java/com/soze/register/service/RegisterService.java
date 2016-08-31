@@ -6,8 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
+import com.soze.common.exceptions.ContainsWhiteSpaceException;
+import com.soze.common.exceptions.InvalidLengthException;
+import com.soze.common.exceptions.NullOrEmptyException;
+import com.soze.common.exceptions.UserAlreadyExistsException;
+import com.soze.common.exceptions.InvalidLengthException.Adjective;
 import com.soze.register.model.RegisterForm;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
@@ -32,59 +36,53 @@ public class RegisterService {
 
   /**
    * Attempts to register user using given register form.
-   * 
    * @param form
-   * @throws IllegalArgumentException if username is null, too long or empty, or if password is null, empty
-   *    or too short/long or if username is not available
+   * @throws UserAlreadyExistsException if user already exists
+   * @throws NullOrEmptyException if username or password are null or empty
+   * @throws InvalidLengthException if username or password have invalid lengths
+   * @throws ContainsWhiteSpaceException if user or password contain white spaces
    */
-  public User register(RegisterForm form) throws IllegalArgumentException {
+  public User register(RegisterForm form)
+  		throws UserAlreadyExistsException, NullOrEmptyException, InvalidLengthException, ContainsWhiteSpaceException {
     log.info("Attempting to register user with username [{}].", form.getUsername());
     validateInput(form);
     if (!isAvailable(form.getUsername())) {
-      throw new IllegalArgumentException("User with given username already exists.");
+      throw new UserAlreadyExistsException(form.getUsername());
     }
     User user = registerConverter.convertRegisterForm(form);
     return userDao.save(user);
   }
 
-  private void validateInput(RegisterForm form) throws IllegalArgumentException {
+  private void validateInput(RegisterForm form) throws NullOrEmptyException, InvalidLengthException, ContainsWhiteSpaceException {
     validateUsername(form.getUsername());
     validatePassword(form.getPassword());
   }
 
-  private void validateUsername(String username) throws IllegalArgumentException {
-    if (!StringUtils.hasText(username)) {
-      throw new IllegalArgumentException(
-          "Username cannot be null, empty or consist of only whitespace.");
-    }
-    if (username.length() > MAX_USERNAME_LENGTH) {
-      throw new IllegalArgumentException(
-          "Username should not be longer than " + MAX_USERNAME_LENGTH + " characters.");
-    }
-    if(hasWhiteSpace(username)) {
-      throw new IllegalArgumentException(
-          "Username cannot contain white space characters.");
-    }
-  }
+	private void validateUsername(String username)
+			throws NullOrEmptyException, InvalidLengthException, ContainsWhiteSpaceException {
+		if (username == null || username.isEmpty()) {
+			throw new NullOrEmptyException("Username");
+		}
+		if (username.length() > MAX_USERNAME_LENGTH) {
+			throw new InvalidLengthException("Username", Adjective.LONG);
+		}
+		if (hasWhiteSpace(username)) {
+			throw new ContainsWhiteSpaceException("Username");
+		}
+	}
 
-  private void validatePassword(String password) throws IllegalArgumentException {
-    if (!StringUtils.hasText(password)) {
-      throw new IllegalArgumentException(
-          "Password cannot be null, empty or consist of only whitespace.");
-    }
-    if (password.length() > MAX_PASSWORD_LENGTH) {
-      throw new IllegalArgumentException(
-          "Password should not be longer than " + MAX_PASSWORD_LENGTH + " characters.");
-    }
-    if(password.length() < MIN_PASSWORD_LENGTH) {
-      throw new IllegalArgumentException(
-          "Password should not be shorter than " + MIN_PASSWORD_LENGTH + " characters.");
-    }
-    if(hasWhiteSpace(password)) {
-      throw new IllegalArgumentException(
-          "Username cannot contain white space characters.");
-    }
-  }
+	private void validatePassword(String password)
+			throws NullOrEmptyException, InvalidLengthException, ContainsWhiteSpaceException {
+		if (password.length() > MAX_PASSWORD_LENGTH) {
+			throw new InvalidLengthException("Password", Adjective.LONG);
+		}
+		if (password.length() < MIN_PASSWORD_LENGTH) {
+			throw new InvalidLengthException("password", Adjective.SHORT);
+		}
+		if (hasWhiteSpace(password)) {
+			throw new ContainsWhiteSpaceException("Password");
+		}
+	}
 
   public boolean isAvailable(String username) {
     return !userDao.exists(username);

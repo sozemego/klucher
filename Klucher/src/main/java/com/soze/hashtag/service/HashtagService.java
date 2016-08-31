@@ -17,7 +17,10 @@ import com.soze.kluch.model.Kluch;
 
 /**
  * A service which extracts {@link Hashtag}s from
- * {@link Kluch}s and adds these <code>Hashtags</code> to <code>Kluch</code> entity.
+ * {@link Kluch}s. 
+ * Hashtags are phrases or numbers (they can contain characters a-Z, digits 0-9 and underscore).
+ * Hashtags have to be preceded by a space or beginning of input.
+ * Hashtags are case insensitive (e.g. #love is the same as #lOvE).
  * @author sozek
  *
  */
@@ -34,7 +37,7 @@ public class HashtagService {
   }
   
   /**
-   * Extracts hashtags from a Kluch and saves them in it.
+   * Extracts hashtags from a Kluch. This kluch is saved in each of the extracted hashtags.
    * @param kluch
    * @return extracted <code>Hashtags</code> from this <code>Kluch</code>
    */
@@ -78,8 +81,7 @@ public class HashtagService {
   }
   
   /**
-   * Assembles a single {@link Hashtag} from text and saves
-   * <code>Hashtag</code> entity in a <code>Kluch</code>.
+   * Assembles a single {@link Hashtag} from text.
    * @param hashtagText
    * @param kluch
    * @return
@@ -90,7 +92,6 @@ public class HashtagService {
       hashtag = new Hashtag(hashtagText);
     }
     hashtag.getKluchs().add(kluch);
-    //kluch.getHashtags().add(hashtag);
     return hashtag;
   }
  

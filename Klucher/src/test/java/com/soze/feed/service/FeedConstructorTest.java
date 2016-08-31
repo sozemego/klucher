@@ -30,7 +30,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.TestWithMockUsers;
+import com.soze.common.exceptions.NullOrEmptyException;
+import com.soze.common.exceptions.UserDoesNotExistException;
 import com.soze.feed.model.Feed;
+import com.soze.feed.service.FeedConstructor.FeedDirection;
 import com.soze.hashtag.dao.HashtagDao;
 import com.soze.hashtag.model.Hashtag;
 import com.soze.kluch.dao.KluchDao;
@@ -65,12 +68,12 @@ public class FeedConstructorTest extends TestWithMockUsers {
     MockitoAnnotations.initMocks(this);
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = UserDoesNotExistException.class)
   public void testInvalidUser() {
     constructor.constructFeed("doesNotExist", 0, false);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullOrEmptyException.class)
   public void testInvalidUserEmptyName() {
     constructor.constructFeed("", 0, false);
   }
@@ -133,7 +136,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(new Timestamp(Long.MAX_VALUE)),
         eq(before)))
     .thenReturn(new PageImpl<Kluch>(Arrays.asList(new Kluch())));
-    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false, "before");
+    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false, FeedDirection.BEFORE);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs, notNullValue());
     assertThat(kluchs.getContent().size(), equalTo(1));
@@ -149,7 +152,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(new Timestamp(Long.MAX_VALUE)),
         eq(before)))
     .thenReturn(new PageImpl<Kluch>(getRandomKluchs(250)));
-    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false, "before");
+    Feed feed = constructor.constructFeed("test", Long.MAX_VALUE, false, FeedDirection.BEFORE);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs, notNullValue());
     assertThat(kluchs.getNumber(), equalTo(0));
@@ -164,7 +167,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(new Timestamp(0)),
         eq(after)))
     .thenReturn(new PageImpl<Kluch>(Arrays.asList(new Kluch())));
-    Feed feed = constructor.constructFeed("test", 0, false, "after");
+    Feed feed = constructor.constructFeed("test", 0, false, FeedDirection.AFTER);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs, notNullValue());
     assertThat(kluchs.getContent().size(), equalTo(1));
@@ -180,19 +183,19 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(new Timestamp(0)),
         eq(after)))
     .thenReturn(new PageImpl<Kluch>(getRandomKluchs(250)));
-    Feed feed = constructor.constructFeed("test", 0, false, "after");
+    Feed feed = constructor.constructFeed("test", 0, false, FeedDirection.AFTER);
     Page<Kluch> kluchs = feed.getKluchs();
     assertThat(kluchs, notNullValue());
     assertThat(kluchs.getNumber(), equalTo(0));
     assertThat(kluchs.getTotalElements(), equalTo(250L));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullOrEmptyException.class)
   public void testInvalidUsername() {
     constructor.constructFeed(null, 0, false);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = UserDoesNotExistException.class)
   public void testNonExistentUsername() {
     constructor.constructFeed("iDontExist", 0, false);
   }

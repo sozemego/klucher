@@ -24,7 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.NestedServletException;
 
 import com.soze.TestWithMockUsers;
-import com.soze.common.exceptions.HttpException;
+import com.soze.common.exceptions.NotLoggedInException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -51,7 +51,7 @@ public class FeedControllerTest extends TestWithMockUsers {
           .contentType(MediaType.APPLICATION_FORM_URLENCODED)
           .param("timestamp", "0"));
     } catch (NestedServletException e) {
-      assertThat(e.getCause().getClass(), equalTo(HttpException.class));
+      assertThat(e.getCause().getClass(), equalTo(NotLoggedInException.class));
     }
   }
   

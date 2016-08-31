@@ -5,7 +5,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,7 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
 
-import com.soze.common.exceptions.HttpException;
+import com.soze.common.exceptions.CannotLoginException;
 
 @Service
 public class LoginService {
@@ -32,21 +31,20 @@ public class LoginService {
    * @param username
    * @param password
    * @param request
-   * @throws HttpException if authentication fails
+   * @throws CannotLoginException if authentication fails
    */
-  public void manualLogin(String username, String password, HttpServletRequest request) throws HttpException {
+  public void manualLogin(String username, String password, HttpServletRequest request) throws CannotLoginException {
     UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
     token.setDetails(new WebAuthenticationDetails(request));
     Authentication authentication = null;
+    
     try {
       authentication = authenticationProvider.authenticate(token);
       SecurityContextHolder.getContext().setAuthentication(authentication);
     } catch (AuthenticationException e) {
-      //Log this exception, but rethrow a different one without including it
-      //so the specifics aren't accidentaly presented to the user
-      log.info("Could not login user [{}]. ", username, e);
-      throw new HttpException("Could not login user [" + username + "].", HttpStatus.UNAUTHORIZED);
+      throw new CannotLoginException("Could not log in " + username, e);
     }
+    
     log.info("Logging in with [username: {}]", authentication.getPrincipal());
   }
   

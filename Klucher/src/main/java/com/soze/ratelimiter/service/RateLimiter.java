@@ -45,27 +45,40 @@ public class RateLimiter {
   }
  
   /**
-   * Method used to rate-limit users. A "window" of previous interactions
+   * Method used to rate-limit users. A "window" of time for previous interactions
    * is 60 seconds wide. The returned object contains information
    * to tell users how many requests they are allowed to make, how many are remaining
    * and if they exceeded their limit, it tells them when (in seconds) will they
    * be able to interact again.
-   * @param username
-   * @param endpoint
+   * @param username <code>username</code> of user that is trying to interact. Does not have to be
+   *        an actual username (can be IP)
+   * @param endpoint endpoint (mapping) user is trying to interact with
    * @param method
-   * @return
+   * @return the result
    */
   public InteractionResult interact(String username, String endpoint, HttpMethod method) {
+  	
     long currentTime = Instant.now().getEpochSecond();
     Interaction interaction = save(username, endpoint, method, currentTime);
-    Limit limit = getLimit(endpoint, method);
+     
+    int limit = getLimit(endpoint, method);
+    int requestLimit = limit;
     int requestsSince = requestsSince(interaction, currentTime);
-    int requestLimit = limit.getLimit();
     int remaining = Math.max(0, (requestLimit - requestsSince));
     int secondsUntilRequest = requestsSince < requestLimit ? 0 : secondsUntilRequest(interaction, requestLimit, currentTime);
+    
     return new InteractionResult(interaction, requestLimit, remaining, secondsUntilRequest);
   }
   
+  /**
+   * Saves this interaction.
+   * @param username <code>username</code> of user that is trying to interact. Does not have to be
+   *        an actual username (can be IP)
+   * @param endpoint endpoint (mapping) user is trying to interact with
+   * @param method
+   * @param currentTime time of the interaction
+   * @return
+   */
   private Interaction save(String username, String endpoint, HttpMethod method, long currentTime) {
     Interaction interaction = new Interaction(username, endpoint, method);
     LinkedList<Long> pastRequests = requests.get(interaction);
@@ -77,13 +90,16 @@ public class RateLimiter {
     return interaction;
   }
 
-  private Limit getLimit(String endpoint, HttpMethod method) {
-    Limit limit = limits.get(endpoint);
-    if(limit == null || !limit.getMethod().equals(method)) {
-      limit = new Limit(method, defaultLimits.get(method));
-      limits.put(endpoint, limit);
-    }    
-    return limit;
+  private int getLimit(String endpoint, HttpMethod method) {
+  	Limit limit = limits.get(endpoint);
+  	if(limit == null) {
+  		limit = addLimit(endpoint, method, defaultLimits.get(method));
+  	}
+  	Integer intLimit = limit.getLimitFor(method);
+  	if(intLimit == null) {
+  		limit = addLimit(endpoint, method, defaultLimits.get(method));
+  	}
+  	return limit.getLimitFor(method);
   }
   
   private int requestsSince(Interaction interaction, long currentTime) {
@@ -127,6 +143,11 @@ public class RateLimiter {
     defaultLimits.put(HttpMethod.GET, DEFAULT_REQUEST_LIMIT);
     defaultLimits.put(HttpMethod.POST, DEFAULT_REQUEST_LIMIT);
     defaultLimits.put(HttpMethod.DELETE, DEFAULT_REQUEST_LIMIT);
+    defaultLimits.put(HttpMethod.PUT, DEFAULT_REQUEST_LIMIT);
+    defaultLimits.put(HttpMethod.HEAD, DEFAULT_REQUEST_LIMIT);
+    defaultLimits.put(HttpMethod.TRACE, DEFAULT_REQUEST_LIMIT);
+    defaultLimits.put(HttpMethod.PATCH, DEFAULT_REQUEST_LIMIT);
+    defaultLimits.put(HttpMethod.OPTIONS, DEFAULT_REQUEST_LIMIT);
   }
   
   private void loadLimits(List<String> limits) {
@@ -142,8 +163,17 @@ public class RateLimiter {
     String perMinute = tokens[2].trim();
     HttpMethod httpMethod = HttpMethod.resolve(method.toUpperCase());
     Integer perMinuteInteger = Integer.parseInt(perMinute);
-    Limit limitModel = new Limit(httpMethod, perMinuteInteger);
-    limits.put(endpoint, limitModel);
+    addLimit(endpoint, httpMethod, perMinuteInteger);
   } 
+  
+  private Limit addLimit(String endpoint, HttpMethod method, int limit) {
+  	Limit limitModel = limits.get(endpoint);
+  	if(limitModel == null) {
+    	limitModel = new Limit(); 	
+    }
+    limitModel.addLimit(method, limit);
+    limits.put(endpoint, limitModel);
+    return limitModel;
+  }
   
 }

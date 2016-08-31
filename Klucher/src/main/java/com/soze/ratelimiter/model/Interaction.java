@@ -62,5 +62,9 @@ public class Interaction {
     return true;
   }
 
+  @Override
+  public String toString() {
+  	return "[username : " + username + ", endpoint: " + endpoint + ", method: " + method + "]";
+  }
   
 }

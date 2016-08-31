@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.soze.common.exceptions.HttpException;
+import com.soze.common.exceptions.CannotLoginException;
 import com.soze.login.service.LoginService;
 import com.soze.register.model.RegisterForm;
 import com.soze.register.service.RegisterService;
@@ -64,7 +64,7 @@ public class RegisterController {
   }
 
   private void login(String username, String password, HttpServletRequest request)
-      throws HttpException {
+      throws CannotLoginException {
     loginService.manualLogin(username, password, request);
   }
 

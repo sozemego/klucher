@@ -20,13 +20,17 @@ import com.soze.utils.FileUtils;
 
 public class RateLimiterTest {
 
-  private RateLimiter rateLimiter;
+  private static final int DEFAULT_LIMIT = 60;
+	private RateLimiter rateLimiter;
   
   @Before
   public void setUp() throws Exception {
     FileUtils utils = mock(FileUtils.class);
     when(utils.readLinesFromClasspathFile(anyString())).
-      thenReturn(Arrays.asList("/register, post, 10", "/login, post, 5"));
+      thenReturn(Arrays.asList(
+      		"/register, post, 10",
+      		"/register, get, 30",
+      		"/login, post, 5"));
     rateLimiter = new RateLimiter(utils);
     rateLimiter.init();
   }
@@ -50,7 +54,7 @@ public class RateLimiterTest {
     assertThat(result.getInteraction().getUsername(), equalTo(username));
     assertThat(result.getInteraction().getEndpoint(), equalTo("/abc"));
     assertThat(result.getInteraction().getMethod(), equalTo(HttpMethod.GET));
-    assertThat(result.getLimit(), equalTo(60));
+    assertThat(result.getLimit(), equalTo(DEFAULT_LIMIT));
     assertThat(result.getRemaining(), equalTo(59));
     assertThat(result.getSecondsUntilInteraction(), equalTo(0));
   }
@@ -71,7 +75,6 @@ public class RateLimiterTest {
     assertThat(result.getSecondsUntilInteraction(), equalTo(0));
   }
   
-  @SuppressWarnings("null")
   @Test
   public void testTooManyInteractions() {
     String username = "user";
@@ -99,8 +102,8 @@ public class RateLimiterTest {
     assertThat(result.getInteraction().getUsername(), equalTo(username));
     assertThat(result.getInteraction().getEndpoint(), equalTo("/register"));
     assertThat(result.getInteraction().getMethod(), equalTo(HttpMethod.GET));
-    assertThat(result.getLimit(), equalTo(60));
-    assertThat(result.getRemaining(), equalTo(59));
+    assertThat(result.getLimit(), equalTo(30));
+    assertThat(result.getRemaining(), equalTo(29));
     assertThat(result.getSecondsUntilInteraction(), equalTo(0));
   }
   
@@ -131,13 +134,40 @@ public class RateLimiterTest {
     for(int i = 0; i < timesToInteract; i++) {
       rateLimiter.interact(username, "/register", HttpMethod.POST);
     }
-    InteractionResult result = rateLimiter.interact(username, "/register", HttpMethod.GET);;
+    InteractionResult result = rateLimiter.interact(username, "/register", HttpMethod.PUT);;
+    assertThat(result.getInteraction().getUsername(), equalTo(username));
+    assertThat(result.getInteraction().getEndpoint(), equalTo("/register"));
+    assertThat(result.getInteraction().getMethod(), equalTo(HttpMethod.PUT));
+    assertThat(result.getLimit(), equalTo(DEFAULT_LIMIT));
+    assertThat(result.getRemaining(), equalTo(59));
+    assertThat(result.getSecondsUntilInteraction(), equalTo(0));
+  }
+  
+  @Test
+  public void testSameEndpointDifferentMethodBothInFile() {
+  	String username = "user";
+    int timesToInteract = 5;
+    InteractionResult result = null;
+    for(int i = 0; i < timesToInteract; i++) {
+    	result = rateLimiter.interact(username, "/register", HttpMethod.POST);
+    }
+    assertThat(result.getInteraction().getUsername(), equalTo(username));
+    assertThat(result.getInteraction().getEndpoint(), equalTo("/register"));
+    assertThat(result.getInteraction().getMethod(), equalTo(HttpMethod.POST));
+    assertThat(result.getLimit(), equalTo(10));
+    assertThat(result.getRemaining(), equalTo(5));
+    assertThat(result.getSecondsUntilInteraction(), equalTo(0));
+    
+    for(int i = 0; i < timesToInteract; i++) {
+    	result = rateLimiter.interact(username, "/register", HttpMethod.GET);
+    }
     assertThat(result.getInteraction().getUsername(), equalTo(username));
     assertThat(result.getInteraction().getEndpoint(), equalTo("/register"));
     assertThat(result.getInteraction().getMethod(), equalTo(HttpMethod.GET));
-    assertThat(result.getLimit(), equalTo(60));
-    assertThat(result.getRemaining(), equalTo(59));
+    assertThat(result.getLimit(), equalTo(30));
+    assertThat(result.getRemaining(), equalTo(25));
     assertThat(result.getSecondsUntilInteraction(), equalTo(0));
+    
   }
   
   @Test

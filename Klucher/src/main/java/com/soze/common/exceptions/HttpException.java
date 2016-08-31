@@ -14,7 +14,7 @@ import com.soze.common.errorresponse.ErrorResponse;
  *
  */
 @SuppressWarnings("serial")
-public class HttpException extends Exception {
+class HttpException extends Exception {
 
   private final HttpStatus status;
 

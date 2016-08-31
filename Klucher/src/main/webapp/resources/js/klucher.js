@@ -217,7 +217,7 @@ function ajaxPostKluch() {
 		url: "/kluch",
 		data: {"kluchText" : kluchText },
 		error: function(xhr, status, error) {
-			displayAlert(xhr.responseText);
+			displayAlert(xhr.responseJSON.message);
 			setGettingFeed(0);
 		},
 		success: function(data, status, xhr) {
@@ -258,7 +258,7 @@ function getFeed(direction, timestamp, append) {
 			"direction" : direction
 		},
 		error: function(xhr, status, error) {
-			displayAlert(xhr.responseText);
+			displayAlert(xhr.responseJSON.message);
 			setGettingFeed(0);
 		},
 		success: function(data, status, xhr) {
@@ -452,7 +452,7 @@ function pollFeed() {
 		},
 		error: function(xhr, status, error) {
 			setTimeout(pollFeed, 5000);
-			displayAlert(xhr.responseText);
+			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
 			setTimeout(pollFeed, 5000);
@@ -606,7 +606,7 @@ function followUserAjax() {
 			"follow" : username
 		},
 		error: function(xhr, status, error) {
-			displayAlert(xhr.responseText);
+			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
 			createUnfollowButton();
@@ -649,7 +649,7 @@ function unfollowUserAjax() {
 			"follow" : username
 		},
 		error: function(xhr, status, error) {
-			displayAlert(xhr.responseText);
+			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
 			createFollowButton();
@@ -776,7 +776,7 @@ function getHashtagFeed(timestamp, append) {
 		},
 		error: function(xhr, status, error) {
 			setGettingFeed(0);
-			displayAlert(xhr.responseText);
+			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
 			addKluchsToFeed(data.kluchs.content, append);

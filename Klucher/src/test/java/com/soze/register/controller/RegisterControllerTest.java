@@ -21,8 +21,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.util.NestedServletException;
 
 import com.soze.TestWithRealUsers;
+import com.soze.common.exceptions.InvalidLengthException;
+import com.soze.common.exceptions.NullOrEmptyException;
+import com.soze.common.exceptions.UserAlreadyExistsException;
 import com.soze.user.dao.UserDao;
 
 @RunWith(SpringRunner.class)
@@ -57,73 +61,97 @@ public class RegisterControllerTest extends TestWithRealUsers {
   @Test
   public void testEmptyFields() throws Exception {
     assertThat(userDao.count(), equalTo(0L));
-    mvc.perform(MockMvcRequestBuilders.post("/register")
-        .accept(MediaType.APPLICATION_FORM_URLENCODED)
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .param("username", generateString(0))
-        .param("password", generateString(0)))
-    .andDo(print())
-    .andExpect(status().is(400));
+    try {
+    	mvc.perform(MockMvcRequestBuilders.post("/register")
+    			.accept(MediaType.APPLICATION_FORM_URLENCODED)
+    			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+    			.param("username", generateString(0))
+    			.param("password", generateString(0)))
+    	.andDo(print())
+    	.andExpect(status().is(400));
+    } catch (NestedServletException e) {
+      assertThat(e.getCause().getClass(), equalTo(NullOrEmptyException.class));
+    }
   }
   
   @Test
   public void testShortFields() throws Exception {
     assertThat(userDao.count(), equalTo(0L));
-    mvc.perform(MockMvcRequestBuilders.post("/register")
-        .accept(MediaType.APPLICATION_FORM_URLENCODED)
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .param("username", generateString(3))
-        .param("password", generateString(3)))
-    .andDo(print())
-    .andExpect(status().is(400));
+    try {
+    	mvc.perform(MockMvcRequestBuilders.post("/register")
+    			.accept(MediaType.APPLICATION_FORM_URLENCODED)
+    			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+    			.param("username", generateString(3))
+    			.param("password", generateString(3)))
+    	.andDo(print())
+    	.andExpect(status().is(400));
+    } catch (NestedServletException e) {
+      assertThat(e.getCause().getClass(), equalTo(InvalidLengthException.class));
+    }
   }
   
   @Test
   public void testValidUsernameInvalidPassword() throws Exception {
     assertThat(userDao.count(), equalTo(0L));
-    mvc.perform(MockMvcRequestBuilders.post("/register")
-        .accept(MediaType.APPLICATION_FORM_URLENCODED)
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .param("username", generateString(4))
-        .param("password", generateString(3)))
-    .andDo(print())
-    .andExpect(status().is(400));
+    try {
+    	mvc.perform(MockMvcRequestBuilders.post("/register")
+    			.accept(MediaType.APPLICATION_FORM_URLENCODED)
+        	.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        	.param("username", generateString(4))
+        	.param("password", generateString(3)))
+    	.andDo(print())
+    	.andExpect(status().is(400));
+    } catch (NestedServletException e) {
+      assertThat(e.getCause().getClass(), equalTo(InvalidLengthException.class));
+    }
   }
   
   @Test
   public void testInvalidUsernameValidPassword() throws Exception {
-    assertThat(userDao.count(), equalTo(0L));
-    mvc.perform(MockMvcRequestBuilders.post("/register")
-        .accept(MediaType.APPLICATION_FORM_URLENCODED)
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .param("username", generateString(0))
-        .param("password", generateString(6)))
-    .andDo(print())
-    .andExpect(status().is(400));
+  	assertThat(userDao.count(), equalTo(0L));
+  	try {
+  		mvc.perform(MockMvcRequestBuilders.post("/register")
+  				.accept(MediaType.APPLICATION_FORM_URLENCODED)
+  				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+  				.param("username", generateString(0))
+  				.param("password", generateString(6)))
+  		.andDo(print())
+  		.andExpect(status().is(400));
+  	} catch (NestedServletException e) {
+      assertThat(e.getCause().getClass(), equalTo(NullOrEmptyException.class));
+    }
   }
   
   @Test
   public void testTooLongFields() throws Exception {
     assertThat(userDao.count(), equalTo(0L));
-    mvc.perform(MockMvcRequestBuilders.post("/register")
-        .accept(MediaType.APPLICATION_FORM_URLENCODED)
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .param("username", generateString(65))
-        .param("password", generateString(65)))
-    .andDo(print())
-    .andExpect(status().is(400));
+    try {
+    	mvc.perform(MockMvcRequestBuilders.post("/register")
+    			.accept(MediaType.APPLICATION_FORM_URLENCODED)
+    			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+    			.param("username", generateString(65))
+    			.param("password", generateString(65)))
+    	.andDo(print())
+    	.andExpect(status().is(400));
+    } catch (NestedServletException e) {
+      assertThat(e.getCause().getClass(), equalTo(InvalidLengthException.class));
+    }
   }
   
   @Test
   public void testWayTooLongFields() throws Exception {
-    assertThat(userDao.count(), equalTo(0L));
-    mvc.perform(MockMvcRequestBuilders.post("/register")
-        .accept(MediaType.APPLICATION_FORM_URLENCODED)
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .param("username", generateString(6500))
-        .param("password", generateString(6500)))
-    .andDo(print())
-    .andExpect(status().is(400));
+  	try {
+  		assertThat(userDao.count(), equalTo(0L));
+  		mvc.perform(MockMvcRequestBuilders.post("/register")
+  				.accept(MediaType.APPLICATION_FORM_URLENCODED)
+  				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+  				.param("username", generateString(6500))
+  				.param("password", generateString(6500)))
+    	.andDo(print())
+    	.andExpect(status().is(400));
+  	} catch (NestedServletException e) {
+      assertThat(e.getCause().getClass(), equalTo(InvalidLengthException.class));
+    }
   }
   
   @Test
@@ -147,13 +175,17 @@ public class RegisterControllerTest extends TestWithRealUsers {
     String password = "password";
     addUser(username, password);
     assertThat(userDao.count(), equalTo(1L));
-    mvc.perform(MockMvcRequestBuilders.post("/register")
-        .accept(MediaType.APPLICATION_FORM_URLENCODED)
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .param("username", username)
-        .param("password", password))
-    .andDo(print())
-    .andExpect(status().is(400));
+    try {
+    	mvc.perform(MockMvcRequestBuilders.post("/register")
+        	.accept(MediaType.APPLICATION_FORM_URLENCODED)
+        	.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        	.param("username", username)
+        	.param("password", password))
+    	.andDo(print())
+    	.andExpect(status().is(400));
+  	} catch (NestedServletException e) {
+      assertThat(e.getCause().getClass(), equalTo(UserAlreadyExistsException.class));
+    }
     assertThat(userDao.count(), equalTo(1l));
   }
   

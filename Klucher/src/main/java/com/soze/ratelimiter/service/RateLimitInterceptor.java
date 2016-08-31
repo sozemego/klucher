@@ -7,11 +7,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import com.soze.common.exceptions.HttpException;
+import com.soze.common.exceptions.TooManyRequestsException;
 import com.soze.ratelimiter.model.InteractionResult;
 
 @Service
@@ -34,7 +33,7 @@ public class RateLimitInterceptor extends HandlerInterceptorAdapter {
     response.setHeader("X-Rate-Limit-Remaining", "" + result.getRemaining());
     response.setHeader("X-Rate-Limit-Reset", "" + result.getSecondsUntilInteraction());
     if(result.getSecondsUntilInteraction() > 0) {
-      throw new HttpException("Too many requests, please wait " + result.getSecondsUntilInteraction() + " seconds.", HttpStatus.TOO_MANY_REQUESTS);
+      throw new TooManyRequestsException(result);
     }   
     return super.preHandle(request, response, handler);
   }

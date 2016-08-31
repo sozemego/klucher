@@ -10,7 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.TestWithMockUsers;
-import com.soze.common.exceptions.HttpException;
+import com.soze.common.exceptions.CannotLoginException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -21,7 +21,7 @@ public class LoginServiceTest extends TestWithMockUsers {
   @Autowired
   private LoginService loginService;
 
-  @Test(expected = HttpException.class)
+  @Test(expected = CannotLoginException.class)
   public void testUserDoesNotExist() throws Exception {
     loginService.manualLogin("invalid username", "invalid password", new MockHttpServletRequest());
   }
@@ -35,7 +35,7 @@ public class LoginServiceTest extends TestWithMockUsers {
         new MockHttpServletRequest());
   }
 
-  @Test(expected = HttpException.class)
+  @Test(expected = CannotLoginException.class)
   public void testUserExistsPasswordInvalid() throws Exception {
     String username = "username";
     String password = "password";

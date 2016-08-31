@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.soze.common.exceptions.InvalidLengthException;
+import com.soze.common.exceptions.KluchPreviouslyPostedException;
+import com.soze.common.exceptions.NullOrEmptyException;
+import com.soze.common.exceptions.InvalidLengthException.Adjective;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
 
@@ -40,10 +44,12 @@ public class KluchService {
    * Attempts to post a Kluch with given content for a user with given username.
    * @param username author of given Kluch, cannot be null or empty
    * @param kluchText Kluch content, cannot be null or empty
-   * @throws IllegalArgumentException if username is null or empty, or if kluch text is null, empty or too long
+   * @throws KluchPreviouslyPostedException if the last <code>kluchText</code> posted by this user is identical to this kluchText
+   * @throws NullOrEmptyException if either <code>username</code> or <code>kluchText</code> are null or empty
+   * @throws InvalidLengthException if <code>kluchText</code> is longer than allowed
    */
   @Transactional
-  public Kluch post(String username, String kluchText) throws IllegalArgumentException {
+  public Kluch post(String username, String kluchText) throws KluchPreviouslyPostedException, NullOrEmptyException, InvalidLengthException {
     validateInput(username, kluchText);
     checkAlreadyPosted(username, kluchText);
     Kluch kluch = kluchAssembler.assembleKluch(username, kluchText);
@@ -54,33 +60,32 @@ public class KluchService {
     return kluch;
   }
 
-  private void checkAlreadyPosted(String username, String kluchText) {
+  private void checkAlreadyPosted(String username, String kluchText) throws KluchPreviouslyPostedException {
     String pastKluch = pastKluchs.get(username);
-    if (kluchText != null && kluchText.equals(pastKluch)) {
-      throw new IllegalArgumentException("User's [" + username + "] last Kluch was identical.");
+    if (kluchText.equals(pastKluch)) {
+      throw new KluchPreviouslyPostedException(username);
     }
   }
   
-  private void validateInput(String username, String kluchText) throws IllegalArgumentException {
-    validateAuthor(username);
+  private void validateInput(String username, String kluchText) throws NullOrEmptyException {
+  	validateUsername(username);
     validateKluch(kluchText);
   }
   
-  private void validateAuthor(String author) {
-    if (author == null || author.isEmpty()) {
-      throw new IllegalArgumentException("Author name cannot be null or empty.");
+  private void validateUsername(String username) throws NullOrEmptyException {
+    if (username == null || username.isEmpty()) {
+      throw new NullOrEmptyException("Username");
     }
   }
   
-  private void validateKluch(String kluchText) {
+  private void validateKluch(String kluchText) throws NullOrEmptyException, InvalidLengthException {
     if (kluchText == null || kluchText.isEmpty()) {
-      throw new IllegalArgumentException("Kluch content cannot be null or empty.");
+      throw new NullOrEmptyException("Kluch content");
     } 
     if (kluchText.length() > KLUCH_MAX_LENGTH) {
-        throw new IllegalArgumentException("Kluch content is too long.");
+        throw new InvalidLengthException("Kluch", Adjective.LONG);
     }
   }
-
 
   private void saveLastKluch(String username, String kluchText) {
     pastKluchs.put(username, kluchText);

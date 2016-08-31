@@ -59,6 +59,10 @@ public class User implements UserDetails {
     this.username = username;
   }
 
+  /**
+   * Names of users that follow this user.
+   * @return
+   */
   public Set<String> getFollowers() {
     return followers;
   }
@@ -67,6 +71,10 @@ public class User implements UserDetails {
     this.followers = followers;
   }
 
+  /**
+   * Names of users this user follows.
+   * @return
+   */
   public Set<String> getFollowing() {
     return following;
   }
