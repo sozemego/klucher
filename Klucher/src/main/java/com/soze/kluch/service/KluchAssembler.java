@@ -11,7 +11,7 @@ import com.soze.hashtag.service.HashtagService;
 import com.soze.kluch.model.Kluch;
 
 /**
- * Assembles a {@link Kluch} object from a String.
+ * Assembles a {@link Kluch} objects.
  * @author sozek
  *
  */

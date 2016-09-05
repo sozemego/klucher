@@ -18,6 +18,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.soze.notification.model.Notification;
+
 @SuppressWarnings("serial")
 @Entity
 public class User implements UserDetails {
@@ -34,6 +36,8 @@ public class User implements UserDetails {
   private Set<String> followers = new HashSet<>();
   @ElementCollection
   private Set<String> following = new HashSet<>();
+  @ElementCollection
+  private List<Notification> notifications = new ArrayList<>();
 
   public User() {
 
@@ -83,7 +87,15 @@ public class User implements UserDetails {
     this.following = following;
   }
 
-  @Override
+  public List<Notification> getNotifications() {
+		return notifications;
+	}
+
+	public void setNotifications(List<Notification> notifications) {
+		this.notifications = notifications;
+	}
+
+	@Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     List<GrantedAuthority> list = new ArrayList<>();
     if (userRoles.isUser()) {

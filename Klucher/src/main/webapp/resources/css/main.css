@@ -548,8 +548,8 @@ opacity
 }
 
 .subheaderButton {
-	max-width: 128px;
-	width: 128px;
+	max-width: 164px;
+	width: 164px;
 	border: 1px solid #d0d0d0;
 	-webkit-transition-duration: 0.3s;
 	transition-duration: 0.3s;
@@ -609,4 +609,37 @@ a.linkInKluch {
 	left: 0;
 	text-align: center;
 	width: 100%;
+}
+
+.newFollowers {
+	width: 450px;
+	height: 85px;
+	margin: auto;
+}
+
+.remainingFollowers {
+	cursor: pointer;
+	color: #b71664;
+}
+
+.remainingFollowersList {
+	position: absolute;
+	display: none;
+	padding: 0px;
+	width: 200px;
+	max-height: 200px;
+	border: 1px solid #b71664;
+	top: 0px;
+	left: 0px;
+}
+
+.block {
+	display: block;
+}
+
+.remainingListBackground {
+	border-radius: 2px;
+	background-color: #add8e6;
+	border: solid 1px gray;
+	padding: 5px;
 }

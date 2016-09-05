@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -43,7 +44,9 @@ public class HashtagControllerTest extends TestWithMockUsers {
 
   @Test
   public void testValidHashtag() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/dupa"))
+    mvc.perform(MockMvcRequestBuilders.get("/hashtag/dupa")
+    		.accept(MediaType.APPLICATION_FORM_URLENCODED)
+    		.contentType(MediaType.APPLICATION_FORM_URLENCODED))
       .andDo(print())
       .andExpect(status().isOk())
       .andExpect(model().attribute("hashtag", equalTo("dupa")))
@@ -52,7 +55,9 @@ public class HashtagControllerTest extends TestWithMockUsers {
   
   @Test
   public void testAnotherHashtag() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/enemenemene"))
+    mvc.perform(MockMvcRequestBuilders.get("/hashtag/enemenemene")
+    		.accept(MediaType.APPLICATION_JSON)
+    		.contentType(MediaType.APPLICATION_JSON))
       .andDo(print())
       .andExpect(status().isOk())
       .andExpect(model().attribute("hashtag", equalTo("enemenemene")))
@@ -61,7 +66,9 @@ public class HashtagControllerTest extends TestWithMockUsers {
   
   @Test
   public void testHashtagUppercase() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/dupA"))
+    mvc.perform(MockMvcRequestBuilders.get("/hashtag/dupA")
+    		.accept(MediaType.APPLICATION_JSON)
+    		.contentType(MediaType.APPLICATION_JSON))
     .andDo(print())
     .andExpect(status().isOk())
     .andExpect(model().attribute("hashtag", equalTo("dupa")))
@@ -69,17 +76,11 @@ public class HashtagControllerTest extends TestWithMockUsers {
   }
   
   @Test
-  public void testEmptyHashtag() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/"))
-      .andDo(print())
-      .andExpect(view().name("redirect:/dashboard"))
-      .andExpect(status().is3xxRedirection());
-  }
-  
-  @Test
   public void loggedIn() throws Exception {
     mockUser("test", "password", true);
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/dupa"))
+    mvc.perform(MockMvcRequestBuilders.get("/hashtag/dupa")
+    		.accept(MediaType.APPLICATION_JSON)
+    		.contentType(MediaType.APPLICATION_JSON))
       .andDo(print())
       .andExpect(status().isOk())
       .andExpect(model().attribute("hashtag", equalTo("dupa")))
@@ -89,13 +90,12 @@ public class HashtagControllerTest extends TestWithMockUsers {
   @Test
   public void testEmptyFeed() throws Exception {
     mvc.perform(MockMvcRequestBuilders.get("/hashtag/feed/dupa")
+    		.accept(MediaType.APPLICATION_JSON)
+    		.contentType(MediaType.APPLICATION_JSON)
         .param("timestamp", "0"))
       .andDo(print())
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.kluchs.content", hasSize(0))) // we mostly care about page size here, not actual Kluchs
-      .andExpect(jsonPath("$.kluchs.last", equalTo(true)))
-      .andExpect(jsonPath("$.kluchs.first", equalTo(true)))
-      .andExpect(jsonPath("$.kluchs.size", equalTo(0)));
+      .andExpect(jsonPath("$.elements", hasSize(0)));
   }
   
   @Test
@@ -104,5 +104,16 @@ public class HashtagControllerTest extends TestWithMockUsers {
     .andDo(print())
     .andExpect(status().isBadRequest());
   }
+  
+  @Test
+  public void testEmptyHashtag() throws Exception {
+    mvc.perform(MockMvcRequestBuilders.get("/hashtag/")
+    		.accept(MediaType.APPLICATION_FORM_URLENCODED)
+    		.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+      .andDo(print())
+      .andExpect(view().name("redirect:/dashboard"))
+      .andExpect(status().is3xxRedirection());
+  }
+  
   
 }

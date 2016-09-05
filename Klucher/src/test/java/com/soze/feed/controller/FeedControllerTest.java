@@ -1,18 +1,19 @@
 package com.soze.feed.controller;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -21,10 +22,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.util.NestedServletException;
 
 import com.soze.TestWithMockUsers;
-import com.soze.common.exceptions.NotLoggedInException;
+import com.soze.feed.service.FeedConstructor;
+import com.soze.feed.service.FeedConstructor.FeedDirection;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -36,83 +37,107 @@ public class FeedControllerTest extends TestWithMockUsers {
   private WebApplicationContext webApplicationContext;
 
   private MockMvc mvc;
+  
+  @MockBean
+  private FeedConstructor feedConstructor;
 
   @Before
   public void setUp() throws Exception {
+  	MockitoAnnotations.initMocks(this);
     mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
         .apply(springSecurity()).build();
   }
 
-  @Test
-  public void testUnauthorized() throws Exception {
-    try {
-      mvc.perform(MockMvcRequestBuilders.get("/feed")
-          .accept(MediaType.APPLICATION_FORM_URLENCODED)
-          .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-          .param("timestamp", "0"));
-    } catch (NestedServletException e) {
-      assertThat(e.getCause().getClass(), equalTo(NotLoggedInException.class));
-    }
-  }
+	@Test
+	public void testUnauthorized() throws Exception {
+		String username = "test";
+		mvc.perform(MockMvcRequestBuilders.get("/feed/" + username)
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.param("timestamp", "0"))
+		.andDo(print())
+		.andExpect(status().isOk());
+		verify(feedConstructor).constructFeed(username, 0, true, FeedDirection.AFTER);
+	}
   
   @Test
   public void testAuthorizedButInvalidTimestampParameter() throws Exception {
     mockUser("test", "password", true);
     mvc.perform(MockMvcRequestBuilders.get("/feed/test")
-        .accept(MediaType.APPLICATION_FORM_URLENCODED)
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON))
     .andDo(print())
     .andExpect(status().isBadRequest());
   }
   
-  /**
-   * Only one test for this, since actual feed construction is
-   * tested in FeedConstructorTest class.
-   * @throws Exception
-   */
   @Test
-  public void testAuthorizedAndValidTimestamp() throws Exception {
+  public void testNegativeTimestamp() throws Exception {
     mockUser("test", "password", true);
     mvc.perform(MockMvcRequestBuilders.get("/feed/test")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
+        .param("timestamp", "-5"))
+    .andDo(print())
+    .andExpect(status().isBadRequest());
+  }
+  
+  @Test
+  public void testAuthorizedAndValidTimestamp() throws Exception {
+  	String username = "test";
+    mockUser(username, "password", true);
+    mvc.perform(MockMvcRequestBuilders.get("/feed/" + username)
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON)
         .param("timestamp", "0"))
     .andDo(print())
-    .andExpect(status().isOk())
-    .andExpect(jsonPath("$.kluchs.content", hasSize(0)))
-    .andExpect(jsonPath("$.kluchs.last", equalTo(true)))
-    .andExpect(jsonPath("$.kluchs.first", equalTo(true)))
-    .andExpect(jsonPath("$.kluchs.size", equalTo(30)));
+    .andExpect(status().isOk());
+    verify(feedConstructor).constructFeed(username, 0, false, FeedDirection.AFTER);
+  }
+  
+  @Test
+  public void testAuthorizedAndValidTimestampAndDirectionBefore() throws Exception {
+  	String username = "test";
+    mockUser(username, "password", true);
+    mvc.perform(MockMvcRequestBuilders.get("/feed/" + username)
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON)
+        .param("timestamp", "0")
+        .param("direction", "before"))
+    .andDo(print())
+    .andExpect(status().isOk());
+    verify(feedConstructor).constructFeed(username, 0, false, FeedDirection.BEFORE);
   }
   
   @Test
   public void testPollAuthorizedButInvalidTimestampParameter() throws Exception {
     mockUser("test", "password", true);
     mvc.perform(MockMvcRequestBuilders.get("/feed/poll")
-        .accept(MediaType.APPLICATION_FORM_URLENCODED)
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON))
     .andDo(print())
     .andExpect(status().isBadRequest());
   }
   
-  /**
-   * Only one test for this, since actual feed construction is
-   * tested in FeedConstructorTest class.
-   * @throws Exception
-   */
   @Test
-  public void testPollAuthorizedAndValidTimestamp() throws Exception {
-    mockUser("test", "password", true);
-    mvc.perform(MockMvcRequestBuilders.get("/feed/test")
+  public void testGetKluchsWithMentionsUnauthorized() throws Exception {
+    mvc.perform(MockMvcRequestBuilders.get("/feed/notification")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
-        .param("timestamp", "0"))
+        .param("kluchIds[]", "1", "2", "3"))
     .andDo(print())
-    .andExpect(status().isOk())
-    .andExpect(jsonPath("$.kluchs.content", hasSize(0)))
-    .andExpect(jsonPath("$.kluchs.last", equalTo(true)))
-    .andExpect(jsonPath("$.kluchs.first", equalTo(true)))
-    .andExpect(jsonPath("$.kluchs.size", equalTo(30)));
+    .andExpect(status().is(401));
+  }
+  
+  @Test
+  public void testGetKluchsWithMentions() throws Exception {
+  	mockUser("test", true);	
+    mvc.perform(MockMvcRequestBuilders.get("/feed/notification")
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON)
+        .param("kluchIds[]", "1", "2", "3"))
+    .andDo(print())
+    .andExpect(status().is(200));
+    verify(feedConstructor).getKluchs(Arrays.asList(1L, 2L, 3L));
   }
 
 }

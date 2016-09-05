@@ -199,6 +199,12 @@ function charactersRemaining(text, length) {
 	return length - text.length;
 }
 
+function attachSubmitButtonListener() {
+	$("#submitButton").click(function () {
+		$("#kluchForm").submit();
+	});
+}
+
 function attachShareKluchListener() {
 	$("#kluchForm").submit(function(event) {
 		event.preventDefault();
@@ -262,7 +268,7 @@ function getFeed(direction, timestamp, append) {
 			setGettingFeed(0);
 		},
 		success: function(data, status, xhr) {
-			addKluchsToFeed(data.kluchs.content, append);
+			addKluchsToFeed(data.elements, append);
 			setGettingFeed(0);
 		}
 	});
@@ -441,7 +447,9 @@ function pollFeed() {
 
 	var timestamp = $("#data").attr("data-last-timestamp");
 	var username = getUsername();
-
+	if(username == "") {
+		return;
+	}
 	$.ajax({
 		dataType: "json",
 		type: "GET",
@@ -478,12 +486,6 @@ function clickNewKluchs() {
 
 function hideNewKluchElement() {
 	$("#newKluch").removeClass("invisible");
-}
-
-function attachSubmitButtonListener() {
-	$("#submitButton").click(function () {
-		$("#kluchForm").submit();
-	});
 }
 
 // converts millisecond (unix time) difference between now and given parameter to readable text
@@ -561,13 +563,17 @@ function addFollowButton() {
 }
 
 function isLoggedIn() {
-	// users can get to this mapping only if they are authorised
+	// users can get to those mappings only if they are authorised
 	if(window.location.pathname == "/dashboard") {
+		return true;
+	}
+	if(window.location.pathname == "/notifications") {
 		return true;
 	}
 	return $("#data").attr("data-logged-in") == "true";
 }
 
+// data-follows should store whether or not you follow the current user (at /u/* mappings)
 function doesFollow() {
 	return $("#data").attr("data-follows") == "true";
 }
@@ -779,7 +785,7 @@ function getHashtagFeed(timestamp, append) {
 			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
-			addKluchsToFeed(data.kluchs.content, append);
+			addKluchsToFeed(data.elements, append);
 			setGettingFeed(0);
 		}
 	});
@@ -791,7 +797,7 @@ function configureSubheaderButtons() {
 	var loggedIn = isLoggedIn();
 	if(!loggedIn) {
 		$("#dashboardButton").toggleClass("invisible");
-		$("#messagesButton").toggleClass("invisible");
+		$("#notificationsButton").toggleClass("invisible");
 		$("#settingsButton").toggleClass("invisible");
 	}
 }
@@ -820,4 +826,218 @@ function animateAlertUp() {
 
 function removeAnimateAlertUp() {
 	$("body").off("click", animateAlertUp);
+}
+
+function subheaderOnLoad() {
+	pollNotifications();
+}
+
+function pollNotifications() {
+	var loggedIn = isLoggedIn();
+	if(!loggedIn) {
+		return;
+	}
+	$.ajax({
+		type: "GET",
+		url: "/notification/poll/",
+		error: function(xhr, status, error) {
+			displayAlert(xhr.responseJSON.message);
+			setTimeout(pollNotifications, 2500);
+		},
+		success: function(data, status, xhr) {
+			setTimeout(pollNotifications, 2500);
+			displayNewNotifications(data);
+		}
+	});
+}
+
+function displayNewNotifications(number) {
+	var notificationsTextElement = $("#notificationsText");
+	if(number <= 0) {
+		notificationsTextElement.text("notifications");
+	} else {
+		notificationsTextElement.text("notifications (" + number + ")");
+	}
+}
+
+
+function notificationsOnLoad() {
+	getNotifications();
+}
+
+function getNotifications() {
+	$.ajax({
+		type: "GET",
+		url: "/notification/",
+		error: function(xhr, status, error) {
+			displayAlert(xhr.responseJSON.message);
+		},
+		success: function(data, status, xhr) {
+			handleNotifications(data.elements);
+		}
+	});
+}
+
+function handleNotifications(notifications) {
+	var kluchIds = [];
+	var newFollowers = [];
+	for(var i = 0; i < notifications.length; i++) {
+		if(notifications[i].kluchId != null) {
+			kluchIds.push(notifications[i].kluchId);
+		}
+		if(notifications[i].follow != null) {
+			newFollowers.push(notifications[i].follow);
+		}
+	}
+	getKluchs(kluchIds);
+	displayNewFollowers(newFollowers);
+	setTimeout(sendMarkNotificationsAsRead, 750);
+}
+
+function getKluchs(kluchIds) {
+	if(kluchIds.length == 0) {
+		return;
+	}
+	$.ajax({
+		dataType: "json",
+		contentType : "application/json; charset=utf-8",
+		type: "GET",
+		data: {
+			"kluchIds" : kluchIds
+		},
+		url: "/feed/notification",
+		error: function(xhr, status, error) {
+			
+		},
+		success: function(data, status, xhr) {
+			addKluchsToFeed(data.elements);			
+		}
+	});	
+}
+
+function sendMarkNotificationsAsRead() {
+$.ajax({
+		type: "POST",
+		url: "/notification/read",
+		error: function(xhr, status, error) {
+			
+		},
+		success: function(data, status, xhr) {
+			displayNewNotifications(0);
+		}
+	});	
+}
+
+function displayNewFollowers(followers) {
+	if(followers.length == 0) {
+		return;
+	}
+	var users = [];
+	for(var i = 0; i < followers.length; i++) {
+		users.push(getUserLinkStyle(followers[i]));
+	}
+	
+	// constructs a message to display with all followers
+	// who followed you recently. very messy. also, logic does not check out
+	var message = "";
+	var namesToDisplay = 1;
+	for(var i = 0; i < users.length; i++) {
+		if(i > 0) {
+			if(i == users.length - 1) {
+				message += " and ";
+			} else {
+				message += ", ";
+			}
+		}
+		message += users[i];
+		if(i == namesToDisplay - 1) {
+			var remainingFollowers = (users.length - (i + 1));
+			message += " and " + createRemainingFollowersElement(remainingFollowers) + " more";
+			break;
+		}
+
+	}
+	message += " followed you.";
+	createEventListenersForRemainingFollowersList();
+	createRemainingFollowersList(followers.slice(namesToDisplay));
+	$("#newFollowersText").html(message);
+}
+
+function createRemainingFollowersElement(remainingFollowers) {
+
+	var text = "<span id = 'remainingFollowers' class = 'remainingFollowers'>" + remainingFollowers + "</span>";
+	return text;
+
+}
+
+function createEventListenersForRemainingFollowersList() {
+	
+	$("body").on("mouseenter", "#remainingFollowers", function(event) {
+		showRemainingFollowersList(true);
+	});
+
+	$("body").on("click", "#remainingFollowers", function(event) {
+		$("#remainingFollowersList").fadeToggle('fast');
+	});
+
+	$("body").on("mousemove", function(event) {
+
+		var boundingRect = $("#remainingFollowersList")[0].getBoundingClientRect();
+		var distance = pointRectDist(event.pageX, event.pageY, boundingRect.left, boundingRect.top, boundingRect.width, boundingRect.height);
+		var distanceToFadeOut = 25;
+		if(distance > distanceToFadeOut) {
+			showRemainingFollowersList(false);
+		}
+
+	});
+}
+
+// calculates a distance from any of the rectangles edges
+function pointRectDist (px, py, rx, ry, rWidth, rHeight) {
+    var cx = Math.max(Math.min(px, rx + rWidth ), rx);
+    var cy = Math.max(Math.min(py, ry + rHeight), ry);
+    return Math.sqrt((px-cx)*(px-cx) + (py-cy)*(py-cy));
+}
+
+function showRemainingFollowersList(bool) {
+	if(bool) {
+
+		var position = $("#remainingFollowers").position();
+		var followersList = $("#remainingFollowersList");
+		
+		followersList.css({
+			"top": position.top + 18,
+			"left": position.left + 10
+		});
+		
+		followersList.fadeIn();
+
+	} else {
+
+		var followersList = $("#remainingFollowersList");
+		followersList.fadeOut();
+
+	}
+}
+
+function createRemainingFollowersList(remainingFollowers) {
+
+	var remainingFollowersListExists = $("#remainingFollowersList").length !== 0;
+
+	if(!remainingFollowersListExists) {
+		var element = $(document.createElement("div"));
+		element.toggleClass("remainingFollowersList");
+		element.toggleClass("remainingListBackground");
+		element.attr("id", "remainingFollowersList");
+		for(var i = 0; i < remainingFollowers.length; i++) {
+			var name = $(document.createElement("a"));
+			name.toggleClass('block');
+			name.toggleClass("userLink");
+			name.text(remainingFollowers[i]);
+			name.attr("href", "/u/" + remainingFollowers[i]);
+			element.append(name);
+		}
+		$("body").append(element);
+	}
+
 }

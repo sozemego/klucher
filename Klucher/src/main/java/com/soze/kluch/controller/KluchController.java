@@ -11,15 +11,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.soze.common.exceptions.NotLoggedInException;
 import com.soze.kluch.model.Kluch;
 import com.soze.kluch.service.KluchService;
+import com.soze.notification.service.NotificationService;
 
 @Controller
 public class KluchController {
   
   private final KluchService kluchService;
+  private final NotificationService notificationService;
   
   @Autowired
-  public KluchController(KluchService kluchService) {
+  public KluchController(KluchService kluchService, NotificationService notificationService) {
     this.kluchService = kluchService;
+    this.notificationService = notificationService;
   }
 
   @RequestMapping(value = "/kluch", method = RequestMethod.POST)
@@ -29,7 +32,9 @@ public class KluchController {
       throw new NotLoggedInException();
     }
     String username = authentication.getName();
-    return kluchService.post(username, kluchText);
+    Kluch kluch = kluchService.post(username, kluchText);
+    notificationService.processKluch(kluch);
+    return kluch;
   }
   
 }

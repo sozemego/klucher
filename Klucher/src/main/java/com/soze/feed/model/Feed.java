@@ -1,32 +1,30 @@
 package com.soze.feed.model;
 
-import org.springframework.data.domain.Page;
-
-import com.soze.kluch.model.Kluch;
+import java.util.List;
 
 /**
- * Feed is a simple wrapper class for a {@link Page} of Kluchs.
+ * Feed is a simple wrapper class for a {@link List} of <code>T</code>.
  * @author sozek
  *
  */
-public class Feed {
+public class Feed<T> {
 
-  private Page<Kluch> kluchs;
+  private List<T> elements;
 
   public Feed() {
 
   }
   
-  public Feed(Page<Kluch> kluchs) {
-    this.kluchs = kluchs;
+  public Feed(List<T> elements) {
+    this.elements = elements;
   }
 
-  public void setKluchs(Page<Kluch> kluchs) {
-    this.kluchs = kluchs;
+  public void setElements(List<T> elements) {
+    this.elements = elements;
   }
 
-  public Page<Kluch> getKluchs() {
-    return kluchs;
+  public List<T> getElements() {
+    return elements;
   }
 
 }

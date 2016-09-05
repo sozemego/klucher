@@ -1,5 +1,7 @@
 package com.soze.user.dao;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +44,7 @@ public class UserDatabase implements UserDao {
   }
 
   @Override
-  public Iterable<User> findAll(Iterable<String> usernames) {
+  public List<User> findAll(Iterable<String> usernames) {
     return userRepository.findAll(usernames);
   }
 

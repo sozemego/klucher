@@ -2,7 +2,7 @@ package com.soze.kluch.service;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.notNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +18,7 @@ public class KluchAssemblerTest {
   @Test
   public void testValidKluch() throws Exception {
     HashtagService mockService = mock(HashtagService.class);
-    when(mockService.process((Kluch)notNull())).thenReturn(new ArrayList<>());
+    when(mockService.process(any(Kluch.class))).thenReturn(new ArrayList<>());
     KluchAssembler assembler = new KluchAssembler(mockService);
     String kluchText = generateString(140);
     Kluch kluch = assembler.assembleKluch("author", kluchText);

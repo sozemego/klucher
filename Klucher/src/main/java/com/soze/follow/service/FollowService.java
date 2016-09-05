@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.soze.common.exceptions.CannotDoItToYourselfException;
 import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
 import com.soze.user.dao.UserDao;
@@ -35,8 +36,9 @@ public class FollowService {
    * @param follow username to follow
    * @throws NullOrEmptyException if either <code>username</code> or <code>follow</code> are null or empty
    * @throws UserDoesNotExistException if any of the Users don't exist
+   * @throws CannotDoItToYourselfException if username and follow are equal
    */
-  public void follow(String username, String follow) throws NullOrEmptyException, UserDoesNotExistException {
+  public void follow(String username, String follow) throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException {
     validateInput(username, follow);
     User user = userDao.findOne(username);
     if (user == null) {
@@ -60,8 +62,9 @@ public class FollowService {
    * @param follow username to unfollow
    * @throws NullOrEmptyException if either <code>username</code> or <code>follow</code> are null or empty
    * @throws UserDoesNotExistException if any of the Users don't exist
+   * @throws CannotDoItToYourselfException if username and follow are equal
    */
-  public void unfollow(String username, String follow) throws NullOrEmptyException, UserDoesNotExistException {
+  public void unfollow(String username, String follow) throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException {
     validateInput(username, follow);
     User user = userDao.findOne(username);
     if (user == null) {
@@ -78,13 +81,16 @@ public class FollowService {
     userDao.save(Arrays.asList(user, followUser));
   }
 
-  private void validateInput(String username, String follow) throws NullOrEmptyException {
+  private void validateInput(String username, String follow) throws NullOrEmptyException, CannotDoItToYourselfException {
     if (username == null || username.isEmpty()) {
       throw new NullOrEmptyException("Username");
     }
     if (follow == null || follow.isEmpty()) {
       throw new NullOrEmptyException(
           "User you are trying to follow");
+    }
+    if(username.equals(follow)) {
+    	throw new CannotDoItToYourselfException(username, "follow/unfollow");
     }
   }
 

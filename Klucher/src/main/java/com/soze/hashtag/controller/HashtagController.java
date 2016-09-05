@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.soze.feed.model.Feed;
 import com.soze.feed.service.FeedConstructor;
+import com.soze.kluch.model.Kluch;
 
 @Controller
 public class HashtagController {
@@ -40,7 +41,7 @@ public class HashtagController {
   
   @RequestMapping(value = "/hashtag/feed/{hashtag}", method = RequestMethod.GET)
   @ResponseBody
-  public Feed getHashtagPage(@PathVariable String hashtag, @RequestParam Long timestamp) {
+  public Feed<Kluch> getHashtagPage(@PathVariable String hashtag, @RequestParam Long timestamp) {
     return feedConstructor.constructHashtagFeed(hashtag.toLowerCase(), timestamp);
   }
   

@@ -26,7 +26,7 @@ public class UserPopulation {
   private static final Logger log = LoggerFactory
       .getLogger(UserPopulation.class);
   private static final String DEV_USERS_PATH = "dev/devUsers.txt";
-
+  private static final String DEFAULT_PASSWORD = "password";
   private final UserDao userDao;
 
   private final RegisterConverter registerConverter;
@@ -68,12 +68,12 @@ public class UserPopulation {
     String[] tokens = userString.split(",");
     RegisterForm form = new RegisterForm();
     form.setUsername(tokens[0]);
-    form.setPassword(tokens[1]);
+    form.setPassword(tokens.length > 1 ? tokens[1] : DEFAULT_PASSWORD);
     User user = registerConverter.convertRegisterForm(form);
     UserRoles userRoles = new UserRoles();
     userRoles.setUsername(tokens[0]);
-    userRoles.setUser(tokens[2].equals("1") ? true : false);
-    userRoles.setAdmin(tokens[3].equals("1") ? true : false);
+    userRoles.setUser(tokens.length > 2 ? (tokens[2].equals("1") ? true : false) : true);
+    userRoles.setAdmin(tokens.length > 2 ? (tokens[3].equals("1") ? true : false) : false);
     user.setUserRoles(userRoles);
     return user;
   }

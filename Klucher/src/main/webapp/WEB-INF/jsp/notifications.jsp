@@ -15,13 +15,13 @@
 <div class="content">
 		<table width = "100%">
 			<tr>
-				<td class = "verticalAlignTop" width = "33%"><c:import url = "userinfo.jsp"></c:import></td>
+				<td class = "verticalAlignTop" width = "33%"></td>
 				<td width = "33%">
-					<c:import url="kluchInput.jsp"></c:import>
-					<div class="newKluch centerText" id="newKluch">
-						<span class = "invisible opacityAnimation centerText roundedCorners verticalCenter cursorPointer"
-						 id = 'newKluchText'>new kluchs available, click here to view!</span>
-					</div>
+					<div class = "newFollowers" id = "newFollowers">
+					<span class = "newFollowersText"
+						 id = 'newFollowersText'></span>
+					
+					</div>					
 					<c:import url="feed.jsp"></c:import>
 				</td>
 				<td width = "33%"></td>
@@ -30,7 +30,7 @@
 
 </div>
 <script>
-$(dashboardOnLoad());
+$(notificationsOnLoad());
 </script>	
 </body>
 </html>

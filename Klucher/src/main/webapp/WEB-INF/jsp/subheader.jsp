@@ -7,9 +7,10 @@
 			</a>
 		</td>
 		<td width = "25%">
-			<div class = "verticalCenter subheaderButton" id = "messagesButton">
-				<img class = "logoutButtonImg" src = "../../resources/images/messages_5.png">messages
-			</div>
+			<a href = "/notifications" class = "verticalCenter subheaderButton" id = "notificationsButton">
+				<img class = "logoutButtonImg" src = "../../resources/images/messages_5.png">
+				<span id = "notificationsText">notifications</span>
+			</a>
 		</td>
 		<td width = "25%" align = "right">
 			<div class = "verticalCenter subheaderButton" id = "settingsButton">
@@ -24,3 +25,6 @@
 	</tr>
 </table>
 </div>	
+<script>
+$(subheaderOnLoad());
+</script>

@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -43,12 +42,12 @@ public class KluchDatabase implements KluchDao {
   }
 
   @Override
-  public Iterable<Kluch> findAll() {
+  public List<Kluch> findAll() {
     return kluchRepository.findAll();
   }
 
   @Override
-  public Iterable<Kluch> findAll(Iterable<Long> ids) {
+  public List<Kluch> findAll(Iterable<Long> ids) {
     return kluchRepository.findAll(ids);
   }
 
@@ -93,27 +92,27 @@ public class KluchDatabase implements KluchDao {
   }
   
   @Override
-  public Page<Kluch> findTop20ByAuthorOrderByTimestampDesc(String author, Pageable pageRequest) {
+  public List<Kluch> findTop20ByAuthorOrderByTimestampDesc(String author, Pageable pageRequest) {
     return kluchRepository.findTop20ByAuthorOrderByTimestampDesc(author, pageRequest);
   }
   
   @Override
-  public Page<Kluch> findByAuthorOrderByTimestampDesc(String author, Pageable pageRequest) {
+  public List<Kluch> findByAuthorOrderByTimestampDesc(String author, Pageable pageRequest) {
     return kluchRepository.findByAuthorOrderByTimestampDesc(author, pageRequest);
   }
   
   @Override
-  public Page<Kluch> findByAuthorInOrderByTimestampDesc(Iterable<String> authors, Pageable pageRequest) {
+  public List<Kluch> findByAuthorInOrderByTimestampDesc(Iterable<String> authors, Pageable pageRequest) {
     return kluchRepository.findByAuthorInOrderByTimestampDesc(authors, pageRequest);
   }
   
   @Override
-  public Page<Kluch> findByAuthorInAndTimestampLessThan(Iterable<String> authors, Timestamp lessThan, Pageable pageRequest) {
+  public List<Kluch> findByAuthorInAndTimestampLessThan(Iterable<String> authors, Timestamp lessThan, Pageable pageRequest) {
     return kluchRepository.findByAuthorInAndTimestampLessThan(authors, lessThan, pageRequest);
   }
   
   @Override
-  public Page<Kluch> findByAuthorInAndTimestampGreaterThan(Iterable<String> authors, Timestamp lessThan, Pageable pageRequest) {
+  public List<Kluch> findByAuthorInAndTimestampGreaterThan(Iterable<String> authors, Timestamp lessThan, Pageable pageRequest) {
     return kluchRepository.findByAuthorInAndTimestampGreaterThan(authors, lessThan, pageRequest);
   }
   
@@ -123,7 +122,7 @@ public class KluchDatabase implements KluchDao {
   }
 
   @Override
-  public Page<Kluch> findByHashtagsInAndTimestampLessThan(Hashtag hashtag, Timestamp lessThan,
+  public List<Kluch> findByHashtagsInAndTimestampLessThan(Hashtag hashtag, Timestamp lessThan,
       Pageable pageRequest) {
     return kluchRepository.findByHashtagsInAndTimestampLessThan(hashtag, lessThan, pageRequest);
   }

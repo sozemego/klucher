@@ -1,5 +1,7 @@
 package com.soze.user.dao;
 
+import java.util.List;
+
 import com.soze.user.model.User;
 
 public interface UserDao {
@@ -14,7 +16,7 @@ public interface UserDao {
   
   public Iterable<User> findAll();
   
-  public Iterable<User> findAll(Iterable<String> usernames);
+  public List<User> findAll(Iterable<String> usernames);
   
   public long count();
   

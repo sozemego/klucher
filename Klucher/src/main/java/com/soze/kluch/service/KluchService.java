@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.common.exceptions.InvalidLengthException;
+import com.soze.common.exceptions.InvalidLengthException.Adjective;
 import com.soze.common.exceptions.KluchPreviouslyPostedException;
 import com.soze.common.exceptions.NullOrEmptyException;
-import com.soze.common.exceptions.InvalidLengthException.Adjective;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
 

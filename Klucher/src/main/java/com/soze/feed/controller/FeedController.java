@@ -1,5 +1,7 @@
 package com.soze.feed.controller;
 
+import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.soze.common.exceptions.NotLoggedInException;
 import com.soze.feed.model.Feed;
 import com.soze.feed.service.FeedConstructor;
 import com.soze.feed.service.FeedConstructor.FeedDirection;
+import com.soze.kluch.model.Kluch;
 
 @Controller
 public class FeedController {
@@ -46,7 +50,7 @@ public class FeedController {
 
 	@RequestMapping(value = "/feed/{username}", method = RequestMethod.GET)
 	@ResponseBody
-	public Feed getFeed(Authentication authentication,
+	public Feed<Kluch> getFeed(Authentication authentication,
 			@PathVariable String username,
 			@RequestParam Long timestamp,
 			@RequestParam(required = false) String direction)
@@ -62,6 +66,15 @@ public class FeedController {
 		log.info("User [{}] requested to construct a feed for user [{}], with timestamp [{}] and direction [{}]",
 				authenticatedUsername, username, timestamp, direction);
 		return feedConstructor.constructFeed(username, timestamp, onlyForUser, feedDirection);
+	}
+	
+	@RequestMapping(value = "/feed/notification", method = RequestMethod.GET)
+	@ResponseBody
+	public Feed<Kluch> getKluchsWithMentions(Authentication authentication, @RequestParam(value = "kluchIds[]") Long[] kluchIds) {
+		if(authentication == null) {
+			throw new NotLoggedInException();
+		}
+		return feedConstructor.getKluchs(Arrays.asList(kluchIds));
 	}
 
 	/**

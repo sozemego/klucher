@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -36,7 +34,7 @@ public class FeedConstructor {
 
   private static final int BEFORE_KLUCHS_PER_REQUEST = 30;
   private static final int AFTER_KLUCHS_PER_REQUEST = 30;
-  private final Feed emptyFeed = new Feed(new PageImpl<Kluch>(new ArrayList<>()));
+  private final Feed<Kluch> emptyFeed = new Feed<>(new ArrayList<>());
   private final PageRequest before = new PageRequest(0, BEFORE_KLUCHS_PER_REQUEST, new Sort(new Order(Direction.DESC, "timestamp")));
   private final PageRequest after = new PageRequest(0, AFTER_KLUCHS_PER_REQUEST, new Sort(new Order(Direction.ASC, "timestamp")));
   private final PageRequest exists = new PageRequest(0, 1);
@@ -66,7 +64,7 @@ public class FeedConstructor {
    * @throws UserDoesNotExistException if user with given <code>username</code> does not exist
    * @throws NullOrEmptyException if <code>username</code> is null or empty
    */
-  public Feed constructFeed(String username, long timestamp, boolean onlyForUser, FeedDirection direction) throws InvalidTimestampException, UserDoesNotExistException, NullOrEmptyException {
+  public Feed<Kluch> constructFeed(String username, long timestamp, boolean onlyForUser, FeedDirection direction) throws InvalidTimestampException, UserDoesNotExistException, NullOrEmptyException {
     if (direction == FeedDirection.BEFORE) {
       return constructFeed(username, timestamp, onlyForUser);
     }
@@ -90,13 +88,13 @@ public class FeedConstructor {
    * @throws UserDoesNotExistException if user with given <code>username</code> does not exist
    * @throws NullOrEmptyException if <code>username</code> is null or empty
    */
-  public Feed constructFeed(String username, long beforeTimestamp, boolean onlyForUser) throws InvalidTimestampException, UserDoesNotExistException, NullOrEmptyException {    
+  public Feed<Kluch> constructFeed(String username, long beforeTimestamp, boolean onlyForUser) throws InvalidTimestampException, UserDoesNotExistException, NullOrEmptyException {    
     validateTimestamp(beforeTimestamp);
     User user = getUser(username);
     List<String> authors = getListOfAuthors(user, onlyForUser);
-    Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampLessThan(authors, new Timestamp(beforeTimestamp), before);
-    Feed feed = new Feed();
-    feed.setKluchs(kluchs);
+    List<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampLessThan(authors, new Timestamp(beforeTimestamp), before);
+    Feed<Kluch> feed = new Feed<>();
+    feed.setElements(kluchs);
     return feed;
   }
   
@@ -114,13 +112,13 @@ public class FeedConstructor {
    * @throws UserDoesNotExistException if user with given <code>username</code> does not exist
    * @throws NullOrEmptyException if <code>username</code> is null or empty
    */
-  public Feed constructFeedAfter(String username, long afterTimestamp, boolean onlyForUser) throws InvalidTimestampException, UserDoesNotExistException, NullOrEmptyException {
+  public Feed<Kluch> constructFeedAfter(String username, long afterTimestamp, boolean onlyForUser) throws InvalidTimestampException, UserDoesNotExistException, NullOrEmptyException {
     validateTimestamp(afterTimestamp);
     User user = getUser(username);
     List<String> authors = getListOfAuthors(user, onlyForUser);
-    Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), after);
-    Feed feed = new Feed();
-    feed.setKluchs(kluchs);
+    List<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), after);
+    Feed<Kluch> feed = new Feed<>();
+    feed.setElements(kluchs);
     return feed;
   }
   
@@ -137,9 +135,8 @@ public class FeedConstructor {
     validateTimestamp(afterTimestamp);
     User user = getUser(username);
     List<String> authors = getListOfAuthors(user, onlyForUser);
-    Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), exists);
-    boolean exists = kluchs.hasContent() || !kluchs.getContent().isEmpty();
-    return exists;
+    List<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), exists);
+    return !kluchs.isEmpty();
   }
   
   /**
@@ -153,15 +150,15 @@ public class FeedConstructor {
    * @throws InvalidTimestampException if timestamp is less than 0
    * @throws NullOrEmptyException if <code>hashtagText</code> is null or empty
    */
-  public Feed constructHashtagFeed(String hashtagText, long timestamp) throws UserDoesNotExistException, NullOrEmptyException {
+  public Feed<Kluch> constructHashtagFeed(String hashtagText, long timestamp) throws UserDoesNotExistException, NullOrEmptyException {
     validateTimestamp(timestamp);
     Hashtag hashtag = getHashtag(hashtagText);
-    Feed feed = new Feed();
+    Feed<Kluch> feed = new Feed<>();
     if(hashtag == null) {
       return emptyFeed;
     }
-    Page<Kluch> kluchs = kluchDao.findByHashtagsInAndTimestampLessThan(hashtag, new Timestamp(timestamp), before);   
-    feed.setKluchs(kluchs);
+    List<Kluch> kluchs = kluchDao.findByHashtagsInAndTimestampLessThan(hashtag, new Timestamp(timestamp), before);   
+    feed.setElements(kluchs);
     return feed;
   }
   
@@ -198,6 +195,15 @@ public class FeedConstructor {
       hashtagText = "#" + hashtagText;
     }
     return hashtagDao.findOne(hashtagText);
+  }
+  
+  /**
+   * Returns a feed of {@link Kluch}s with given ids.
+   * @param ids a list of IDs of Kluchs you want to retrieve
+   * @return a feed of kluchs, sorted in descending order according to timestamp
+   */
+  public Feed<Kluch> getKluchs(List<Long> ids) {
+  	return new Feed<Kluch>(kluchDao.findAll((Iterable<Long>)ids));
   }
   
   /**
