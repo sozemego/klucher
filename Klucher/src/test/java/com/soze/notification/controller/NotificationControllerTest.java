@@ -63,24 +63,26 @@ public class NotificationControllerTest extends TestWithMockUsers {
 
 	@Test
 	public void testNoNotificationsPoll() throws Exception {
-		mockUser("user", "password", true);
+		String username = "user";
+		mockUser(username, "password", true);
 		mvc.perform(MockMvcRequestBuilders.get("/notification/poll")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print());
-		verify(notificationService).poll("user");
+		verify(notificationService).poll(username);
 	}
 
 	@Test
 	public void testAFewUnreadNotifications() throws Exception {
-		mockUser("test", "password", true);
+		String username = "test";
+		mockUser(username, "password", true);
 		mvc.perform(MockMvcRequestBuilders.get("/notification/poll")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andReturn();
-		verify(notificationService).poll("test");
+		verify(notificationService).poll(username);
 	}
 
 	@Test
@@ -95,14 +97,15 @@ public class NotificationControllerTest extends TestWithMockUsers {
 
 	@Test
 	public void testGetNoNotifications() throws Exception {
-		mockUser("test", "password", true);
-		when(notificationService.getNotifications("test")).thenReturn(new Feed<>(Arrays.asList()));
+		String username = "test";
+		mockUser(username, "password", true);
+		when(notificationService.getNotifications(username)).thenReturn(new Feed<>(Arrays.asList()));
 		mvc.perform(MockMvcRequestBuilders.get("/notification")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print())
 			.andReturn();
-		verify(notificationService).getNotifications("test");
+		verify(notificationService).getNotifications(username);
 	}
 	
 	@Test
@@ -117,13 +120,14 @@ public class NotificationControllerTest extends TestWithMockUsers {
 	
 	@Test
 	public void testReadNotifications() throws Exception {
-		mockUser("test", "password", true);
+		String username = "test";
+		mockUser(username, "password", true);
 		mvc.perform(MockMvcRequestBuilders.post("/notification/read")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print())
 			.andExpect(status().is(200));
-		verify(notificationService).read("test");
+		verify(notificationService).read(username);
 	}
 	
 	@Test
@@ -138,7 +142,8 @@ public class NotificationControllerTest extends TestWithMockUsers {
 	
 	@Test
 	public void testGetView() throws Exception {
-		mockUser("test", "password", true);
+		String username = "test";
+		mockUser(username, "password", true);
 		mvc.perform(MockMvcRequestBuilders.get("/notifications")
 				.accept(MediaType.APPLICATION_FORM_URLENCODED)
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED))

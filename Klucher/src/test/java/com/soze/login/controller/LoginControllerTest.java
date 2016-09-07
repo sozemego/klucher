@@ -79,10 +79,11 @@ public class LoginControllerTest extends TestWithMockUsers {
   @Test
   public void testWrongPasswordLogin() throws Exception {
     String username = "user";
+    String password = "wrong password";
     mockUser(username, "password");
     mvc.perform(MockMvcRequestBuilders.post("/login")
         .param("username", username)
-        .param("password", "wrong password")
+        .param("password", password)
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andDo(print())
@@ -92,9 +93,11 @@ public class LoginControllerTest extends TestWithMockUsers {
   
   @Test
   public void testUserDoesNotExist() throws Exception {
+  	String username = "user";
+    String password = "password";
     mvc.perform(MockMvcRequestBuilders.post("/login")
-        .param("username", "user")
-        .param("password", "password")
+        .param("username", username)
+        .param("password", password)
         .accept(MediaType.APPLICATION_FORM_URLENCODED)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andDo(print())

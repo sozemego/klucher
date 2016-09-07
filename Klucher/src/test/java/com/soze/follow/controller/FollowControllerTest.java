@@ -64,23 +64,27 @@ public class FollowControllerTest extends TestWithMockUsers {
   
   @Test
   public void testValidFollow() throws Exception {
-  	mockUser("test", true);
+  	String username = "test";
+  	String follow = "test1";
+  	mockUser(username, true);
   	mvc.perform(MockMvcRequestBuilders.post("/user/follow")
-  			.param("follow", "test1"))
+  			.param("follow", follow))
   	.andDo(print())
   	.andExpect(status().isOk());
-  	verify(followService).follow("test", "test1");
-  	verify(notificationService).addFollowNotification("test", "test1");
+  	verify(followService).follow(username, follow);
+  	verify(notificationService).addFollowNotification(username, follow);
   }
   
   @Test
   public void testValidUnfollow() throws Exception {
-  	mockUser("test", true);
+  	String username = "test";
+  	String follow = "test1";
+  	mockUser(username, true);
   	mvc.perform(MockMvcRequestBuilders.post("/user/unfollow")
-  			.param("follow", "test1"))
+  			.param("follow", follow))
   	.andDo(print())
   	.andExpect(status().isOk());
-  	verify(followService).unfollow("test", "test1");
+  	verify(followService).unfollow(username, follow);
   	verifyZeroInteractions(notificationService);
   }
 

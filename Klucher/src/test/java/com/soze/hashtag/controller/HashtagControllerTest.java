@@ -44,52 +44,57 @@ public class HashtagControllerTest extends TestWithMockUsers {
 
   @Test
   public void testValidHashtag() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/dupa")
+  	String hashtag = "dupa";
+    mvc.perform(MockMvcRequestBuilders.get("/hashtag/" + hashtag)
     		.accept(MediaType.APPLICATION_FORM_URLENCODED)
     		.contentType(MediaType.APPLICATION_FORM_URLENCODED))
       .andDo(print())
       .andExpect(status().isOk())
-      .andExpect(model().attribute("hashtag", equalTo("dupa")))
+      .andExpect(model().attribute("hashtag", equalTo(hashtag)))
       .andExpect(model().attribute("loggedIn", equalTo(false)));
   }
   
   @Test
   public void testAnotherHashtag() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/enemenemene")
+  	String hashtag = "enemenemene";
+    mvc.perform(MockMvcRequestBuilders.get("/hashtag/" + hashtag)
     		.accept(MediaType.APPLICATION_JSON)
     		.contentType(MediaType.APPLICATION_JSON))
       .andDo(print())
       .andExpect(status().isOk())
-      .andExpect(model().attribute("hashtag", equalTo("enemenemene")))
+      .andExpect(model().attribute("hashtag", equalTo(hashtag)))
       .andExpect(model().attribute("loggedIn", equalTo(false)));
   }
   
   @Test
   public void testHashtagUppercase() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/dupA")
+  	String hashtag = "dupA";
+    mvc.perform(MockMvcRequestBuilders.get("/hashtag/" + hashtag)
     		.accept(MediaType.APPLICATION_JSON)
     		.contentType(MediaType.APPLICATION_JSON))
     .andDo(print())
     .andExpect(status().isOk())
-    .andExpect(model().attribute("hashtag", equalTo("dupa")))
+    .andExpect(model().attribute("hashtag", equalTo(hashtag.toLowerCase())))
     .andExpect(model().attribute("loggedIn", equalTo(false)));
   }
   
   @Test
   public void loggedIn() throws Exception {
+  	String hashtag = "dupa";
     mockUser("test", "password", true);
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/dupa")
+    mvc.perform(MockMvcRequestBuilders.get("/hashtag/" + hashtag)
     		.accept(MediaType.APPLICATION_JSON)
     		.contentType(MediaType.APPLICATION_JSON))
       .andDo(print())
       .andExpect(status().isOk())
-      .andExpect(model().attribute("hashtag", equalTo("dupa")))
+      .andExpect(model().attribute("hashtag", equalTo(hashtag)))
       .andExpect(model().attribute("loggedIn", equalTo(true)));
   }
   
   @Test
   public void testEmptyFeed() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/feed/dupa")
+  	String hashtag = "dupa";
+    mvc.perform(MockMvcRequestBuilders.get("/hashtag/feed/" + hashtag)
     		.accept(MediaType.APPLICATION_JSON)
     		.contentType(MediaType.APPLICATION_JSON)
         .param("timestamp", "0"))
@@ -100,7 +105,8 @@ public class HashtagControllerTest extends TestWithMockUsers {
   
   @Test
   public void getFeedMissingTimestamp() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/feed/dupa"))
+  	String hashtag = "dupa";
+    mvc.perform(MockMvcRequestBuilders.get("/hashtag/feed/" + hashtag))
     .andDo(print())
     .andExpect(status().isBadRequest());
   }

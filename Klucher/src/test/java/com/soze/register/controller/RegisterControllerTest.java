@@ -71,30 +71,34 @@ public class RegisterControllerTest extends TestWithRealUsers {
   
   @Test
   public void testValidFields() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.post("/register")
+    String username = "user";
+		String password = "password";
+		mvc.perform(MockMvcRequestBuilders.post("/register")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
-        .param("username", "user")
-        .param("password", "password"))
+        .param("username", username)
+        .param(password, password))
     .andDo(print())
     .andExpect(status().is3xxRedirection())
     .andExpect(redirectedUrl("/dashboard"));
-    verify(registerService).register(new RegisterForm("user", "password"));
-    verify(loginService).manualLogin(eq("user"), eq("password"), any(HttpServletRequest.class));
+    verify(registerService).register(new RegisterForm(username, password));
+    verify(loginService).manualLogin(eq(username), eq(password), any(HttpServletRequest.class));
   }
   
   @Test
   public void testDifferentValidFields() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.post("/register")
+    String username = "differentUser";
+		String password = "differentPassword";
+		mvc.perform(MockMvcRequestBuilders.post("/register")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
-        .param("username", "differentUser")
-        .param("password", "differentPassword"))
+        .param("username", username)
+        .param("password", password))
     .andDo(print())
     .andExpect(status().is3xxRedirection())
     .andExpect(redirectedUrl("/dashboard"));
-    verify(registerService).register(new RegisterForm("differentUser", "differentPassword"));
-    verify(loginService).manualLogin(eq("differentUser"), eq("differentPassword"), any(HttpServletRequest.class));
+    verify(registerService).register(new RegisterForm(username, password));
+    verify(loginService).manualLogin(eq(username), eq(password), any(HttpServletRequest.class));
   }
   
   @Test

@@ -62,21 +62,11 @@ public class FeedControllerTest extends TestWithMockUsers {
   
   @Test
   public void testAuthorizedButInvalidTimestampParameter() throws Exception {
-    mockUser("test", "password", true);
-    mvc.perform(MockMvcRequestBuilders.get("/feed/test")
+  	String username = "test";
+    mockUser(username, "password", true);
+    mvc.perform(MockMvcRequestBuilders.get("/feed/" + username)
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON))
-    .andDo(print())
-    .andExpect(status().isBadRequest());
-  }
-  
-  @Test
-  public void testNegativeTimestamp() throws Exception {
-    mockUser("test", "password", true);
-    mvc.perform(MockMvcRequestBuilders.get("/feed/test")
-        .accept(MediaType.APPLICATION_JSON)
-        .contentType(MediaType.APPLICATION_JSON)
-        .param("timestamp", "-5"))
     .andDo(print())
     .andExpect(status().isBadRequest());
   }

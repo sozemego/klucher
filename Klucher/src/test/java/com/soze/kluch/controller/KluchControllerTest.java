@@ -64,8 +64,9 @@ public class KluchControllerTest extends TestWithMockUsers {
   
   @Test
   public void testUnauthorized() throws Exception {
+  	String kluchText = "text";
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
-        .param("kluchText", "text")
+        .param("kluchText", kluchText)
         .accept(MediaType.APPLICATION_JSON)
     		.contentType(MediaType.APPLICATION_JSON))
     .andDo(print())
@@ -76,9 +77,10 @@ public class KluchControllerTest extends TestWithMockUsers {
   
   @Test
   public void testValidKluch() throws Exception {
+  	String kluchText = "text";
     mockUser("username", "password", true); 
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
-        .param("kluchText", "text")
+        .param("kluchText", kluchText)
         .accept(MediaType.APPLICATION_JSON)
     		.contentType(MediaType.APPLICATION_JSON))
     .andDo(print())
@@ -111,9 +113,10 @@ public class KluchControllerTest extends TestWithMockUsers {
   
   @Test
   public void testEmptyText() throws Exception {
+  	String kluchText = "";
     mockUser("username", "password", true);
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
-        .param("kluchText", "")
+        .param("kluchText", kluchText)
         .accept(MediaType.APPLICATION_JSON)
     		.contentType(MediaType.APPLICATION_JSON))
     .andDo(print())
@@ -124,9 +127,10 @@ public class KluchControllerTest extends TestWithMockUsers {
   
   @Test
   public void testTooLongKluch() throws Exception {
+  	String kluchText = generateString(251);
     mockUser("username", "password", true);    
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
-        .param("kluchText", generateString(251))
+        .param("kluchText", kluchText)
         .accept(MediaType.APPLICATION_JSON)
     		.contentType(MediaType.APPLICATION_JSON))
     .andDo(print())
