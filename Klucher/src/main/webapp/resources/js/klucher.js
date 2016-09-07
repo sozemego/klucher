@@ -940,7 +940,7 @@ function displayNewFollowers(followers) {
 	// constructs a message to display with all followers
 	// who followed you recently. very messy. also, logic does not check out
 	var message = "";
-	var namesToDisplay = 1;
+	var namesToDisplay = 3;
 	for(var i = 0; i < users.length; i++) {
 		if(i > 0) {
 			if(i == users.length - 1) {
@@ -955,8 +955,8 @@ function displayNewFollowers(followers) {
 			message += " and " + createRemainingFollowersElement(remainingFollowers) + " more";
 			break;
 		}
-
 	}
+
 	message += " followed you.";
 	createEventListenersForRemainingFollowersList();
 	createRemainingFollowersList(followers.slice(namesToDisplay));
