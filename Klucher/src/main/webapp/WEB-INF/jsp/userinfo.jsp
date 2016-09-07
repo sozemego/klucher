@@ -7,10 +7,10 @@
 					<table id = "followButton" class = "followButton">
 						<tr>
 							<td>
-								<span id = "followText" class = "followText"></span>
+								<img id = "followImage" class = followImage>
 							</td>
 							<td>
-								<img id = "followImage" class = followImage>
+								<span id = "followText" class = "followText"></span>
 							</td>
 						</tr>
 					</table>

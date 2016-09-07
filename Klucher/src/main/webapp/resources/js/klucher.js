@@ -1,5 +1,3 @@
-/*jshint -W065 */
-
 function registerOnLoad() {
 	checkAvailability(null);
 	attachValidationListeners();
@@ -15,7 +13,7 @@ function checkAvailability(lastUsername) {
 		return;
 	}
 
-	if(currentUsername === null || currentUsername === "") {
+	if(currentUsername === undefined || currentUsername === null || currentUsername === "") {
 		setTimeout(checkAvailability, 2500, currentUsername);
 		return;
 	}
@@ -28,31 +26,17 @@ function checkAvailability(lastUsername) {
 			setTimeout(checkAvailability, 10000, currentUsername);
 		},
 		success: function(data) {
-			var currentUsernameElement = $("#username");
-			if(data) {
-				currentUsernameElement.removeClass("unavailable");
-				currentUsernameElement.addClass("available");
-			} else {
-				currentUsernameElement.removeClass("available");
-				currentUsernameElement.addClass("unavailable");
-			}
-			addUsernameAvailableMessage(data);
+			displayUsernameAvailable(data);
 			setTimeout(checkAvailability, 1000, currentUsername);
 		}
 	});
 }
 
 function attachValidationListeners() {
-	$("#username").keyup(function() {
+	$("#username").on("keyup blur", function() {
 		validateRegisterForm();
 	});
-	$("#username").blur(function() {
-		validateRegisterForm();
-	});
-	$("#password").keyup(function() {
-		validateRegisterForm();
-	});
-	$("#password").blur(function() {
+	$("#password").on("keyup blur", function() {
 		validateRegisterForm();
 	});
 }
@@ -68,16 +52,17 @@ function clearErrorTable() {
 }
 
 function validateUsername() {
-	var usernameElement = $("#username");
+
+	const usernameElement = $("#username");
 
 	usernameElement.removeClass("invalidImg");
 	usernameElement.addClass("validImg");
 
-	var username = usernameElement.val();
+	const username = usernameElement.val();
 
-	var isTooShort = isUsernameTooShort(username);
-	var isTooLong = isUsernameTooLong(username);
-	var whiteSpace = hasWhiteSpace(username);
+	const isTooShort = isUsernameTooShort(username);
+	const isTooLong = isUsernameTooLong(username);
+	const whiteSpace = hasWhiteSpace(username);
 
 	if(isTooShort || isTooLong || whiteSpace) {
 		usernameElement.removeClass("validImg");
@@ -96,15 +81,16 @@ function validateUsername() {
 }
 
 function validatePassword() {
-	var passwordElement = $("#password");
+
+	const passwordElement = $("#password");
 
 	passwordElement.removeClass("invalidImg");
 	passwordElement.addClass("validImg");
 
-	var password = passwordElement.val();
-	var isTooShort = isPasswordTooShort(password);
-	var isTooLong = isPasswordTooLong(password);
-	var whiteSpace = hasWhiteSpace(password);
+	const password = passwordElement.val();
+	const isTooShort = isPasswordTooShort(password);
+	const isTooLong = isPasswordTooLong(password);
+	const whiteSpace = hasWhiteSpace(password);
 
 	if(isTooShort || isTooLong || whiteSpace) {
 		passwordElement.removeClass("validImg");
@@ -125,7 +111,7 @@ function validatePassword() {
 function attachSubmitRegisterListener() {
 	$("#registerForm").submit(function(event) {
 		validateRegisterForm();
-		var errors = $("#errorTable").children().length;
+		const errors = $("#errorTable").children().length;
 		if(errors > 0) {
 			event.preventDefault();
 			return false;
@@ -134,9 +120,16 @@ function attachSubmitRegisterListener() {
 	});
 }
 
+function displayUsernameAvailable(available) {
 
-function addUsernameAvailableMessage(available) {
-	if(!available) {
+	const currentUsernameElement = $("#username");
+
+	if(available) {
+		currentUsernameElement.removeClass("unavailable");
+		currentUsernameElement.addClass("available");
+	} else {
+		currentUsernameElement.removeClass("available");
+		currentUsernameElement.addClass("unavailable invalidImg");
 		$("#errorTable").prepend(createTableRowWithText("Username exists already."));
 	}
 }
@@ -183,16 +176,17 @@ function attachCharacterCountListener() {
 }
 
 function checkCharacterCount() {
-	var textArea = $("#kluchTextArea");
-	var charactersLeft = charactersRemaining(textArea.val(), 250);
-	var charactersLeftElement = $("#charactersLeft");
+	const textArea = $("#kluchTextArea");
+	const maxCharacters = 250;
+	const charactersLeft = charactersRemaining(textArea.val(), maxCharacters);
+	const charactersLeftElement = $("#charactersLeft");
 	if(charactersLeft < 0) {
-		var text = textArea.val();
+		let text = textArea.val();
 		text = text.slice(0, 250);
 		textArea.val(text);
 	}
 	charactersLeftElement.empty();
-	charactersLeftElement.append(charactersRemaining(textArea.val(), 250));
+	charactersLeftElement.append(charactersRemaining(textArea.val(), maxCharacters));
 }
 
 function charactersRemaining(text, length) {
@@ -213,7 +207,7 @@ function attachShareKluchListener() {
 }
 
 function ajaxPostKluch() {
-	var kluchText = $("#kluchTextArea").val();
+	const kluchText = $("#kluchTextArea").val();
 	if(kluchText.length === 0) {
 		return;
 	}
@@ -249,12 +243,12 @@ function getKluch(username, timestamp, text) {
 }
 
 function getFeed(direction, timestamp, append) {
-	var isGettingFeed = $("#data").attr("data-getting-feed");
+	const isGettingFeed = $("#data").attr("data-getting-feed");
 	if(isGettingFeed == 1) {
 		return;
 	}
 	setGettingFeed(1);
-	var username = getUsername();
+	const username = getUsername();
 	$.ajax({
 		dataType: "json",
 		type: "GET",
@@ -276,7 +270,7 @@ function getFeed(direction, timestamp, append) {
 
 // remembers if we've reached a Feed's last page
 function setPage(data) {
-	var page = data.kluchs;
+	const page = data.kluchs;
 	if(page.last) {
 		$("#data").attr("data-page", -1);
 	}
@@ -287,39 +281,35 @@ function clearTextArea() {
 }
 
 function addKluchsToFeed(kluchs, append) {
-	for(var i = 0; i < kluchs.length; i++) {
-		var kluch = kluchs[i];
-		addKluchToFeed(kluch, append);
+	for(let i = 0; i < kluchs.length; i++) {
+		addKluchToFeed(kluchs[i], append);
 	}
 }
 
 function addKluchToFeed(kluch, append) {
-	var outerDiv = document.createElement("div");
+
+	const outerDiv = $(document.createElement("div"));
 	append ? $("#kluchFeed").append(outerDiv) : $("#kluchFeed").prepend(outerDiv);
+	outerDiv.addClass("kluch opacityAnimation");
 
-	outerDiv.classList.toggle("kluch");
-	outerDiv.classList.toggle("opacityAnimation");
-
-	var authorDiv = document.createElement("div");
-	authorDiv.classList.toggle("authorDiv");
+	const authorDiv = $(document.createElement("div"));
+	authorDiv.addClass("authorDiv");
 	$("<a class = 'author' href = '/u/" + kluch.author + "'>" + kluch.author + "</span>").appendTo(authorDiv);
 	$("<span class = 'dashboardTime'>" + millisToText(kluch.timestamp) + "</span>").appendTo(authorDiv);
-	$(authorDiv).appendTo(outerDiv);
+	authorDiv.appendTo(outerDiv);
 
-	var textAreaDiv = document.createElement("div");
+	const textAreaDiv = $(document.createElement("div"));
+	textAreaDiv.addClass("kluchTextArea preWrap");
 
-	var loggedIn = isLoggedIn();
+	const loggedIn = isLoggedIn();
 	if(loggedIn) {
-		var username = getUsername();
-		if(kluch.author == username) {
-			textAreaDiv.classList.toggle("ownKluch");
+		const username = getUsername();
+		if(kluch.author === username) {
+			textAreaDiv.addClass("ownKluch");
 		}
 	}
 
-	textAreaDiv.classList.toggle("kluchTextArea");
-	textAreaDiv.classList.toggle("preWrap");
-
-	var processedKluchText = processKluchText(kluch.text);
+	const processedKluchText = processKluchText(kluch.text);
 	$("<span>" + processedKluchText + "</span>").appendTo(textAreaDiv);
 	$(textAreaDiv).appendTo(outerDiv);
 
@@ -345,7 +335,7 @@ function escapeHtml(text) {
 * returns changed text
 */
 function addLinks(text, regex, styleCallback) {
-	var result = regex.exec(text);
+	let result = regex.exec(text);
 
 	while(result !== null) {
 		/**
@@ -357,7 +347,7 @@ function addLinks(text, regex, styleCallback) {
 			result.index += 1;
 		}
 
-		var replaced = styleCallback(text.substring(result.index, regex.lastIndex));
+		const replaced = styleCallback(text.substring(result.index, regex.lastIndex));
 		text = text.substring(0, result.index) + replaced + text.substring(regex.lastIndex, text.length);
 
 		//start the search after the inserted element, which invariably makes the text longer
@@ -368,8 +358,7 @@ function addLinks(text, regex, styleCallback) {
 }
 
 function getHashtagStyle(hashtag) {
-	var toReturn = "<a class = 'hashtagLink' href = '/hashtag/" + hashtagWithoutPound(hashtag) + "'>" + hashtag + "</a>";
-	return toReturn;
+	return "<a class = 'hashtagLink' href = '/hashtag/" + hashtagWithoutPound(hashtag) + "'>" + hashtag + "</a>";
 }
 
 function hashtagWithoutPound(hashtag) {
@@ -377,8 +366,7 @@ function hashtagWithoutPound(hashtag) {
 }
 
 function getUserLinkStyle(user) {
-	var toReturn = "<a class = 'userLink' href = '/u/" + userWithoutAt(user) + "'>" + user + "</a>";
-	return toReturn;
+	return "<a class = 'userLink' href = '/u/" + userWithoutAt(user) + "'>" + user + "</a>";
 }
 
 function userWithoutAt(user) {
@@ -386,8 +374,7 @@ function userWithoutAt(user) {
 }
 
 function getLinkStyle(link) {
-	var toReturn = "<a class = 'linkInKluch' href = 'http://" + link + "'>" + link + "</a>";
-	return toReturn;
+	return "<a class = 'linkInKluch' href = 'http://" + link + "'>" + link + "</a>";
 }
 
 function getUsername() {
@@ -396,20 +383,20 @@ function getUsername() {
 
 // sets values for last (latest) and first (earliest) timestamps
 function assignTimestamps(kluch) {
-	var timestamp = kluch.timestamp;
+	const timestamp = kluch.timestamp;
 	setLastTimestamp(timestamp);
 	setFirstTimestamp(timestamp);
 }
 
 function setLastTimestamp(millis) {
-	var currentLastTimestamp = parseInt($("#data").attr("data-last-timestamp"));
+	const currentLastTimestamp = parseInt($("#data").attr("data-last-timestamp"));
 	if(millis > currentLastTimestamp) {
 		$("#data").attr("data-last-timestamp", millis);
 	}
 }
 
 function setFirstTimestamp(millis) {
-	var currentFirstTimestamp = parseInt($("#data").attr("data-first-timestamp"));
+	const currentFirstTimestamp = parseInt($("#data").attr("data-first-timestamp"));
 	if(millis < currentFirstTimestamp) {
 		$("#data").attr("data-first-timestamp", millis);
 	}
@@ -417,9 +404,9 @@ function setFirstTimestamp(millis) {
 
 function attachInfiniteScrollingListener() {
 	$(window).scroll(function(ev) {
-		var windowInnerHeight = window.innerHeight;
-		var scrollY = window.scrollY;
-		var bodyHeight = document.body.offsetHeight;
+		const windowInnerHeight = window.innerHeight;
+		const scrollY = window.scrollY;
+		const bodyHeight = document.body.offsetHeight;
 		if ((windowInnerHeight + scrollY) >= bodyHeight * 0.9) {
 			getFeed("before", parseInt($("#data").attr("data-first-timestamp")), true);
 		}
@@ -428,7 +415,7 @@ function attachInfiniteScrollingListener() {
 }
 
 function displayLastPageMessage() {
-	var lastPage = $("#data").attr("data-page");
+	const lastPage = $("#data").attr("data-page");
 	if(lastPage == -1) {
 		$("#lastPage").removeClass("hidden");
 	}
@@ -439,17 +426,18 @@ function setGettingFeed(data) {
 }
 
 function pollFeed() {
-	var isGettingFeed = $("#data").attr("data-getting-feed");
+	const isGettingFeed = $("#data").attr("data-getting-feed");
 	if(isGettingFeed == 1) {
 		setTimeout(pollFeed, 5000);
 		return;
 	}
 
-	var timestamp = $("#data").attr("data-last-timestamp");
-	var username = getUsername();
-	if(username == "") {
+	const timestamp = $("#data").attr("data-last-timestamp");
+	const username = getUsername();
+	if(username === undefined || username === null || username === "") {
 		return;
 	}
+
 	$.ajax({
 		dataType: "json",
 		type: "GET",
@@ -490,11 +478,11 @@ function hideNewKluchElement() {
 
 // converts millisecond (unix time) difference between now and given parameter to readable text
 function millisToText(millis) {
-	var date = new Date(millis);
-	var now = new Date();
-	var millisNow = now.getTime();
-	var millisDifference = millisNow - date.getTime();
-	var minutesPassed = Math.floor(this.minutesPassed(millisDifference));
+	const date = new Date(millis);
+	const now = new Date();
+	const millisNow = now.getTime();
+	const millisDifference = millisNow - date.getTime();
+	const minutesPassed = Math.floor(this.minutesPassed(millisDifference));
 	if(minutesPassed < 60) {
 		if(minutesPassed === 0) {
 			return "less than a minute ago";
@@ -504,14 +492,14 @@ function millisToText(millis) {
 		}
 		return minutesPassed + " minutes ago";
 	}
-	var hoursPassed = Math.floor(this.hoursPassed(minutesPassed));
+	const hoursPassed = Math.floor(this.hoursPassed(minutesPassed));
     if(hoursPassed < 24) {
     	if(hoursPassed === 1) {
     		return "an hour ago";
     	}
     	return hoursPassed + " hours ago";
     }
-    var daysPassed = Math.floor(this.daysPassed(hoursPassed));
+    const daysPassed = Math.floor(this.daysPassed(hoursPassed));
     if(daysPassed === 1) {
     	return "a day ago";
     }
@@ -519,7 +507,7 @@ function millisToText(millis) {
 }
 
 function minutesPassed(millis) {
-	var seconds = millis / 1000;
+	const seconds = millis / 1000;
 	return seconds / 60;
 }
 
@@ -548,12 +536,12 @@ function createUserButtonContainer() {
 }
 
 function addFollowButton() {
-	var loggedIn = isLoggedIn();
+	const loggedIn = isLoggedIn();
 	if(!loggedIn) {
 		createFollowButtonLeadsToLogin();
 	}
 	if(loggedIn) {
-		var follows = doesFollow();
+		const follows = doesFollow();
 		if(follows) {
 			createUnfollowButton();
 		} else {
@@ -570,20 +558,20 @@ function isLoggedIn() {
 	if(window.location.pathname == "/notifications") {
 		return true;
 	}
-	return $("#data").attr("data-logged-in") == "true";
+	return $("#data").attr("data-logged-in") === "true";
 }
 
 // data-follows should store whether or not you follow the current user (at /u/* mappings)
 function doesFollow() {
-	return $("#data").attr("data-follows") == "true";
+	return $("#data").attr("data-follows") === "true";
 }
 
 function createFollowButton() {
 	$("#followText").empty();
-	var followText = "Follow";
-	var followTextToAppend = "<span class = 'followText'>" + followText + "</span>";
+	const followText = "Follow";
+	const followTextToAppend = "<span class = 'followText'>" + followText + "</span>";
 	$(document.createTextNode(followText)).appendTo("#followText");
-	var src = "../../resources/images/lasso.png";
+	const src = "../../resources/images/lasso.png";
 	$("#followImage").attr("src", src);
 	addFollowListener();
 }
@@ -596,11 +584,11 @@ function addFollowListener() {
 }
 
 function followUserAjax() {
-	var loggedIn = isLoggedIn();
+	const loggedIn = isLoggedIn();
 	if(!loggedIn) {
 		return;
 	}
-	var follows = doesFollow();
+	const follows = doesFollow();
 	if(follows) {
 		return;
 	}
@@ -623,10 +611,10 @@ function followUserAjax() {
 
 function createUnfollowButton() {
 	$("#followText").empty();
-	var followText = "Unfollow";
-	var followTextToAppend = "<span class = 'followText'>" + followText + "</span>";
+	const followText = "Unfollow";
+	const followTextToAppend = "<span class = 'followText'>" + followText + "</span>";
 	$(document.createTextNode(followText)).appendTo("#followText");
-	var src = "../../resources/images/invisible.png";
+	const src = "../../resources/images/invisible.png";
 	$("#followImage").attr("src", src);
 	addUnfollowListener();
 }
@@ -639,15 +627,15 @@ function addUnfollowListener() {
 }
 
 function unfollowUserAjax() {
-	var loggedIn = isLoggedIn();
+	const loggedIn = isLoggedIn();
 	if(!loggedIn) {
 		return;
 	}
-	var follows = doesFollow();
+	const follows = doesFollow();
 	if(!follows) {
 		return;
 	}
-	var username = $("#data").attr("data-username");
+	const username = $("#data").attr("data-username");
 	$.ajax({
 		type: "POST",
 		url: "/user/unfollow",
@@ -696,7 +684,7 @@ function showLoginPage(bool) {
 }
 
 function addOverlay() {
-	var overlay = "<div class = 'darkOverlay'></div>";
+	const overlay = "<div class = 'darkOverlay'></div>";
 	$(overlay).appendTo("body");
 	setTimeout(attachClickOutsideLoginElementListener, 50);
 }
@@ -708,7 +696,7 @@ function removeOverlay() {
 
 function attachClickOutsideLoginElementListener() {
 	$("body").click(function(event) {
-		var isActive = $("#loginTable").hasClass("active");
+		const isActive = $("#loginTable").hasClass("active");
 		if(!isActive) {
 			showLoginPage(false);
 		}
@@ -732,15 +720,15 @@ function toggleLoginTableActiveClass() {
 }
 
 function configureLogoutButton() {
-	var loggedIn = isLoggedIn();
+	const loggedIn = isLoggedIn();
 	if(loggedIn) {
 		return;
 	}
-	var logoutSpan = $("#logoutButton .buttonText");
+	const logoutSpan = $("#logoutButton .buttonText");
 	logoutSpan.text("login");
-	var logoutImg = $("#logoutButton .logoutButtonImg");
+	const logoutImg = $("#logoutButton .logoutButtonImg");
 	logoutImg.attr("src", "../../resources/images/login.png");
-	var logoutButtonElement = $("#logoutButton");
+	const logoutButtonElement = $("#logoutButton");
 	logoutButtonElement.attr("href", "#");
 	logoutButtonElement.click(function(event) {
 		showLoginPage(true);
@@ -757,9 +745,9 @@ function hashtagOnLoad() {
 
 function attachInifiteScrollingListenerHashtag() {
 	$(window).scroll(function(ev) {
-		var windowInnerHeight = window.innerHeight;
-		var scrollY = window.scrollY;
-		var bodyHeight = document.body.offsetHeight;
+		const windowInnerHeight = window.innerHeight;
+		const scrollY = window.scrollY;
+		const bodyHeight = document.body.offsetHeight;
 			if ((windowInnerHeight + scrollY) >= bodyHeight * 0.9) {
 				getHashtagFeed(parseInt($("#data").attr("data-first-timestamp")), true);
 			}
@@ -767,12 +755,12 @@ function attachInifiteScrollingListenerHashtag() {
 }
 
 function getHashtagFeed(timestamp, append) {
-	var isGettingFeed = $("#data").attr("data-getting-feed");
+	const isGettingFeed = $("#data").attr("data-getting-feed");
 	if(isGettingFeed == 1) {
 		return;
 	}
 	setGettingFeed(1);
-	var hashtag = $("#data").attr("data-hashtag");
+	const hashtag = $("#data").attr("data-hashtag");
 	$.ajax({
 		dataType: "json",
 		type: "GET",
@@ -794,7 +782,7 @@ function getHashtagFeed(timestamp, append) {
 // configures dashboard/messages/settings buttons. basically, hides them if the user is not logged in
 function configureSubheaderButtons() {
 	configureLogoutButton();
-	var loggedIn = isLoggedIn();
+	const loggedIn = isLoggedIn();
 	if(!loggedIn) {
 		$("#dashboardButton").toggleClass("invisible");
 		$("#notificationsButton").toggleClass("invisible");
@@ -833,7 +821,7 @@ function subheaderOnLoad() {
 }
 
 function pollNotifications() {
-	var loggedIn = isLoggedIn();
+	const loggedIn = isLoggedIn();
 	if(!loggedIn) {
 		return;
 	}
@@ -852,7 +840,7 @@ function pollNotifications() {
 }
 
 function displayNewNotifications(number) {
-	var notificationsTextElement = $("#notificationsText");
+	const notificationsTextElement = $("#notificationsText");
 	if(number <= 0) {
 		notificationsTextElement.text("notifications");
 	} else {
@@ -879,8 +867,8 @@ function getNotifications() {
 }
 
 function handleNotifications(notifications) {
-	var kluchIds = [];
-	var newFollowers = [];
+	const kluchIds = [];
+	const newFollowers = [];
 	for(var i = 0; i < notifications.length; i++) {
 		if(notifications[i].kluchId != null) {
 			kluchIds.push(notifications[i].kluchId);
@@ -932,15 +920,15 @@ function displayNewFollowers(followers) {
 	if(followers.length == 0) {
 		return;
 	}
-	var users = [];
+	const users = [];
 	for(var i = 0; i < followers.length; i++) {
 		users.push(getUserLinkStyle(followers[i]));
 	}
 	
 	// constructs a message to display with all followers
 	// who followed you recently. very messy. also, logic does not check out
-	var message = "";
-	var namesToDisplay = 3;
+	const message = "";
+	const namesToDisplay = 3;
 	for(var i = 0; i < users.length; i++) {
 		if(i > 0) {
 			if(i == users.length - 1) {
@@ -951,7 +939,7 @@ function displayNewFollowers(followers) {
 		}
 		message += users[i];
 		if(i == namesToDisplay - 1) {
-			var remainingFollowers = (users.length - (i + 1));
+			const remainingFollowers = (users.length - (i + 1));
 			message += " and " + createRemainingFollowersElement(remainingFollowers) + " more";
 			break;
 		}
@@ -964,10 +952,7 @@ function displayNewFollowers(followers) {
 }
 
 function createRemainingFollowersElement(remainingFollowers) {
-
-	var text = "<span id = 'remainingFollowers' class = 'remainingFollowers'>" + remainingFollowers + "</span>";
-	return text;
-
+	return "<span id = 'remainingFollowers' class = 'remainingFollowers'>" + remainingFollowers + "</span>";
 }
 
 function createEventListenersForRemainingFollowersList() {
@@ -982,9 +967,9 @@ function createEventListenersForRemainingFollowersList() {
 
 	$("body").on("mousemove", function(event) {
 
-		var boundingRect = $("#remainingFollowersList")[0].getBoundingClientRect();
-		var distance = pointRectDist(event.pageX, event.pageY, boundingRect.left, boundingRect.top, boundingRect.width, boundingRect.height);
-		var distanceToFadeOut = 25;
+		const boundingRect = $("#remainingFollowersList")[0].getBoundingClientRect();
+		const distance = pointRectDist(event.pageX, event.pageY, boundingRect.left, boundingRect.top, boundingRect.width, boundingRect.height);
+		const distanceToFadeOut = 25;
 		if(distance > distanceToFadeOut) {
 			showRemainingFollowersList(false);
 		}
@@ -994,43 +979,37 @@ function createEventListenersForRemainingFollowersList() {
 
 // calculates a distance from any of the rectangles edges
 function pointRectDist (px, py, rx, ry, rWidth, rHeight) {
-    var cx = Math.max(Math.min(px, rx + rWidth ), rx);
-    var cy = Math.max(Math.min(py, ry + rHeight), ry);
+    const cx = Math.max(Math.min(px, rx + rWidth ), rx);
+    const cy = Math.max(Math.min(py, ry + rHeight), ry);
     return Math.sqrt((px-cx)*(px-cx) + (py-cy)*(py-cy));
 }
 
 function showRemainingFollowersList(bool) {
-	if(bool) {
 
-		var position = $("#remainingFollowers").position();
-		var followersList = $("#remainingFollowersList");
-		
+	const followersList = $("#remainingFollowersList");
+
+	if(bool) {
+		const position = $("#remainingFollowers").position();
 		followersList.css({
 			"top": position.top + 18,
 			"left": position.left + 10
 		});
-		
 		followersList.fadeIn();
-
 	} else {
-
-		var followersList = $("#remainingFollowersList");
 		followersList.fadeOut();
-
 	}
 }
 
 function createRemainingFollowersList(remainingFollowers) {
 
-	var remainingFollowersListExists = $("#remainingFollowersList").length !== 0;
+	const remainingFollowersListExists = $("#remainingFollowersList").length !== 0;
 
 	if(!remainingFollowersListExists) {
-		var element = $(document.createElement("div"));
-		element.toggleClass("remainingFollowersList");
-		element.toggleClass("remainingListBackground");
+		const element = $(document.createElement("div"));
+		element.toggleClass("remainingFollowersList remainingListBackground");
 		element.attr("id", "remainingFollowersList");
 		for(var i = 0; i < remainingFollowers.length; i++) {
-			var name = $(document.createElement("a"));
+			const name = $(document.createElement("a"));
 			name.toggleClass('block');
 			name.toggleClass("userLink");
 			name.text(remainingFollowers[i]);
