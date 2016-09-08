@@ -6,9 +6,12 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,14 +35,19 @@ import com.soze.user.model.User;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class NotificationServiceTest extends TestWithMockUsers {
-
+public class NotificationServiceWithCacheTest extends TestWithMockUsers {
+	
 	@Autowired
-	@Qualifier("SimpleNotificationService")
+	@Qualifier("NotificationServiceWithCache")
 	private NotificationService notificationService;
 	
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
+		Class aClass = NotificationServiceWithCache.class;
+		Field field = aClass.getDeclaredField("cachedUsers");
+		field.setAccessible(true);
+		Map<String, Integer> toReplace = new ConcurrentHashMap<String, Integer>();
+		field.set(notificationService, toReplace);
 		MockitoAnnotations.initMocks(this);
 	}
 	

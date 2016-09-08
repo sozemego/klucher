@@ -37,7 +37,7 @@ public class KluchControllerTest extends TestWithMockUsers {
   @MockBean
   private KluchDao kluchDao;
   
-  @MockBean
+  @MockBean(name = "NotificationServiceWithCache")
   private NotificationService notificationService;
   
   @Autowired

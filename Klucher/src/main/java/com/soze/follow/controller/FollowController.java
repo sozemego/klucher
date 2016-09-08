@@ -3,6 +3,7 @@ package com.soze.follow.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,7 +24,9 @@ public class FollowController {
   private final NotificationService notificationService;
 
   @Autowired
-  public FollowController(FollowService followService, NotificationService notificationService) {
+  public FollowController(
+  		FollowService followService,
+  		@Qualifier("NotificationServiceWithCache") NotificationService notificationService) {
     this.followService = followService;
     this.notificationService = notificationService;
   }

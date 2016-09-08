@@ -37,7 +37,7 @@ public class FollowControllerTest extends TestWithMockUsers {
   @MockBean
   private FollowService followService;
   
-  @MockBean
+  @MockBean(name = "NotificationServiceWithCache")
   private NotificationService notificationService;
 
   @Before

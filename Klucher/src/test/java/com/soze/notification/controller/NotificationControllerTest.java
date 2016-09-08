@@ -41,7 +41,7 @@ public class NotificationControllerTest extends TestWithMockUsers {
 
 	private MockMvc mvc;
 
-	@MockBean
+	@MockBean(name = "NotificationServiceWithCache")
 	private NotificationService notificationService;
 
 	@Before

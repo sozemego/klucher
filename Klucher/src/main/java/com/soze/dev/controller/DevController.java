@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +33,7 @@ public class DevController {
   
   @Autowired
   public DevController(KluchService kluchService, RandomKluchGenerator kluchGenerator,
-  		FollowService followService, NotificationService notificationService) {
+  		FollowService followService, @Qualifier("NotificationServiceWithCache") NotificationService notificationService) {
     this.kluchService = kluchService;
     this.kluchGenerator = kluchGenerator;
     this.followService = followService;
