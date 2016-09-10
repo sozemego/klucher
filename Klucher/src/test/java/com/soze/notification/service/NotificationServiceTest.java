@@ -1,6 +1,8 @@
 package com.soze.notification.service;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -290,6 +292,96 @@ public class NotificationServiceTest extends TestWithMockUsers {
 	@Test(expected = UserDoesNotExistException.class)
 	public void testReadNotificationsUserDoesNotExist() throws Exception {
 		notificationService.read("valid");
+	}
+	
+	@Test(expected = NullOrEmptyException.class)
+	public void testRemoveFollowNotificationUsernameNull() throws Exception {
+		notificationService.removeFollowNotification(null, null);
+	}
+	
+	@Test(expected = NullOrEmptyException.class)
+	public void testRemoveFollowNotificationUsernameEmpty() throws Exception {
+		notificationService.removeFollowNotification("", null);
+	}
+	
+	@Test(expected = NullOrEmptyException.class)
+	public void testRemoveFollowNotificationFollowNull() throws Exception {
+		mockUser("test");
+		notificationService.removeFollowNotification("test", null);
+	}
+	
+	@Test(expected = NullOrEmptyException.class)
+	public void testRemoveFollowNotificationFollowEmpty() throws Exception {
+		mockUser("test");
+		notificationService.removeFollowNotification("test", "");
+	}
+	
+	@Test(expected = UserDoesNotExistException.class)
+	public void testRemoveFollowNotificationUsernameDoesNotExist() throws Exception {
+		notificationService.removeFollowNotification("test", "");
+	}
+	
+	@Test(expected = UserDoesNotExistException.class)
+	public void testRemoveFollowNotificationFollowDoesNotExist() throws Exception {
+		mockUser("test");
+		notificationService.removeFollowNotification("test", "follow");
+		
+	}
+	
+	@Test(expected = CannotDoItToYourselfException.class)
+	public void testRemoveFollowNotificationUsernameAndFollowEqual() throws Exception {
+		mockUser("test");
+		notificationService.removeFollowNotification("test", "test");
+	}
+	
+	@Test
+	public void testRemoveFollowNotificationDoesNotExist() throws Exception {
+		mockUser("test");
+		mockUser("follow");
+		Notification n = notificationService.removeFollowNotification("test", "follow");
+		assertThat(n, equalTo(null));
+	}
+	
+	@Test
+	public void testRemoveFollowNotificationValid() throws Exception {
+		mockUser("test");
+		User follow = mockUser("follow");
+		Notification notification = new Notification();
+		notification.setFollow("test");
+		follow.getNotifications().add(notification);
+		Notification n = notificationService.removeFollowNotification("test", "follow");
+		assertThat(n, notNullValue());
+		assertThat(n.getFollow(), equalTo("test"));
+	}
+	
+	@Test
+	public void testRemoveFollowNotificationTwiceValid() throws Exception {
+		mockUser("test");
+		User follow = mockUser("follow");
+		Notification notification = new Notification();
+		notification.setFollow("test");
+		follow.getNotifications().add(notification);
+		Notification n = notificationService.removeFollowNotification("test", "follow");
+		assertThat(n, notNullValue());
+		assertThat(n.getFollow(), equalTo("test"));
+		n = notificationService.removeFollowNotification("test", "follow");
+		assertThat(n, nullValue());
+	}
+	
+	@Test
+	public void testNumberOfNotificationsChangesWhenFollowNotificationRemoved() throws Exception {
+		mockUser("test");
+		User follow = mockUser("follow");
+		Notification notification = new Notification();
+		notification.setFollow("test");
+		follow.getNotifications().add(notification);
+		int notifications = notificationService.poll("follow");
+		assertThat(notifications, equalTo(1));
+		Notification n = notificationService.removeFollowNotification("test", "follow");
+		assertThat(n, notNullValue());
+		assertThat(n.getFollow(), equalTo("test"));
+		notifications = notificationService.poll("follow");
+		assertThat(notifications, equalTo(0));
 	}
 	
 	@Test

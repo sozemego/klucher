@@ -1,7 +1,6 @@
 package com.soze.follow.controller;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -85,7 +84,7 @@ public class FollowControllerTest extends TestWithMockUsers {
   	.andDo(print())
   	.andExpect(status().isOk());
   	verify(followService).unfollow(username, follow);
-  	verifyZeroInteractions(notificationService);
+  	verify(notificationService).removeFollowNotification(username, follow);
   }
 
 }

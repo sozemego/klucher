@@ -95,7 +95,8 @@ public class SimpleNotificationService implements NotificationService {
 	}
 	
 	@Override
-	public Notification addFollowNotification(String username, String follow) throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException {
+	public Notification addFollowNotification(String username, String follow)
+			throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException {
 		getUser(username);
 		User followUser = getUser(follow);
 		if(username.equals(follow)) {
@@ -108,6 +109,29 @@ public class SimpleNotificationService implements NotificationService {
 		return n;
 	}
 	
+	@Override
+	public Notification removeFollowNotification(String username, String follow)
+			throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException {
+		getUser(username);
+		User followUser = getUser(follow);
+		if(username.equals(follow)) {
+			throw new CannotDoItToYourselfException(username, "follow");
+		}
+		List<Notification> notifications = followUser.getNotifications();
+		Notification toRemove = null;
+		for(Notification n: notifications) {
+			if(username.equals(n.getFollow())) {
+				toRemove = n;
+				break;
+			}
+		}
+		if(toRemove != null) {
+			notifications.remove(toRemove);
+		}
+		userDao.save(followUser);		
+		return toRemove;
+	}
+
 	@Override
 	public void read(String username) throws NullOrEmptyException, UserDoesNotExistException {
 		User user = getUser(username);

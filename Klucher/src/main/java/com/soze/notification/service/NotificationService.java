@@ -46,14 +46,26 @@ public interface NotificationService {
 	/**
 	 * Creates a notification detailing an event of one User following another user.
 	 * Notification is going to be created for the user who was followed (<code>follow</code>).
-	 * @param username <code>username</code> of the user which followed
+	 * @param username <code>username</code> of the user who followed
 	 * @param follow <code>follow</code> is the name of the user who was followed
 	 * @throws NullOrEmptyException if either <code>username</code> or <code>follow</code> are null or empty
-	 * @throws UserDoesNotExistException if  with given username does not exist
+	 * @throws UserDoesNotExistException if user with given username does not exist
 	 * @throws CannotDoItToYourselfException if user tried to follow himself
 	 * @return a Notification for a follow event
 	 */
 	public Notification addFollowNotification(String username, String follow) throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException;
+	
+	/**
+	 * Removes a {@link Notification} which contains an event of <code>username</code>
+	 * following a user with username <code>follow</code>.
+	 * @param username <code>username</code> of the user who followed
+	 * @param follow <code>follow</code> is the name of the user who was followed
+	 * @return the removed Notification or null if it does not exist
+	 * @throws NullOrEmptyException if either <code>username</code> or <code>follow</code> are null or empty
+	 * @throws UserDoesNotExistException if user with given username does not exist
+	 * @throws CannotDoItToYourselfException if user tried to follow himself
+	 */
+	public Notification removeFollowNotification(String username, String follow) throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException;
 	
 	/**
 	 * Marks all notifications for this <code>username</code> as read.

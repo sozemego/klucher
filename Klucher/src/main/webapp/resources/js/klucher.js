@@ -927,7 +927,7 @@ function displayNewFollowers(followers) {
 	
 	// constructs a message to display with all followers
 	// who followed you recently. very messy. also, logic does not check out
-	const message = "";
+	let message = "";
 	const namesToDisplay = 3;
 	for(var i = 0; i < users.length; i++) {
 		if(i > 0) {

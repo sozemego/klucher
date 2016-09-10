@@ -52,6 +52,7 @@ public class FollowController {
     String username = authentication.getName();
     log.info("User [{}] tried to unfollow [{}]", username, follow);
     followService.unfollow(username, follow);
+    notificationService.removeFollowNotification(username, follow);
     return new ResponseEntity<String>(HttpStatus.OK);
     
   }
