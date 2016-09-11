@@ -6,6 +6,8 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.soze.register.model.RegisterForm;
 import com.soze.user.model.User;
+import com.soze.utils.FileUtils;
 
 public class RegisterConverterTest {
 
@@ -21,9 +24,12 @@ public class RegisterConverterTest {
   private PasswordEncoder encoder;
   
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     encoder = mock(PasswordEncoder.class);
-    converter = new RegisterConverter(encoder);
+    FileUtils utils = mock(FileUtils.class);
+    when(utils.readLinesFromClasspathFile("config/avatars.txt")).thenReturn(Arrays.asList("avatar_path"));
+    converter = new RegisterConverter(encoder, utils);
+    converter.init();
   }
   
   @Test
@@ -41,6 +47,7 @@ public class RegisterConverterTest {
     assertThat(user.getHashedPassword(), equalTo(hashedPassword));
     assertThat(user.getAuthorities().size(), equalTo(1));
     assertThat(user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER")), equalTo(true));
+    assertThat(user.getAvatarPath(), equalTo("avatar_path"));
   }
   
   @Test
@@ -58,6 +65,7 @@ public class RegisterConverterTest {
     assertThat(user.getHashedPassword(), equalTo(hashedPassword));
     assertThat(user.getAuthorities().size(), equalTo(1));
     assertThat(user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER")), equalTo(true));
+    assertThat(user.getAvatarPath(), equalTo("avatar_path"));
   }
 
 }

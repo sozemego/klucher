@@ -38,6 +38,7 @@ public class User implements UserDetails {
   private Set<String> following = new HashSet<>();
   @ElementCollection
   private List<Notification> notifications = new ArrayList<>();
+  private String avatarPath;
 
   public User() {
 
@@ -93,6 +94,14 @@ public class User implements UserDetails {
 
 	public void setNotifications(List<Notification> notifications) {
 		this.notifications = notifications;
+	}
+
+	public String getAvatarPath() {
+		return avatarPath;
+	}
+
+	public void setAvatarPath(String avatarPath) {
+		this.avatarPath = avatarPath;
 	}
 
 	@Override

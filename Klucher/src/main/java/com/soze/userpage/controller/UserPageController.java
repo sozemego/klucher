@@ -38,9 +38,8 @@ public class UserPageController {
       }
       model.addAttribute("follows", doesUsernameFollow(authorizedUsername, user));
     }    
-    model.addAttribute("username", username);
     model.addAttribute("loggedIn", loggedIn);
-    
+    model.addAttribute("user", user);
     return "user";
   }
   

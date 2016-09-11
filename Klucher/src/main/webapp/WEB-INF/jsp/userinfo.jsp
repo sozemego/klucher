@@ -19,10 +19,10 @@
 			<td>
 				<div class="profilePictureContainer dottedLightBlueBorder">
 					<img class="profilePicture"
-						src="../../resources/images/blue_profile.png"></img>
+						src="../../resources/images/${user.avatarPath}"></img>
 				</div>
 				<div class="userInfoText">
-					<span class="userInfoText">${username}</span>
+					<span class="userInfoText">${user.username}</span>
 				</div>
 			</td>
 		</tr>
