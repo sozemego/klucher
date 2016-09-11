@@ -1,13 +1,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <div class="userInfoContainer">
-	<table>
+	<table class = "userInfoTable">
 		<tr>
 			<td class = "verticalAlignTop">
 				<div id = "userButtonContainer" class="hidden">
-					<table id = "followButton" class = "followButton">
+					<table id = "followButton" class = "followButton dottedLightBlueBorder">
 						<tr>
 							<td>
-								<img id = "followImage" class = followImage>
+								<img id = "followImage" class = "followImage">
 							</td>
 							<td>
 								<span id = "followText" class = "followText"></span>
@@ -17,7 +17,7 @@
 				</div>
 			</td>
 			<td>
-				<div class="profilePictureContainer">
+				<div class="profilePictureContainer dottedLightBlueBorder">
 					<img class="profilePicture"
 						src="../../resources/images/blue_profile.png"></img>
 				</div>

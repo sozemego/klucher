@@ -13,7 +13,7 @@
 <c:import url="subheader.jsp"></c:import>
 <c:import url="alertElement.jsp"></c:import>
 <div class="content">
-		<table width = "100%">
+		<table width = "100%" class = "contentTable">
 			<tr>
 				<td class = "verticalAlignTop" width = "33%"><c:import url = "userinfo.jsp"></c:import></td>
 				<td width = "33%">

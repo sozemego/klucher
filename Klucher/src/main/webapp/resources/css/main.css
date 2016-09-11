@@ -2,6 +2,10 @@
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+form {
+	margin-bottom: 0em;
+}
+
 body {
 	padding: 0;
 	margin: 0;
@@ -9,6 +13,15 @@ body {
 
 .content {
 	padding-top: 125px;
+}
+
+.contentTable {
+	border:none;
+	border-collapse: collapse;
+}
+
+td.contentTable, th.contentTable {
+	padding: 0;
 }
 
 .centerViewport {
@@ -467,12 +480,38 @@ opacity
 }
 
 .profilePicture {
-	width: 200px;
-	height: 200px;
+	width: 196px;
+	height: 196px;
+	padding: 2px;
 }
 
 .profilePictureContainer {
 	width: 200px;
+}
+
+.dottedLightBlueBorder {
+	border: 1px dotted #add8e6;
+	border-radius: 4px;
+	-webkit-transition-duration: 0.15s;
+	transition-duration: 0.15s;
+	-webkit-transition-property: border;
+	transition-property: border;
+}
+
+.lightBlueBackgroundOnHover {
+	-webkit-transition-duration: 0.15s;
+	transition-duration: 0.15s;
+	-webkit-transition-property: background-color;
+	transition-property: background-color;
+	background-color: none;
+}
+
+.lightBlueBackgroundOnHover:hover {
+	background-color: #add8e6;
+}
+
+.dottedLightBlueBorder:hover {
+	border: 1px dotted #1c8baf;
 }
 
 .userInfoText {
@@ -482,6 +521,11 @@ opacity
 .userInfoContainer {
 	float: right;
 	vertical-align: top;
+}
+
+.userInfoTable {
+	border: none;
+	border-collapse: collapse;
 }
 
 .followButton { 
@@ -505,6 +549,10 @@ opacity
 .followText {
 	vertical-align: top;
 	top: -16px;
+}
+
+.followButton {
+	
 }
 
 .registerText {

@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 function registerOnLoad() {
 	checkAvailability(null);
 	attachValidationListeners();
@@ -289,7 +291,11 @@ function addKluchsToFeed(kluchs, append) {
 function addKluchToFeed(kluch, append) {
 
 	const outerDiv = $(document.createElement("div"));
-	append ? $("#kluchFeed").append(outerDiv) : $("#kluchFeed").prepend(outerDiv);
+	if(append) {
+		$("#kluchFeed").append(outerDiv);
+	} else {
+		$("#kluchFeed").prepend(outerDiv);
+	}
 	outerDiv.addClass("kluch opacityAnimation");
 
 	const authorDiv = $(document.createElement("div"));
@@ -482,7 +488,7 @@ function millisToText(millis) {
 	const now = new Date();
 	const millisNow = now.getTime();
 	const millisDifference = millisNow - date.getTime();
-	const minutesPassed = Math.floor(this.minutesPassed(millisDifference));
+	const minutesPassed = Math.floor(getMinutesPassed(millisDifference));
 	if(minutesPassed < 60) {
 		if(minutesPassed === 0) {
 			return "less than a minute ago";
@@ -492,30 +498,30 @@ function millisToText(millis) {
 		}
 		return minutesPassed + " minutes ago";
 	}
-	const hoursPassed = Math.floor(this.hoursPassed(minutesPassed));
+	const hoursPassed = Math.floor(getHoursPassed(minutesPassed));
     if(hoursPassed < 24) {
     	if(hoursPassed === 1) {
     		return "an hour ago";
     	}
     	return hoursPassed + " hours ago";
     }
-    const daysPassed = Math.floor(this.daysPassed(hoursPassed));
+    const daysPassed = Math.floor(getDaysPassed(hoursPassed));
     if(daysPassed === 1) {
     	return "a day ago";
     }
     return daysPassed + " days ago";
 }
 
-function minutesPassed(millis) {
+function getMinutesPassed(millis) {
 	const seconds = millis / 1000;
 	return seconds / 60;
 }
 
-function hoursPassed(minutes) {
+function getHoursPassed(minutes) {
 	return minutes / 60;
 }
 
-function daysPassed(hours) {
+function getDaysPassed(hours) {
 	return hours / 24;
 }
 
@@ -571,7 +577,7 @@ function createFollowButton() {
 	const followText = "Follow";
 	const followTextToAppend = "<span class = 'followText'>" + followText + "</span>";
 	$(document.createTextNode(followText)).appendTo("#followText");
-	const src = "../../resources/images/lasso.png";
+	const src = "../../resources/images/follow_1.png";
 	$("#followImage").attr("src", src);
 	addFollowListener();
 }
@@ -579,6 +585,7 @@ function createFollowButton() {
 function addFollowListener() {
 	$("#followButton").unbind("click");
 	$("#followButton").click(function() {
+		//$(this).fadeOut();
 		followUserAjax();
 	});
 }
@@ -614,7 +621,7 @@ function createUnfollowButton() {
 	const followText = "Unfollow";
 	const followTextToAppend = "<span class = 'followText'>" + followText + "</span>";
 	$(document.createTextNode(followText)).appendTo("#followText");
-	const src = "../../resources/images/invisible.png";
+	const src = "../../resources/images/unfollow_1.png";
 	$("#followImage").attr("src", src);
 	addUnfollowListener();
 }
@@ -870,10 +877,10 @@ function handleNotifications(notifications) {
 	const kluchIds = [];
 	const newFollowers = [];
 	for(var i = 0; i < notifications.length; i++) {
-		if(notifications[i].kluchId != null) {
+		if(notifications[i].kluchId !== null) {
 			kluchIds.push(notifications[i].kluchId);
 		}
-		if(notifications[i].follow != null) {
+		if(notifications[i].follow !== null) {
 			newFollowers.push(notifications[i].follow);
 		}
 	}
@@ -883,7 +890,7 @@ function handleNotifications(notifications) {
 }
 
 function getKluchs(kluchIds) {
-	if(kluchIds.length == 0) {
+	if(kluchIds.length === 0) {
 		return;
 	}
 	$.ajax({
@@ -917,7 +924,7 @@ $.ajax({
 }
 
 function displayNewFollowers(followers) {
-	if(followers.length == 0) {
+	if(followers.length === 0) {
 		return;
 	}
 	const users = [];
@@ -1018,5 +1025,4 @@ function createRemainingFollowersList(remainingFollowers) {
 		}
 		$("body").append(element);
 	}
-
 }
