@@ -1,10 +1,8 @@
 package com.soze.hashtag.controller;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -89,26 +87,6 @@ public class HashtagControllerTest extends TestWithMockUsers {
       .andExpect(status().isOk())
       .andExpect(model().attribute("hashtag", equalTo(hashtag)))
       .andExpect(model().attribute("loggedIn", equalTo(true)));
-  }
-  
-  @Test
-  public void testEmptyFeed() throws Exception {
-  	String hashtag = "dupa";
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/feed/" + hashtag)
-    		.accept(MediaType.APPLICATION_JSON)
-    		.contentType(MediaType.APPLICATION_JSON)
-        .param("timestamp", "0"))
-      .andDo(print())
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.elements", hasSize(0)));
-  }
-  
-  @Test
-  public void getFeedMissingTimestamp() throws Exception {
-  	String hashtag = "dupa";
-    mvc.perform(MockMvcRequestBuilders.get("/hashtag/feed/" + hashtag))
-    .andDo(print())
-    .andExpect(status().isBadRequest());
   }
   
   @Test

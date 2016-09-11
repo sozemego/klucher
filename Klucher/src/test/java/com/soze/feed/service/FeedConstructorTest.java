@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +32,7 @@ import com.soze.TestWithMockUsers;
 import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
 import com.soze.feed.model.Feed;
+import com.soze.feed.model.KluchFeedElement;
 import com.soze.feed.service.FeedConstructor.FeedDirection;
 import com.soze.hashtag.dao.HashtagDao;
 import com.soze.hashtag.model.Hashtag;
@@ -84,8 +86,8 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(new Timestamp(0)),
         eq(before)))
     .thenReturn(Arrays.asList());
-    Feed<Kluch> feed = constructor.constructFeed("test", 0, false);
-    List<Kluch> kluchs = feed.getElements();
+    Feed<KluchFeedElement> feed = constructor.constructFeed("test", 0, false);
+    List<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(0));
   }
 
@@ -128,13 +130,14 @@ public class FeedConstructorTest extends TestWithMockUsers {
   @Test
   public void getOneKluchBefore() {
     mockUser("test", "password");
+    List<Kluch> randomKluchs = getRandomKluchs(1);
     when(kluchDao.findByAuthorInAndTimestampLessThan(
         eq(Arrays.asList("test")),
         eq(new Timestamp(Long.MAX_VALUE)),
         eq(before)))
-    .thenReturn(Arrays.asList(new Kluch()));
-    Feed<Kluch> feed = constructor.constructFeed("test", Long.MAX_VALUE, false, FeedDirection.BEFORE);
-    List<Kluch> kluchs = feed.getElements();
+    .thenReturn(randomKluchs);
+    Feed<KluchFeedElement> feed = constructor.constructFeed("test", Long.MAX_VALUE, false, FeedDirection.BEFORE);
+    List<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs, notNullValue());
     assertThat(kluchs.size(), equalTo(1));
   }
@@ -142,13 +145,14 @@ public class FeedConstructorTest extends TestWithMockUsers {
   @Test
   public void getManyKluchsBefore() {
     mockUser("test", "password");
+    List<Kluch> randomKluchs = getRandomKluchs(30);
     when(kluchDao.findByAuthorInAndTimestampLessThan(
         eq(Arrays.asList("test")),
         eq(new Timestamp(Long.MAX_VALUE)),
         eq(before)))
-    .thenReturn(getRandomKluchs(30));
-    Feed<Kluch> feed = constructor.constructFeed("test", Long.MAX_VALUE, false, FeedDirection.BEFORE);
-    List<Kluch> kluchs = feed.getElements();
+    .thenReturn(randomKluchs);
+    Feed<KluchFeedElement> feed = constructor.constructFeed("test", Long.MAX_VALUE, false, FeedDirection.BEFORE);
+    List<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs, notNullValue());
     assertThat(kluchs.size(), equalTo(30));
   }
@@ -156,13 +160,14 @@ public class FeedConstructorTest extends TestWithMockUsers {
   @Test
   public void getOneKluchAfter() {
     mockUser("test", "password");
+    List<Kluch> randomKluchs = getRandomKluchs(1);
     when(kluchDao.findByAuthorInAndTimestampGreaterThan(
         eq(Arrays.asList("test")),
         eq(new Timestamp(0)),
         eq(after)))
-    .thenReturn(Arrays.asList(new Kluch()));
-    Feed<Kluch> feed = constructor.constructFeed("test", 0, false, FeedDirection.AFTER);
-    List<Kluch> kluchs = feed.getElements();
+    .thenReturn(randomKluchs);
+    Feed<KluchFeedElement> feed = constructor.constructFeed("test", 0, false, FeedDirection.AFTER);
+    List<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs, notNullValue());
     assertThat(kluchs.size(), equalTo(1));
   }
@@ -170,13 +175,14 @@ public class FeedConstructorTest extends TestWithMockUsers {
   @Test
   public void getManyKluchsAfter() {
     mockUser("test", "password");
+    List<Kluch> randomKluchs = getRandomKluchs(30);
     when(kluchDao.findByAuthorInAndTimestampGreaterThan(
         eq(Arrays.asList("test")),
         eq(new Timestamp(0)),
         eq(after)))
-    .thenReturn(getRandomKluchs(30));
-    Feed<Kluch> feed = constructor.constructFeed("test", 0, false, FeedDirection.AFTER);
-    List<Kluch> kluchs = feed.getElements();
+    .thenReturn(randomKluchs);
+    Feed<KluchFeedElement> feed = constructor.constructFeed("test", 0, false, FeedDirection.AFTER);
+    List<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs, notNullValue());
     assertThat(kluchs.size(), equalTo(30));
   }
@@ -199,9 +205,9 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(new Timestamp(0)),
         eq(before)))
     .thenReturn(Arrays.asList());
-    Feed<Kluch> feed = constructor.constructHashtagFeed(hashtagText, 0);
+    Feed<KluchFeedElement> feed = constructor.constructHashtagFeed(hashtagText, 0);
     assertThat(feed, notNullValue());
-    List<Kluch> kluchs = feed.getElements();
+    List<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(0));
   }
   
@@ -213,54 +219,74 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(new Timestamp(0)),
         eq(before)))
     .thenReturn(Arrays.asList());
-    Feed<Kluch> feed = constructor.constructHashtagFeed(hashtagText, 0);
+    Feed<KluchFeedElement> feed = constructor.constructHashtagFeed(hashtagText, 0);
     assertThat(feed, notNullValue());
-    List<Kluch> kluchs = feed.getElements();
+    List<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(0));
   }
   
   @Test
   public void testHashtagFeedValid() {
     String hashtagText = "#hashtag";
+    List<Kluch> randomKluchs = getRandomKluchs(1);
     when(kluchDao.findByHashtagsInAndTimestampLessThan(
         eq(new Hashtag(hashtagText)),
         eq(new Timestamp(0)),
         eq(before)))
-    .thenReturn(Arrays.asList(new Kluch()));
+    .thenReturn(randomKluchs);
     when(hashtagDao.findOne(hashtagText)).thenReturn(new Hashtag(hashtagText));
-    Feed<Kluch> feed = constructor.constructHashtagFeed(hashtagText, 0);
+    Feed<KluchFeedElement> feed = constructor.constructHashtagFeed(hashtagText, 0);
     assertThat(feed, notNullValue());
-    List<Kluch> kluchs = feed.getElements();
+    List<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(1));
   }
   
   @Test
   public void testHashtagFeedValidManyKluchs() {
     String hashtagText = "#hashtag";
+    List<Kluch> randomKluchs = getRandomKluchs(30);
     when(kluchDao.findByHashtagsInAndTimestampLessThan(
         eq(new Hashtag(hashtagText)),
         eq(new Timestamp(0)),
         eq(before)))
-    .thenReturn(getRandomKluchs(30));
+    .thenReturn(randomKluchs);
     when(hashtagDao.findOne(hashtagText)).thenReturn(new Hashtag(hashtagText));
-    Feed<Kluch> feed = constructor.constructHashtagFeed(hashtagText, 0);
+    Feed<KluchFeedElement> feed = constructor.constructHashtagFeed(hashtagText, 0);
     assertThat(feed, notNullValue());
-    List<Kluch> kluchs = feed.getElements();
+    List<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(30));
   }
   
   @Test
   public void getKluchsDontExist() throws Exception {
-  	Feed<Kluch> feed = constructor.getKluchs(Arrays.asList(1L, 2L));
+  	Feed<KluchFeedElement> feed = constructor.getKluchs(Arrays.asList(1L, 2L));
   	assertThat(feed.getElements().size(), equalTo(0));
   }
   
   private List<Kluch> getRandomKluchs(int number) {
     List<Kluch> kluchs = new ArrayList<>();
+    List<String> accumulatedUsernames = new ArrayList<>();
     for(int i = 0; i < number; i++) {
-      kluchs.add(new Kluch());
+    	Kluch kluch = new Kluch();
+    	String randomUsername = getRandomUsername();
+    	accumulatedUsernames.add(randomUsername);
+    	kluch.setAuthor(randomUsername);
+      kluchs.add(kluch);
     }
+    mockUsers(accumulatedUsernames);
     return kluchs;
+  }
+  
+  private String getRandomUsername() {
+  	Random random = new Random();
+  	String alphabet = "qwertyuiopasdfghjklzxcvbnm";	
+  	int randomUsernameLength = random.nextInt(12) + 1;
+  	String username = "";
+  	for(int i = 0; i < randomUsernameLength; i++) {
+  		int randomIndex = random.nextInt(alphabet.length());
+  		username += alphabet.charAt(randomIndex);
+  	}
+  	return username;
   }
 
 }

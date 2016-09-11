@@ -7,8 +7,8 @@ public class Notification {
 
 	private Long kluchId;
 
-	// name of the user which was followed by another user
-	private String follow;
+	// user data relevant to this notification
+	private NotificationUserView notificationUserView;
 
 	private boolean read;
 
@@ -32,20 +32,12 @@ public class Notification {
 		return read;
 	}
 
-	/**
-	 * Name of the user who was followed.
-	 * @return
-	 */
-	public String getFollow() {
-		return follow;
+	public NotificationUserView getNotificationUserView() {
+		return notificationUserView;
 	}
 
-	/**
-	 * Sets name of the user who was followed.
-	 * @param follow
-	 */
-	public void setFollow(String follow) {
-		this.follow = follow;
+	public void setNotificationUserView(NotificationUserView notificationUserView) {
+		this.notificationUserView = notificationUserView;
 	}
 
 }

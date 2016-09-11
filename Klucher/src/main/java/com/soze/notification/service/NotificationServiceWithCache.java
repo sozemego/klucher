@@ -20,6 +20,7 @@ import com.soze.common.exceptions.UserDoesNotExistException;
 import com.soze.feed.model.Feed;
 import com.soze.kluch.model.Kluch;
 import com.soze.notification.model.Notification;
+import com.soze.notification.model.NotificationUserView;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 
@@ -60,8 +61,12 @@ public class NotificationServiceWithCache implements NotificationService {
 	@Override
 	public Feed<Notification> getNotifications(String username) throws NullOrEmptyException, UserDoesNotExistException {
 		User user = getUser(username);
-		List<Notification> notifications = user.getNotifications();
+		List<Notification> notifications = getNotifications(user);
 		return new Feed<>(notifications);
+	}
+	
+	private List<Notification> getNotifications(User user) {
+		return user.getNotifications();
 	}
 
 	@Override
@@ -112,13 +117,13 @@ public class NotificationServiceWithCache implements NotificationService {
 	@Override
 	public Notification addFollowNotification(String username, String follow)
 			throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException {
-		getUser(username);
+		User follower = getUser(username);
 		User followUser = getUser(follow);
 		if(username.equals(follow)) {
 			throw new CannotDoItToYourselfException(username, "follow");
 		}
 		Notification n = new Notification();
-		n.setFollow(username);
+		n.setNotificationUserView(new NotificationUserView(follower.getUsername(), follower.getAvatarPath()));
 		followUser.getNotifications().add(n);
 		userDao.save(followUser);
 		cachedUsers.remove(follow);
@@ -136,9 +141,11 @@ public class NotificationServiceWithCache implements NotificationService {
 		List<Notification> notifications = followUser.getNotifications();
 		Notification toRemove = null;
 		for(Notification n: notifications) {
-			if(username.equals(n.getFollow())) {
-				toRemove = n;
-				break;
+			if(n.getNotificationUserView() != null) {
+				if(username.equals(n.getNotificationUserView().getUsername())) {
+					toRemove = n;
+					break;
+				}
 			}
 		}
 		if(toRemove != null) {

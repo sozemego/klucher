@@ -1,6 +1,5 @@
 package com.soze.dashboard.controller;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -61,8 +60,7 @@ public class DashboardControllerTest extends TestWithMockUsers {
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(view().name("dashboard"))
-        .andExpect(model().attributeExists("username"))
-        .andExpect(model().attribute("username", equalTo("user")));
+        .andExpect(model().attributeExists("user"));
   }
 
 }

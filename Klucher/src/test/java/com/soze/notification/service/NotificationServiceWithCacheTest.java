@@ -32,6 +32,7 @@ import com.soze.common.exceptions.UserDoesNotExistException;
 import com.soze.feed.model.Feed;
 import com.soze.kluch.model.Kluch;
 import com.soze.notification.model.Notification;
+import com.soze.notification.model.NotificationUserView;
 import com.soze.user.model.User;
 
 @RunWith(SpringRunner.class)
@@ -274,7 +275,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		mockUser("one", "password");
 		mockUser("two", "password");
 		Notification notification = notificationService.addFollowNotification("one", "two");
-		assertThat(notification.getFollow(), equalTo("one"));
+		assertThat(notification.getNotificationUserView().getUsername(), equalTo("one"));
 	}
 	
 	@Test
@@ -282,10 +283,10 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		mockUser("one", "password");
 		mockUser("two", "password");
 		Notification notification = notificationService.addFollowNotification("one", "two");
-		assertThat(notification.getFollow(), equalTo("one"));
+		assertThat(notification.getNotificationUserView().getUsername(), equalTo("one"));
 		mockUser("three", "password");
 		notification = notificationService.addFollowNotification("one", "three");
-		assertThat(notification.getFollow(), equalTo("one"));
+		assertThat(notification.getNotificationUserView().getUsername(), equalTo("one"));
 	}
 	
 	@Test(expected = NullOrEmptyException.class)
@@ -356,11 +357,13 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		mockUser("test");
 		User follow = mockUser("follow");
 		Notification notification = new Notification();
-		notification.setFollow("test");
+		NotificationUserView notificationUserView = new NotificationUserView();
+		notificationUserView.setUsername("test");
+		notification.setNotificationUserView(notificationUserView);
 		follow.getNotifications().add(notification);
 		Notification n = notificationService.removeFollowNotification("test", "follow");
 		assertThat(n, notNullValue());
-		assertThat(n.getFollow(), equalTo("test"));
+		assertThat(n.getNotificationUserView().getUsername(), equalTo("test"));
 	}
 	
 	@Test
@@ -368,11 +371,13 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		mockUser("test");
 		User follow = mockUser("follow");
 		Notification notification = new Notification();
-		notification.setFollow("test");
+		NotificationUserView notificationUserView = new NotificationUserView();
+		notificationUserView.setUsername("test");
+		notification.setNotificationUserView(notificationUserView);
 		follow.getNotifications().add(notification);
 		Notification n = notificationService.removeFollowNotification("test", "follow");
 		assertThat(n, notNullValue());
-		assertThat(n.getFollow(), equalTo("test"));
+		assertThat(n.getNotificationUserView().getUsername(), equalTo("test"));
 		n = notificationService.removeFollowNotification("test", "follow");
 		assertThat(n, nullValue());
 	}
@@ -382,13 +387,15 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		mockUser("test");
 		User follow = mockUser("follow");
 		Notification notification = new Notification();
-		notification.setFollow("test");
+		NotificationUserView notificationUserView = new NotificationUserView();
+		notificationUserView.setUsername("test");
+		notification.setNotificationUserView(notificationUserView);
 		follow.getNotifications().add(notification);
 		int notifications = notificationService.poll("follow");
 		assertThat(notifications, equalTo(1));
 		Notification n = notificationService.removeFollowNotification("test", "follow");
 		assertThat(n, notNullValue());
-		assertThat(n.getFollow(), equalTo("test"));
+		assertThat(n.getNotificationUserView().getUsername(), equalTo("test"));
 		notifications = notificationService.poll("follow");
 		assertThat(notifications, equalTo(0));
 	}

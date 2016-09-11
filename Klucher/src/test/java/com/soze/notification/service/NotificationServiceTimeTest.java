@@ -29,10 +29,6 @@ public class NotificationServiceTimeTest extends TestWithRealUsers {
 	private final Random random = new Random();
 	
 	@Autowired
-	@Qualifier("SimpleNotificationService")
-	private NotificationService notificationService;
-	
-	@Autowired
 	@Qualifier("NotificationServiceWithCache")
 	private NotificationService notificationServiceWithCache;
 	
@@ -64,18 +60,6 @@ public class NotificationServiceTimeTest extends TestWithRealUsers {
 	
 	@Test
 	@Ignore
-	public void timeTestUncachedPoll() throws Exception {
-		String username = "test";
-		addUser(username, "password");
-		addNotifications(username);
-		for(int i = 0; i < 5; i++) {
-			testUncached(username, true);
-		}
-		testUncached(username, false);
-	}
-	
-	@Test
-	@Ignore
 	public void timeTestCachedPoll() throws Exception {
 		String username = "test";
 		addUser(username, "password");
@@ -84,17 +68,6 @@ public class NotificationServiceTimeTest extends TestWithRealUsers {
 			testCached(username, true);
 		}
 		testCached(username, false);
-	}
-	
-	private void testUncached(String username, boolean warmUp) {
-		long startMs = System.currentTimeMillis();
-		int iterations = 500_000;
-		int sum = 0;
-		for(int i = 0; i < iterations; i++) {
-			sum += notificationService.poll(username);
-		}
-		long totalMs = System.currentTimeMillis() - startMs;
-		System.out.println("[UNCACHED] Sum was " + sum + ". total time taken in ms was " + totalMs + ". warmup ? " + warmUp);
 	}
 	
 	private void testCached(String username, boolean warmUp) {
@@ -106,12 +79,6 @@ public class NotificationServiceTimeTest extends TestWithRealUsers {
 		}
 		long totalMs = System.currentTimeMillis() - startMs;
 		System.out.println("[CACHED] Sum was " + sum + ". total time taken in ms was " + totalMs + ". warmup ? " + warmUp);
-	}
-	
-	private void addNotifications(String username) {
-		for(String user: usernames) {
-			notificationService.addFollowNotification(user, username);
-		}
 	}
 	
 	private void addNotificationsCache(String username) {

@@ -208,9 +208,33 @@ td.contentTable, th.contentTable {
 	padding-top: 45px;
 }
 
-.kluch {
+.kluchContainer {
 	width: 450px;
 	margin: auto;
+	overflow: auto;
+}
+
+.thumbnailContainer {
+	float: left;
+}
+
+.thumbnailAvatar {
+	min-width: 48px;
+	max-width: 48px;
+	max-height: 48px;
+	min-height: 48px;
+}
+
+.thumbnailAvatarSmall {
+	min-width: 24px;
+	max-width: 24px;
+	max-height: 24px;
+	min-height: 24px;
+}
+
+.kluch {
+	float: left;
+	width: 402px;
 }
 
 .author {
@@ -681,8 +705,17 @@ a.linkInKluch {
 	left: 0px;
 }
 
+.remainingFollowersListLink {
+	padding-left: 6px;
+	height: 100%;
+}
+
 .block {
 	display: block;
+}
+
+.inlineBlock {
+	display: inline-block;
 }
 
 .remainingListBackground {
@@ -690,4 +723,9 @@ a.linkInKluch {
 	background-color: #add8e6;
 	border: solid 1px gray;
 	padding: 5px;
+}
+
+.remainingFollowerContainer {
+	display: flex;
+	align-items: center;
 }

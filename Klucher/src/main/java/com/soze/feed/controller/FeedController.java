@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.soze.common.exceptions.NotLoggedInException;
 import com.soze.feed.model.Feed;
+import com.soze.feed.model.KluchFeedElement;
 import com.soze.feed.service.FeedConstructor;
 import com.soze.feed.service.FeedConstructor.FeedDirection;
-import com.soze.kluch.model.Kluch;
 
 @Controller
 public class FeedController {
@@ -50,7 +50,7 @@ public class FeedController {
 
 	@RequestMapping(value = "/feed/{username}", method = RequestMethod.GET)
 	@ResponseBody
-	public Feed<Kluch> getFeed(Authentication authentication,
+	public Feed<KluchFeedElement> getFeed(Authentication authentication,
 			@PathVariable String username,
 			@RequestParam Long timestamp,
 			@RequestParam(required = false) String direction)
@@ -70,12 +70,18 @@ public class FeedController {
 	
 	@RequestMapping(value = "/feed/notification", method = RequestMethod.GET)
 	@ResponseBody
-	public Feed<Kluch> getKluchsWithMentions(Authentication authentication, @RequestParam(value = "kluchIds[]") Long[] kluchIds) {
+	public Feed<KluchFeedElement> getKluchsWithMentions(Authentication authentication, @RequestParam(value = "kluchIds[]") Long[] kluchIds) {
 		if(authentication == null) {
 			throw new NotLoggedInException();
 		}
 		return feedConstructor.getKluchs(Arrays.asList(kluchIds));
 	}
+
+  @RequestMapping(value = "/feed/hashtag/{hashtag}", method = RequestMethod.GET)
+  @ResponseBody
+  public Feed<KluchFeedElement> getHashtagPage(@PathVariable String hashtag, @RequestParam Long timestamp) {
+    return feedConstructor.constructHashtagFeed(hashtag.toLowerCase(), timestamp);
+  }
 
 	/**
 	 * If an authenticated user polls their own feed, returns false. Otherwise,

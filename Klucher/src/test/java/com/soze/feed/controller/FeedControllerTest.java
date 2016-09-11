@@ -129,5 +129,25 @@ public class FeedControllerTest extends TestWithMockUsers {
     .andExpect(status().is(200));
     verify(feedConstructor).getKluchs(Arrays.asList(1L, 2L, 3L));
   }
+  
+  @Test
+  public void testEmptyFeed() throws Exception {
+  	String hashtag = "dupa";
+    mvc.perform(MockMvcRequestBuilders.get("/feed/hashtag/" + hashtag)
+    		.accept(MediaType.APPLICATION_JSON)
+    		.contentType(MediaType.APPLICATION_JSON)
+        .param("timestamp", "0"))
+      .andDo(print())
+      .andExpect(status().isOk());
+    verify(feedConstructor).constructHashtagFeed(hashtag, 0L);
+  }
+  
+  @Test
+  public void getFeedMissingTimestamp() throws Exception {
+  	String hashtag = "dupa";
+    mvc.perform(MockMvcRequestBuilders.get("/feed/hashtag/" + hashtag))
+    .andDo(print())
+    .andExpect(status().isBadRequest());
+  }
 
 }

@@ -4,9 +4,11 @@ import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.hamcrest.BaseMatcher;
@@ -32,6 +34,8 @@ import com.soze.user.model.User;
  */
 public class TestWithMockUsers {
 
+	private final Random random = new Random();
+	
   @MockBean
   private UserDao userDao;
   
@@ -84,21 +88,37 @@ public class TestWithMockUsers {
     return testUser;
   }
   
+  protected User mockRandomUser() {
+  	String username = getRandomUsername();
+  	return mockUser(username, false);
+  }
+  
+  private String getRandomUsername() {
+  	String alphabet = "qwertyuiopasdfghjklzxcvbnm";	
+  	int randomUsernameLength = random.nextInt(12) + 1;
+  	String username = "";
+  	for(int i = 0; i < randomUsernameLength; i++) {
+  		int randomIndex = random.nextInt(alphabet.length());
+  		username += alphabet.charAt(randomIndex);
+  	}
+  	return username;
+  }
+  
 	@SuppressWarnings("unchecked")
 	// http://stackoverflow.com/a/25700998/5017419
-	protected <T> Matcher<List<T>> sameAsSet(List<T> expected) {
-		return new BaseMatcher<List<T>>() {
+	protected <T> Matcher<Iterable<T>> sameAsSet(Iterable<T> expected) {
+		return new BaseMatcher<Iterable<T>>() {
 			@Override
 			public boolean matches(Object o) {
 
-				List<T> actualList = Collections.EMPTY_LIST;
+				Iterable<T> actualList = Collections.EMPTY_LIST;
 				try {
-					actualList = (List<T>) o;
+					actualList = (Iterable<T>) o;
 				} catch (ClassCastException e) {
 					return false;
 				}
-				Set<T> expectedSet = new HashSet<T>(expected);
-				Set<T> actualSet = new HashSet<T>(actualList);
+				Set<T> expectedSet = new HashSet<T>((Collection<? extends T>) expected);
+				Set<T> actualSet = new HashSet<T>((Collection<? extends T>) actualList);
 				return actualSet.equals(expectedSet);
 			}
 

@@ -222,14 +222,27 @@ function ajaxPostKluch() {
 			displayAlert(xhr.responseJSON.message);
 			setGettingFeed(0);
 		},
-		success: function(data, status, xhr) {
+		success: function(kluch, status, xhr) {
 			clearTextArea();
-			addKluchToFeed(data, false);
+			addKluchToFeed(kluch, getUserData(), false);
 			checkCharacterCount();
 			setGettingFeed(0);
 		}
 	});
 	focusInputArea();
+}
+
+function getUserData() {
+	const username = getUsername();
+	const avatarPath = getAvatarPath();
+	return  {
+		"username" : username,
+		"avatarPath" : avatarPath
+	};
+}
+
+function getAvatarPath() {
+	return $("#data").attr("data-avatar-path");
 }
 
 function focusInputArea() {
@@ -264,38 +277,38 @@ function getFeed(direction, timestamp, append) {
 			setGettingFeed(0);
 		},
 		success: function(data, status, xhr) {
-			addKluchsToFeed(data.elements, append);
+			addKluchUserFeed(data, append);
 			setGettingFeed(0);
 		}
 	});
-}
-
-// remembers if we've reached a Feed's last page
-function setPage(data) {
-	const page = data.kluchs;
-	if(page.last) {
-		$("#data").attr("data-page", -1);
-	}
 }
 
 function clearTextArea() {
 	$("#kluchTextArea").val("");
 }
 
-function addKluchsToFeed(kluchs, append) {
-	for(let i = 0; i < kluchs.length; i++) {
-		addKluchToFeed(kluchs[i], append);
+function addKluchUserFeed(feed, append) {
+	const feedElements = feed.elements;
+	for(let i = 0; i < feedElements.length; i++) {
+		addKluchToFeed(feedElements[i].kluch, feedElements[i].user, append);
 	}
 }
 
-function addKluchToFeed(kluch, append) {
+function addKluchToFeed(kluch, user, append) {
+
+	const kluchContainer = $(document.createElement("div"));
+	kluchContainer.addClass("kluchContainer");
+
+	const profileImageDiv = $(document.createElement("div"));
+	profileImageDiv.addClass("thumbnailContainer");
+	const img = $(document.createElement("img"));
+	img.attr("src", "../../resources/images/" + user.avatarPath);
+	img.addClass("thumbnailAvatar");
+	profileImageDiv.append(img);
+	kluchContainer.append(profileImageDiv);
 
 	const outerDiv = $(document.createElement("div"));
-	if(append) {
-		$("#kluchFeed").append(outerDiv);
-	} else {
-		$("#kluchFeed").prepend(outerDiv);
-	}
+	
 	outerDiv.addClass("kluch opacityAnimation");
 
 	const authorDiv = $(document.createElement("div"));
@@ -318,6 +331,13 @@ function addKluchToFeed(kluch, append) {
 	const processedKluchText = processKluchText(kluch.text);
 	$("<span>" + processedKluchText + "</span>").appendTo(textAreaDiv);
 	$(textAreaDiv).appendTo(outerDiv);
+	kluchContainer.append(outerDiv);
+
+	if(append) {
+		$("#kluchFeed").append(kluchContainer);
+	} else {
+		$("#kluchFeed").prepend(kluchContainer);
+	}
 
 	assignTimestamps(kluch);
 }
@@ -771,7 +791,7 @@ function getHashtagFeed(timestamp, append) {
 	$.ajax({
 		dataType: "json",
 		type: "GET",
-		url: "/hashtag/feed/" + hashtag,
+		url: "/feed/hashtag/" + hashtag,
 		data: {
 			"timestamp" : timestamp
 		},
@@ -780,7 +800,7 @@ function getHashtagFeed(timestamp, append) {
 			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
-			addKluchsToFeed(data.elements, append);
+			addKluchUserFeed(data, append);
 			setGettingFeed(0);
 		}
 	});
@@ -880,8 +900,8 @@ function handleNotifications(notifications) {
 		if(notifications[i].kluchId !== null) {
 			kluchIds.push(notifications[i].kluchId);
 		}
-		if(notifications[i].follow !== null) {
-			newFollowers.push(notifications[i].follow);
+		if(notifications[i].notificationUserView !== null) {
+			newFollowers.push(notifications[i].notificationUserView);
 		}
 	}
 	getKluchs(kluchIds);
@@ -905,7 +925,7 @@ function getKluchs(kluchIds) {
 			
 		},
 		success: function(data, status, xhr) {
-			addKluchsToFeed(data.elements);			
+			addKluchUserFeed(data);			
 		}
 	});	
 }
@@ -928,30 +948,31 @@ function displayNewFollowers(followers) {
 		return;
 	}
 	const users = [];
-	for(var i = 0; i < followers.length; i++) {
-		users.push(getUserLinkStyle(followers[i]));
+	for(let i = 0; i < followers.length; i++) {
+		users.push(getUserLinkStyle(followers[i].username));
 	}
 	
 	// constructs a message to display with all followers
 	// who followed you recently. very messy. also, logic does not check out
 	let message = "";
 	const namesToDisplay = 3;
-	for(var i = 0; i < users.length; i++) {
-		if(i > 0) {
-			if(i == users.length - 1) {
-				message += " and ";
-			} else {
-				message += ", ";
-			}
+	if(users.length === 1) {
+		message += users[0];
+	}
+	if(users.length === 2) {
+		message += users[0] + " and " + users[1];
+	}
+	if(users.length > 2) {
+		const remainingFollowers = users.length - namesToDisplay;
+		if(remainingFollowers === 0) {
+			message += users[0] + ", " + users[1] + " and " + users[2];
 		}
-		message += users[i];
-		if(i == namesToDisplay - 1) {
-			const remainingFollowers = (users.length - (i + 1));
+		
+		if(remainingFollowers > 0) {
+			message += users[0] + ", " + users[1] + ", " + users[2];
 			message += " and " + createRemainingFollowersElement(remainingFollowers) + " more";
-			break;
 		}
 	}
-
 	message += " followed you.";
 	createEventListenersForRemainingFollowersList();
 	createRemainingFollowersList(followers.slice(namesToDisplay));
@@ -1016,12 +1037,18 @@ function createRemainingFollowersList(remainingFollowers) {
 		element.toggleClass("remainingFollowersList remainingListBackground");
 		element.attr("id", "remainingFollowersList");
 		for(var i = 0; i < remainingFollowers.length; i++) {
+			const remainingFollowerContainer = $(document.createElement("div"));
+			remainingFollowerContainer.addClass("remainingFollowerContainer");
+			const img = $(document.createElement("img"));
+			img.addClass("thumbnailAvatarSmall");
+			img.attr("src", "../../resources/images/" + remainingFollowers[i].avatarPath);
+			remainingFollowerContainer.append(img);
 			const name = $(document.createElement("a"));
-			name.toggleClass('block');
-			name.toggleClass("userLink");
-			name.text(remainingFollowers[i]);
-			name.attr("href", "/u/" + remainingFollowers[i]);
-			element.append(name);
+			name.toggleClass("userLink remainingFollowersListLink");
+			name.text(remainingFollowers[i].username);
+			name.attr("href", "/u/" + remainingFollowers[i].username);
+			remainingFollowerContainer.append(name);
+			element.append(remainingFollowerContainer);
 		}
 		$("body").append(element);
 	}
