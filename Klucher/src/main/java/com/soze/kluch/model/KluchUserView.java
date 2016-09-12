@@ -1,8 +1,8 @@
 package com.soze.kluch.model;
 
 /**
- * A class containing fields of {@link User} object which are relevant to send
- * among {@link Kluch}'s.
+ * A class containing relevant data about a single {@link Kluch}'s author. Used
+ * within {@link KluchFeedElement}.
  * 
  * @author sozek
  *

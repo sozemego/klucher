@@ -3,7 +3,8 @@ package com.soze.feed.model;
 import java.util.List;
 
 /**
- * Feed is a simple wrapper class for a {@link List} of <code>T</code>.
+ * Feed is a simple wrapper class for a {@link List} of your desired type.
+ * This may change in the future.
  * @author sozek
  *
  */
