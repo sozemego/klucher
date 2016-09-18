@@ -1,6 +1,7 @@
 package com.soze.notification.model;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 
 @Embeddable
 public class Notification {
@@ -10,7 +11,8 @@ public class Notification {
 	// user data relevant to this notification
 	private NotificationUserView notificationUserView;
 
-	private boolean read;
+	@NotNull
+	private boolean noticed;
 
 	public Notification() {
 
@@ -24,12 +26,12 @@ public class Notification {
 		this.kluchId = kluchId;
 	}
 
-	public void setRead(boolean read) {
-		this.read = read;
+	public void setNoticed(boolean noticed) {
+		this.noticed = noticed;
 	}
 
-	public boolean isRead() {
-		return read;
+	public boolean isNoticed() {
+		return noticed;
 	}
 
 	public NotificationUserView getNotificationUserView() {

@@ -3,13 +3,14 @@ repositories {
 	maven { url "https://repository.jboss.org/nexus/content/repositories/releases" }
 }
 
+apply plugin: 'war'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'spring-boot'
 
 jar {
 	baseName = 'Klucher'
-	version = '0.0.1'
+	version = '0.5.0'
 }
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -29,9 +30,7 @@ buildscript {
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-actuator')
-	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-security')
-	compile('org.springframework:spring-messaging')
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.hibernate:hibernate-validator')
     compile('com.h2database:h2')
@@ -39,6 +38,8 @@ dependencies {
 	compile('org.apache.tomcat.embed:tomcat-embed-jasper')
 	compile('org.springframework.boot:spring-boot-devtools')
 	compile('org.springframework.security:spring-security-test')
+	compile('mysql:mysql-connector-java')
 	testCompile('org.springframework.boot:spring-boot-starter-test') 
 	testCompile('com.jayway.jsonpath:json-path')
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 }

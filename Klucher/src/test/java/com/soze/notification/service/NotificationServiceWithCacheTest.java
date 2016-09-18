@@ -94,7 +94,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		notifications.add(new Notification());
 		notifications.add(new Notification());
 		Notification readNotification = new Notification();
-		readNotification.setRead(true);
+		readNotification.setNoticed(true);
 		notifications.add(readNotification);
 		user.setNotifications(notifications);
 		int unreadNotifications = notificationService.poll("test");
@@ -409,7 +409,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		user.getNotifications().add(new Notification());
 		notificationService.read("user");
 		for(Notification n: user.getNotifications()) {
-			if(!n.isRead()) {
+			if(!n.isNoticed()) {
 				fail("All notifications should be read.");
 			}
 		}
