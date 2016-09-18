@@ -4,12 +4,18 @@ function registerOnLoad() {
 	checkAvailability(null);
 	attachValidationListeners();
 	attachSubmitRegisterListener();
+	validateRegisterForm();
 }
 
 //sends an Ajax request to check if given username is available
 function checkAvailability(lastUsername) {
 
-	var currentUsername = $("#username").val();
+	const currentUsername = $("#register-form-username").val();
+	if(hasWhiteSpace(currentUsername)) {
+		setTimeout(checkAvailability, 2500, currentUsername);
+		return;
+	}
+
 	if(lastUsername === currentUsername) {
 		setTimeout(checkAvailability, 2500, currentUsername);
 		return;
@@ -35,109 +41,97 @@ function checkAvailability(lastUsername) {
 }
 
 function attachValidationListeners() {
-	$("#username").on("keyup blur", function() {
+	$("#register-form-username").on("keyup click blur", function() {
 		validateRegisterForm();
 	});
-	$("#password").on("keyup blur", function() {
+	$("#register-form-password").on("keyup click blur", function() {
 		validateRegisterForm();
 	});
 }
 
 function validateRegisterForm() {
-	clearErrorTable();
+	clearErrors();
 	validateUsername();
 	validatePassword();
+	isUsernameAvailable();
 }
 
-function clearErrorTable() {
-	$("#errorTable").empty();
+function clearErrors() {
+	$("#register-errors").empty();
 }
 
 function validateUsername() {
 
-	const usernameElement = $("#username");
-
-	usernameElement.removeClass("invalidImg");
-	usernameElement.addClass("validImg");
-
+	const usernameElement = $("#register-form-username");
 	const username = usernameElement.val();
 
 	const isTooShort = isUsernameTooShort(username);
 	const isTooLong = isUsernameTooLong(username);
 	const whiteSpace = hasWhiteSpace(username);
 
-	if(isTooShort || isTooLong || whiteSpace) {
-		usernameElement.removeClass("validImg");
-		usernameElement.addClass("invalidImg");
-	}
-
 	if(isTooShort) {
-		$("#errorTable").append(createTableRowWithText("Username should be at least 1 character long."));
+		$("#register-errors").append(createDivWithText("Username should be at least 1 character long."));
 	}
 	if(isTooLong) {
-		$("#errorTable").append(createTableRowWithText("Username should not be longer than 32 characters."));
+		$("#register-errors").append(createDivWithText("Username should not be longer than 32 characters."));
 	}
 	if(whiteSpace) {
-		$("#errorTable").append(createTableRowWithText("Username cannot contain white space."));
+		$("#register-errors").append(createDivWithText("Username cannot contain white space."));
 	}
+
+	usernameElement.removeClass("form-input-field-invalid");
+	if(isTooShort || isTooLong || whiteSpace) {
+		usernameElement.addClass("form-input-field-invalid");
+	} 
 }
 
 function validatePassword() {
 
-	const passwordElement = $("#password");
-
-	passwordElement.removeClass("invalidImg");
-	passwordElement.addClass("validImg");
-
+	const passwordElement = $("#register-form-password");
 	const password = passwordElement.val();
+
 	const isTooShort = isPasswordTooShort(password);
 	const isTooLong = isPasswordTooLong(password);
 	const whiteSpace = hasWhiteSpace(password);
 
-	if(isTooShort || isTooLong || whiteSpace) {
-		passwordElement.removeClass("validImg");
-		passwordElement.addClass("invalidImg");
-	}
-
 	if(isTooShort) {
-		$("#errorTable").append(createTableRowWithText("Password should be at least 6 characters long."));
+		$("#register-errors").append(createDivWithText("Password should be at least 6 characters long."));
 	}
 	if(isTooLong) {
-		$("#errorTable").append(createTableRowWithText("Password should not be longer than 64 characters."));
+		$("#register-errors").append(createDivWithText("Password should not be longer than 64 characters."));
 	}
 	if(whiteSpace) {
-		$("#errorTable").append(createTableRowWithText("Password cannot contain white space."));
+		$("#register-errors").append(createDivWithText("Password cannot contain white space."));
 	}
+
+	passwordElement.removeClass("form-input-field-invalid");
+	if(isTooShort || isTooLong || whiteSpace) {
+		passwordElement.addClass("form-input-field-invalid");
+	} 
 }
 
 function attachSubmitRegisterListener() {
-	$("#registerForm").submit(function(event) {
+	$("#register-form").submit(function(event) {
 		validateRegisterForm();
-		const errors = $("#errorTable").children().length;
+		const errors = $("#register-errors").children().length + $("#register-availability-errors").children().length;
 		if(errors > 0) {
 			event.preventDefault();
 			return false;
 		}
-		$("#registerForm").submit();
 	});
 }
 
 function displayUsernameAvailable(available) {
-
-	const currentUsernameElement = $("#username");
-
-	if(available) {
-		currentUsernameElement.removeClass("unavailable");
-		currentUsernameElement.addClass("available");
-	} else {
-		currentUsernameElement.removeClass("available");
-		currentUsernameElement.addClass("unavailable invalidImg");
-		$("#errorTable").prepend(createTableRowWithText("Username exists already."));
-	}
+	const currentUsernameElement = $("#register-form-username");
+	$("#register-availability-errors").empty();
+	if(!available) {
+		currentUsernameElement.addClass("form-input-field-invalid");
+		$("#register-availability-errors").prepend(createDivWithText("Username exists already."));
+	} 
 }
 
-function createTableRowWithText(text) {
-	return "<tr><td align = \"center\">"+text+"</td></tr>";
+function createDivWithText(text) {
+	return "<div>"+text+"</div>";
 }
 
 function isUsernameTooShort(username) {
@@ -160,28 +154,36 @@ function hasWhiteSpace(text) {
 	return (/\s/g).test(text);
 }
 
+function isUsernameAvailable() {
+	const errors = $("#register-availability-errors").children().length > 0;
+	const usernameElement = $("#register-form-username");
+	if(errors) {
+		usernameElement.addClass("form-input-field-invalid");
+	} 
+}
+
 function dashboardOnLoad() {
 	// call getFeed with maximum (latest) allowable timestamp
-	getFeed("before", Number.MAX_SAFE_INTEGER, true);
 	attachCharacterCountListener();
-	attachShareKluchListener();
+	getFeed("before", Number.MAX_SAFE_INTEGER, true);
+	attachShareButtonListener();
 	attachInfiniteScrollingListener();
-	attachSubmitButtonListener();
 	attachNewKluchElementListener();
 	pollFeed();
+	pollNotifications();
 }
 
 function attachCharacterCountListener() {
-	$("#kluchTextArea").keyup(function() {
+	$("#kluch-text").keyup(function() {
 		checkCharacterCount();
 	});
 }
 
 function checkCharacterCount() {
-	const textArea = $("#kluchTextArea");
+	const textArea = $("#kluch-text");
 	const maxCharacters = 250;
 	const charactersLeft = charactersRemaining(textArea.val(), maxCharacters);
-	const charactersLeftElement = $("#charactersLeft");
+	const charactersLeftElement = $("#kluch-characters-remaining");
 	if(charactersLeft < 0) {
 		let text = textArea.val();
 		text = text.slice(0, 250);
@@ -195,21 +197,15 @@ function charactersRemaining(text, length) {
 	return length - text.length;
 }
 
-function attachSubmitButtonListener() {
-	$("#submitButton").click(function () {
-		$("#kluchForm").submit();
-	});
-}
-
-function attachShareKluchListener() {
-	$("#kluchForm").submit(function(event) {
-		event.preventDefault();
+function attachShareButtonListener() {
+	$("#kluch-share-button").on("click", function() {
 		ajaxPostKluch();
+		return false;
 	});
 }
 
 function ajaxPostKluch() {
-	const kluchText = $("#kluchTextArea").val();
+	const kluchText = $("#kluch-text").val();
 	if(kluchText.length === 0) {
 		return;
 	}
@@ -246,7 +242,11 @@ function getAvatarPath() {
 }
 
 function focusInputArea() {
-	$("#kluchTextArea").focus();
+	$("#kluch-text").focus();
+}
+
+function clearTextArea() {
+	$("#kluch-text").val("");
 }
 
 function getKluch(username, timestamp, text) {
@@ -283,10 +283,6 @@ function getFeed(direction, timestamp, append) {
 	});
 }
 
-function clearTextArea() {
-	$("#kluchTextArea").val("");
-}
-
 function addKluchUserFeed(feed, append) {
 	const feedElements = feed.elements;
 	for(let i = 0; i < feedElements.length; i++) {
@@ -297,49 +293,60 @@ function addKluchUserFeed(feed, append) {
 function addKluchToFeed(kluch, user, append) {
 
 	const kluchContainer = $(document.createElement("div"));
-	kluchContainer.addClass("kluchContainer");
+	kluchContainer.addClass("kluch-container");
 
-	const profileImageDiv = $(document.createElement("div"));
-	profileImageDiv.addClass("thumbnailContainer");
-	const img = $(document.createElement("img"));
-	img.attr("src", "../../resources/images/" + user.avatarPath);
-	img.addClass("thumbnailAvatar");
-	profileImageDiv.append(img);
-	kluchContainer.append(profileImageDiv);
+	const kluchAvatar = $(document.createElement("img"));
+	kluchAvatar.addClass("kluch-avatar");
+	kluchAvatar.attr("src", "../../resources/images/" + user.avatarPath);
+	kluchContainer.append(kluchAvatar);
 
-	const outerDiv = $(document.createElement("div"));
+	const kluchBody = $(document.createElement("div"));
+	kluchBody.addClass("kluch-body");
+
+	const kluchHeader = $(document.createElement("div"));
+	kluchHeader.addClass("kluch-header");
+
+	const kluchAuthor = $(document.createElement("a"));
+	kluchAuthor.addClass("kluch-header-author");
+	kluchAuthor.attr("href", "/u/" + kluch.author);
+	kluchAuthor.text(kluch.author);
 	
-	outerDiv.addClass("kluch opacityAnimation");
 
-	const authorDiv = $(document.createElement("div"));
-	authorDiv.addClass("authorDiv");
-	$("<a class = 'author' href = '/u/" + kluch.author + "'>" + kluch.author + "</span>").appendTo(authorDiv);
-	$("<span class = 'dashboardTime'>" + millisToText(kluch.timestamp) + "</span>").appendTo(authorDiv);
-	authorDiv.appendTo(outerDiv);
+	const kluchTime = $(document.createElement("span"));
+	kluchTime.addClass("kluch-header-time");
+	kluchTime.text(millisToText(kluch.timestamp));
 
-	const textAreaDiv = $(document.createElement("div"));
-	textAreaDiv.addClass("kluchTextArea preWrap");
+	kluchHeader.append(kluchAuthor);
+	kluchHeader.append(kluchTime);
 
-	const loggedIn = isLoggedIn();
-	if(loggedIn) {
-		const username = getUsername();
-		if(kluch.author === username) {
-			textAreaDiv.addClass("ownKluch");
-		}
-	}
+	kluchBody.append(kluchHeader);
 
+	const kluchContent = $(document.createElement("div"));
+	kluchContent.addClass("kluch-content");
+
+	const kluchText = $(document.createElement("span"));
+	kluchText.addClass("kluch-text");
 	const processedKluchText = processKluchText(kluch.text);
-	$("<span>" + processedKluchText + "</span>").appendTo(textAreaDiv);
-	$(textAreaDiv).appendTo(outerDiv);
-	kluchContainer.append(outerDiv);
+	kluchText.html(processedKluchText);
+
+	kluchContent.append(kluchText);
+
+	const kluchFooter = $(document.createElement("div"));
+	kluchFooter.addClass("kluch-footer");
+
+	kluchBody.append(kluchContent);
+	kluchBody.append(kluchFooter);
+
+	kluchContainer.append(kluchBody);
 
 	if(append) {
-		$("#kluchFeed").append(kluchContainer);
+		$("#kluch-feed").append(kluchContainer);
 	} else {
-		$("#kluchFeed").prepend(kluchContainer);
+		$("#kluch-feed").prepend(kluchContainer);
 	}
 
 	assignTimestamps(kluch);
+	
 }
 
 function processKluchText(text) {
@@ -384,7 +391,7 @@ function addLinks(text, regex, styleCallback) {
 }
 
 function getHashtagStyle(hashtag) {
-	return "<a class = 'hashtagLink' href = '/hashtag/" + hashtagWithoutPound(hashtag) + "'>" + hashtag + "</a>";
+	return "<a class = 'kluch-text-hashtag-link' href = '/hashtag/" + hashtagWithoutPound(hashtag) + "'>" + hashtag + "</a>";
 }
 
 function hashtagWithoutPound(hashtag) {
@@ -392,7 +399,7 @@ function hashtagWithoutPound(hashtag) {
 }
 
 function getUserLinkStyle(user) {
-	return "<a class = 'userLink' href = '/u/" + userWithoutAt(user) + "'>" + user + "</a>";
+	return "<a class = 'kluch-text-user-link' href = '/u/" + userWithoutAt(user) + "'>" + user + "</a>";
 }
 
 function userWithoutAt(user) {
@@ -400,7 +407,7 @@ function userWithoutAt(user) {
 }
 
 function getLinkStyle(link) {
-	return "<a class = 'linkInKluch' href = 'http://" + link + "'>" + link + "</a>";
+	return "<a class = 'kluch-text-link-link' href = 'http://" + link + "'>" + link + "</a>";
 }
 
 function getUsername() {
@@ -443,7 +450,7 @@ function attachInfiniteScrollingListener() {
 function displayLastPageMessage() {
 	const lastPage = $("#data").attr("data-page");
 	if(lastPage == -1) {
-		$("#lastPage").removeClass("hidden");
+		$(".kluch-no-more").addClass("kluch-no-more-visible");
 	}
 }
 
@@ -486,11 +493,11 @@ function pollFeed() {
 }
 
 function attachNewKluchElementListener() {
-	$("#newKluch").click(clickNewKluchs);
+	$("#new-kluch-alert").click(clickNewKluchs);
 }
 
 function displayNewKluchElement() {
-	$("#newKluch").removeClass("invisible");
+	$("#new-kluch-alert").addClass("dashboard-new-kluch-alert-visible");
 }
 
 function clickNewKluchs() {
@@ -499,7 +506,7 @@ function clickNewKluchs() {
 }
 
 function hideNewKluchElement() {
-	$("#newKluch").removeClass("invisible");
+	$("#new-kluch-alert").removeClass("dashboard-new-kluch-alert-visible");
 }
 
 // converts millisecond (unix time) difference between now and given parameter to readable text
@@ -549,39 +556,105 @@ function userOnLoad() {
 	getFeed("before", Number.MAX_SAFE_INTEGER, true);
 	attachInfiniteScrollingListener();
 	pollFeed();
-	createUserButtonContainer();
-	addFollowButton();
-	showLoginPage(false);
-	attachMouseOverOutListenersToLoginElement();
+	pollNotifications();
+	setUpUserButtons();
+	setUpLoginForm();
 	configureSubheaderButtons();
 }
 
-function createUserButtonContainer() {
-	$("#userButtonContainer").removeClass("hidden");
-	$("#userButtonContainer").addClass("userButtonContainer");
+function setUpUserButtons() {
+	const loggedIn = isLoggedIn();
+	if(loggedIn) {
+		setUpUserButtonsLoggedIn();
+	} else {
+		setUpUserButtonsLoggedOut();
+	}
 }
 
-function addFollowButton() {
-	const loggedIn = isLoggedIn();
-	if(!loggedIn) {
-		createFollowButtonLeadsToLogin();
+function setUpUserButtonsLoggedIn() {
+	setUpFollowButtonLoggedIn();
+}
+
+function setUpUserButtonsLoggedOut() {
+	attachLoginOnClick($("#user-button-follow"));
+	$("#user-button-like").addClass("user-button-inactive");
+	$("#user-button-poke").addClass("user-button-inactive");
+}
+
+function setUpFollowButtonLoggedIn() {
+	const follows = doesFollow();
+	if(follows) {
+		setUpUnfollowButton();
+	} else {
+		setUpFollowButton();
 	}
-	if(loggedIn) {
-		const follows = doesFollow();
-		if(follows) {
-			createUnfollowButton();
-		} else {
-			createFollowButton();
+}
+
+function setUpFollowButton() {
+	const userButtonFollowImg = $("#user-button-follow-image");
+	userButtonFollowImg.attr("src", "../../resources/images/follow_1.png");
+	const userButtonFollowText = $("#user-button-follow-text");
+	userButtonFollowText.text("follow");
+	$("#user-button-follow").unbind("click");
+	$("#user-button-follow").click(function() {
+		followUserAjax();
+	});
+}
+
+function setUpUnfollowButton() {
+	const userButtonFollowImg = $("#user-button-follow-image");
+	userButtonFollowImg.attr("src", "../../resources/images/unfollow_1.png");
+	const userButtonFollowText = $("#user-button-follow-text");
+	userButtonFollowText.text("unfollow");
+	$("#user-button-follow").unbind("click");
+	$("#user-button-follow").click(function() {
+		unfollowUserAjax();
+	});
+}
+
+function attachLoginOnClick(element) {
+	element.click(function() {
+		showLoginForm();
+	});
+}
+
+function showLoginForm() {
+	$("#page-overlay").fadeIn(150);
+	$("#form-login").fadeIn(150);
+	setTimeout(attachClickOutsideLoginElementListener, 50);
+}
+
+function hideLoginForm() {
+	$("#page-overlay").fadeOut(150);
+	$("#form-login").fadeOut(150);
+}
+
+function setUpLoginForm() {
+	$("#form-login").hover(function () {
+		$("#form-login").addClass("hover");
+	}, function() {
+		$("#form-login").removeClass("hover");
+	});
+}
+
+function attachClickOutsideLoginElementListener() {
+	$("body").click(toggleLoginFormIfMouseDoesNotHover);
+}
+
+function toggleLoginFormIfMouseDoesNotHover() {
+	const mouseHovers = $("#form-login").hasClass("hover");
+		if(!mouseHovers) {
+			hideLoginForm();
+			$("body").off("click", toggleLoginFormIfMouseDoesNotHover);
 		}
-	}
 }
 
 function isLoggedIn() {
 	// users can get to those mappings only if they are authorised
-	if(window.location.pathname == "/dashboard") {
+	if(window.location.pathname === "/dashboard") {
 		return true;
 	}
-	if(window.location.pathname == "/notifications") {
+	if(window.location.pathname === "/notifications") {
 		return true;
 	}
 	return $("#data").attr("data-logged-in") === "true";
@@ -590,24 +663,6 @@ function isLoggedIn() {
 // data-follows should store whether or not you follow the current user (at /u/* mappings)
 function doesFollow() {
 	return $("#data").attr("data-follows") === "true";
-}
-
-function createFollowButton() {
-	$("#followText").empty();
-	const followText = "Follow";
-	const followTextToAppend = "<span class = 'followText'>" + followText + "</span>";
-	$(document.createTextNode(followText)).appendTo("#followText");
-	const src = "../../resources/images/follow_1.png";
-	$("#followImage").attr("src", src);
-	addFollowListener();
-}
-
-function addFollowListener() {
-	$("#followButton").unbind("click");
-	$("#followButton").click(function() {
-		//$(this).fadeOut();
-		followUserAjax();
-	});
 }
 
 function followUserAjax() {
@@ -630,26 +685,9 @@ function followUserAjax() {
 			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
-			createUnfollowButton();
 			setFollow(true);
+			setUpUserButtons();
 		}
-	});
-}
-
-function createUnfollowButton() {
-	$("#followText").empty();
-	const followText = "Unfollow";
-	const followTextToAppend = "<span class = 'followText'>" + followText + "</span>";
-	$(document.createTextNode(followText)).appendTo("#followText");
-	const src = "../../resources/images/unfollow_1.png";
-	$("#followImage").attr("src", src);
-	addUnfollowListener();
-}
-
-function addUnfollowListener() {
-	$("#followButton").unbind("click");
-	$("#followButton").click(function() {
-		unfollowUserAjax();
 	});
 }
 
@@ -673,8 +711,8 @@ function unfollowUserAjax() {
 			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
-			createFollowButton();
 			setFollow(false);
+			setUpUserButtons();
 		}
 	});
 }
@@ -683,91 +721,12 @@ function setFollow(bool) {
 	$("#data").attr("data-follows", bool);
 }
 
-function createFollowButtonLeadsToLogin() {
-	createFollowButton();
-	addRedirectToLoginListener();
-}
-
-function addRedirectToLoginListener() {
-	$("#followButton").unbind("click");
-	$("#followButton").click(function() {
-		showLoginPage(true);
-	});
-}
-
-function redirectToLogin() {
-	window.location.href = "/login";
-}
-
-function showLoginPage(bool) {
-	if(!bool) {
-		$("#loginTable").addClass("hidden");
-		removeOverlay();
-	} else {
-		$("#loginTable").removeClass("hidden");
-		addOverlay();
-	}
-
-}
-
-function addOverlay() {
-	const overlay = "<div class = 'darkOverlay'></div>";
-	$(overlay).appendTo("body");
-	setTimeout(attachClickOutsideLoginElementListener, 50);
-}
-
-function removeOverlay() {
-	$("body").children(".darkOverlay").remove();
-	detachClickOutsideLoginElementListener();
-}
-
-function attachClickOutsideLoginElementListener() {
-	$("body").click(function(event) {
-		const isActive = $("#loginTable").hasClass("active");
-		if(!isActive) {
-			showLoginPage(false);
-		}
-	});
-}
-
-function detachClickOutsideLoginElementListener() {
-	$("body").off("click");
-}
-
-function attachMouseOverOutListenersToLoginElement() {
-	$("#loginTable").hover(function () {
-		$("#loginTable").addClass("active");
-	}, function() {
-		$("#loginTable").removeClass("active");
-	});
-}
-
-function toggleLoginTableActiveClass() {
-	$("#loginTable").toggleClass("active");
-}
-
-function configureLogoutButton() {
-	const loggedIn = isLoggedIn();
-	if(loggedIn) {
-		return;
-	}
-	const logoutSpan = $("#logoutButton .buttonText");
-	logoutSpan.text("login");
-	const logoutImg = $("#logoutButton .logoutButtonImg");
-	logoutImg.attr("src", "../../resources/images/login.png");
-	const logoutButtonElement = $("#logoutButton");
-	logoutButtonElement.attr("href", "#");
-	logoutButtonElement.click(function(event) {
-		showLoginPage(true);
-	});
-}
-
 function hashtagOnLoad() {
 	attachInifiteScrollingListenerHashtag();
 	configureSubheaderButtons();
-	showLoginPage(false);
-	attachMouseOverOutListenersToLoginElement();
+	setUpLoginForm();
 	getHashtagFeed(parseInt($("#data").attr("data-first-timestamp")), true);
+	pollNotifications();
 }
 
 function attachInifiteScrollingListenerHashtag() {
@@ -811,17 +770,37 @@ function configureSubheaderButtons() {
 	configureLogoutButton();
 	const loggedIn = isLoggedIn();
 	if(!loggedIn) {
-		$("#dashboardButton").toggleClass("invisible");
-		$("#notificationsButton").toggleClass("invisible");
-		$("#settingsButton").toggleClass("invisible");
+		$("#header-button-dashboard").toggleClass("header-button-inactive");
+		$("#header-button-notifications").toggleClass("header-button-inactive");
+		$("#header-button-settings").toggleClass("header-button-inactive");
 	}
 }
 
+function configureLogoutButton() {
+	const loggedIn = isLoggedIn();
+	if(loggedIn) {
+		return;
+	}
+	const loginButton = $("#header-logout-button");
+
+	const loginImage = loginButton.find(".header-button-image");
+	loginImage.attr("src", "../../resources/images/login.png");
+
+	const loginText = loginButton.find(".header-button-text");
+	loginText.text("login");
+
+	const loginLink = loginButton.find(".header-button-link");
+	loginLink.attr("href", "#");
+	loginButton.click(function() {
+		showLoginForm();
+	});
+}
+
 function displayAlert(text) {
-	$("#alertContent").text(text);
-	$("#alertElement").animate(
+	$("#alert-text").text(text);
+	$("#alert-container").animate(
 		{
-			height: "120px"
+			height: "135px"
 		},
 		150, attachHideAlert);
 }
@@ -832,9 +811,9 @@ function attachHideAlert() {
 
 function animateAlertUp() {
 	removeAnimateAlertUp();
-	$("#alertElement").animate(
+	$("#alert-container").animate(
 		{
-			height: "-120px"
+			height: "-135px"
 		},
 		150);
 }
@@ -843,8 +822,9 @@ function removeAnimateAlertUp() {
 	$("body").off("click", animateAlertUp);
 }
 
-function subheaderOnLoad() {
+function notificationsOnLoad() {
 	pollNotifications();
+	getNotifications();
 }
 
 function pollNotifications() {
@@ -867,17 +847,15 @@ function pollNotifications() {
 }
 
 function displayNewNotifications(number) {
-	const notificationsTextElement = $("#notificationsText");
+	const notificationsText = $("#header-button-notifications").find(".header-button-text");
 	if(number <= 0) {
-		notificationsTextElement.text("notifications");
+		notificationsText.text("notifications");
 	} else {
-		notificationsTextElement.text("notifications (" + number + ")");
+		if(number > 999) {
+			number = 999;
+		}
+		notificationsText.text("notifications (" + number + ")");
 	}
-}
-
-
-function notificationsOnLoad() {
-	getNotifications();
 }
 
 function getNotifications() {
@@ -931,7 +909,7 @@ function getKluchs(kluchIds) {
 }
 
 function sendMarkNotificationsAsRead() {
-$.ajax({
+	$.ajax({
 		type: "POST",
 		url: "/notification/read",
 		error: function(xhr, status, error) {
@@ -975,33 +953,30 @@ function displayNewFollowers(followers) {
 	}
 	message += " followed you.";
 	createEventListenersForRemainingFollowersList();
-	createRemainingFollowersList(followers.slice(namesToDisplay));
-	$("#newFollowersText").html(message);
+	populateRemainingFollowers(followers.slice(namesToDisplay));
+	$("#followers-new-text").html(message);
 }
 
 function createRemainingFollowersElement(remainingFollowers) {
-	return "<span id = 'remainingFollowers' class = 'remainingFollowers'>" + remainingFollowers + "</span>";
+	return "<span id = 'followers-new-remaining-text' class = 'followers-new-remaining-text'>" + remainingFollowers + "</span>";
 }
 
 function createEventListenersForRemainingFollowersList() {
-	
-	$("body").on("mouseenter", "#remainingFollowers", function(event) {
+	$("body").on("mouseenter", "#followers-new-remaining-text", function(event) {
 		showRemainingFollowersList(true);
 	});
 
-	$("body").on("click", "#remainingFollowers", function(event) {
-		$("#remainingFollowersList").fadeToggle('fast');
+	$("body").on("click", "#followers-new-remaining-text", function(event) {
+		$("#followers-new-free").fadeToggle('fast');
 	});
 
 	$("body").on("mousemove", function(event) {
-
-		const boundingRect = $("#remainingFollowersList")[0].getBoundingClientRect();
+		const boundingRect = $("#followers-new-free")[0].getBoundingClientRect();
 		const distance = pointRectDist(event.pageX, event.pageY, boundingRect.left, boundingRect.top, boundingRect.width, boundingRect.height);
 		const distanceToFadeOut = 25;
 		if(distance > distanceToFadeOut) {
 			showRemainingFollowersList(false);
 		}
-
 	});
 }
 
@@ -1014,10 +989,10 @@ function pointRectDist (px, py, rx, ry, rWidth, rHeight) {
 
 function showRemainingFollowersList(bool) {
 
-	const followersList = $("#remainingFollowersList");
+	const followersList = $("#followers-new-free");
 
 	if(bool) {
-		const position = $("#remainingFollowers").position();
+		const position = $("#followers-new-remaining-text").position();
 		followersList.css({
 			"top": position.top + 18,
 			"left": position.left + 10
@@ -1028,28 +1003,33 @@ function showRemainingFollowersList(bool) {
 	}
 }
 
-function createRemainingFollowersList(remainingFollowers) {
+function populateRemainingFollowers(remainingFollowers) {
 
-	const remainingFollowersListExists = $("#remainingFollowersList").length !== 0;
+	const remainingFollowersList = $("#followers-new-free");
+	remainingFollowersList.empty();
 
-	if(!remainingFollowersListExists) {
-		const element = $(document.createElement("div"));
-		element.toggleClass("remainingFollowersList remainingListBackground");
-		element.attr("id", "remainingFollowersList");
-		for(var i = 0; i < remainingFollowers.length; i++) {
-			const remainingFollowerContainer = $(document.createElement("div"));
-			remainingFollowerContainer.addClass("remainingFollowerContainer");
-			const img = $(document.createElement("img"));
-			img.addClass("thumbnailAvatarSmall");
-			img.attr("src", "../../resources/images/" + remainingFollowers[i].avatarPath);
-			remainingFollowerContainer.append(img);
-			const name = $(document.createElement("a"));
-			name.toggleClass("userLink remainingFollowersListLink");
-			name.text(remainingFollowers[i].username);
-			name.attr("href", "/u/" + remainingFollowers[i].username);
-			remainingFollowerContainer.append(name);
-			element.append(remainingFollowerContainer);
-		}
-		$("body").append(element);
+	for(var i = 0; i < remainingFollowers.length; i++) {
+
+		const follower = remainingFollowers[i];
+
+		const element = $(document.createElement("a"));
+		element.addClass("followers-new-free-element");
+		element.attr("href", "/u/" + follower.username);
+
+		const avatarContainer = $(document.createElement("div"));
+		avatarContainer.addClass("followers-new-free-element-image-container");
+
+		const avatar = $(document.createElement("img"));
+		avatar.addClass("followers-new-free-element-image");
+		avatar.attr("src", "../../resources/images/" + follower.avatarPath);
+		avatarContainer.append(avatar);
+		element.append(avatarContainer);
+
+		const text = $(document.createElement("span"));
+		text.addClass("followers-new-free-element-text");
+		text.text(follower.username);
+		element.append(text);
+		remainingFollowersList.append(element);
 	}
+
 }

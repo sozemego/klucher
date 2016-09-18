@@ -73,7 +73,7 @@ public class UserPopulation {
     UserRoles userRoles = new UserRoles();
     userRoles.setUsername(tokens[0]);
     userRoles.setUser(tokens.length > 2 ? (tokens[2].equals("1") ? true : false) : true);
-    userRoles.setAdmin(tokens.length > 2 ? (tokens[3].equals("1") ? true : false) : false);
+    userRoles.setAdmin(tokens.length > 3 ? (tokens[3].equals("1") ? true : false) : false);
     user.setUserRoles(userRoles);
     return user;
   }

@@ -26,6 +26,7 @@ import com.soze.kluch.model.Kluch;
  *
  */
 @Service
+@Transactional
 public class KluchService {
 
   private static final Logger log = LoggerFactory.getLogger(KluchService.class);
@@ -48,7 +49,6 @@ public class KluchService {
    * @throws NullOrEmptyException if either <code>username</code> or <code>kluchText</code> are null or empty
    * @throws InvalidLengthException if <code>kluchText</code> is longer than allowed
    */
-  @Transactional
   public Kluch post(String username, String kluchText) throws KluchPreviouslyPostedException, NullOrEmptyException, InvalidLengthException {
     validateInput(username, kluchText);
     checkAlreadyPosted(username, kluchText);
