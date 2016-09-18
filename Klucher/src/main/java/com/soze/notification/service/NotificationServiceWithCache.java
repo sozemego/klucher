@@ -53,7 +53,7 @@ public class NotificationServiceWithCache implements NotificationService {
 		List<Notification> unreadNotifications = 
 				notifications
 				.stream()
-				.filter(e -> !e.isRead())
+				.filter(e -> !e.isNoticed())
 				.collect(Collectors.toList());
 		return unreadNotifications.size();
 	}
@@ -159,7 +159,7 @@ public class NotificationServiceWithCache implements NotificationService {
 	@Override
 	public void read(String username) throws NullOrEmptyException, UserDoesNotExistException {
 		User user = getUser(username);
-		user.getNotifications().forEach(n -> n.setRead(true));
+		user.getNotifications().forEach(n -> n.setNoticed(true));
 		userDao.save(user);
 		cachedUsers.remove(username);
 	}
