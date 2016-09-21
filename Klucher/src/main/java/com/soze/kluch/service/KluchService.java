@@ -11,10 +11,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.common.exceptions.InvalidLengthException;
 import com.soze.common.exceptions.InvalidLengthException.Adjective;
+import com.soze.common.exceptions.InvalidOwnerException;
+import com.soze.common.exceptions.KluchDoesNotExistException;
 import com.soze.common.exceptions.KluchPreviouslyPostedException;
 import com.soze.common.exceptions.NullOrEmptyException;
+import com.soze.common.exceptions.UserDoesNotExistException;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
+import com.soze.user.dao.UserDao;
+import com.soze.user.model.User;
 
 /**
  * A service responsible for posting new Kluchs. It validates them, assembles
@@ -32,13 +37,15 @@ public class KluchService {
   private static final Logger log = LoggerFactory.getLogger(KluchService.class);
   private static final int KLUCH_MAX_LENGTH = 250;
   private final KluchDao kluchDao;
+  private final UserDao userDao;
   private final KluchAssembler kluchAssembler;
   private final Map<String, String> pastKluchs = new ConcurrentHashMap<>();
 
   @Autowired
-  public KluchService(KluchDao kluchDao, KluchAssembler kluchAssembler) {
+  public KluchService(KluchDao kluchDao, KluchAssembler kluchAssembler, UserDao userDao) {
     this.kluchDao = kluchDao;
     this.kluchAssembler = kluchAssembler;
+    this.userDao = userDao;
   }
 
   /**
@@ -86,19 +93,56 @@ public class KluchService {
         throw new InvalidLengthException("Kluch", Adjective.LONG);
     }
   }
-
+  
   private void saveLastKluch(String username, String kluchText) {
     pastKluchs.put(username, kluchText);
   }
-
-  public void deleteKluch(long id) {
-    kluchDao.delete(id);
-    log.info("Deleting a kluch with id [{}].", id);
+  
+  /**
+   * Removes {@link Kluch} with given id, if the username is an author of said kluch.
+   * @param username owner of kluch
+   * @param id id of kluch
+   * @return deleted Kluch
+   * @throws NullOrEmptyException username is empty or null
+   * @throws UserDoesNotExistException user with username does not exist
+   * @throws InvalidOwnerException user is not the owner of kluch with given id
+   * @throws KluchDoesNotExistException kluch with given id does not exist
+   */
+  public Kluch deleteKluch(String username, long id)
+  		throws NullOrEmptyException, UserDoesNotExistException,
+  		InvalidOwnerException, KluchDoesNotExistException {
+  	User user = getUser(username);
+  	Kluch kluch = kluchDao.findOne(id);
+  	if(kluch == null) {
+  		throw new KluchDoesNotExistException();
+  	}
+  	if(!user.getUsername().equals(kluch.getAuthor())) {
+  		throw new InvalidOwnerException("Kluch");
+  	}
+  	kluchDao.delete(kluch);
+  	return kluch;
   }
-
-  public void deleteAll(String username) {
-    kluchDao.deleteByAuthor(username);
-    log.info("Deleting all Kluchs posted by [{}].", username);
-  }
+  
+  /**
+	 * Validates username and checks if user exists. If it does, returns the
+	 * {@link User}.
+	 * 
+	 * @param username
+	 * @return
+	 * @throws NullOrEmptyException
+	 *           if <code>username</code> is null or empty
+	 * @throws UserDoesNotExistException
+	 *           if username with given <code>username</code> doesn't exist
+	 */
+	private User getUser(String username) throws UserDoesNotExistException, NullOrEmptyException {
+		if (username == null || username.isEmpty()) {
+			throw new NullOrEmptyException("Username");
+		}
+		User user = userDao.findOne(username);
+		if (user == null) {
+			throw new UserDoesNotExistException("There is no user named " + username);
+		}
+		return user;
+	}
 
 }

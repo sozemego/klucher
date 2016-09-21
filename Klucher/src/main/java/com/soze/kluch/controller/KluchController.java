@@ -2,6 +2,8 @@ package com.soze.kluch.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,8 +37,20 @@ public class KluchController {
     }
     String username = authentication.getName();
     Kluch kluch = kluchService.post(username, kluchText);
-    notificationService.processKluch(kluch);
+    notificationService.processUserMentions(kluch);
     return kluch;
+  }
+  
+  @RequestMapping(value = "/kluch", method = RequestMethod.DELETE)
+  @ResponseBody
+  public ResponseEntity<Object> deleteKluch(Authentication authentication, @RequestParam Long kluchId) throws Exception {
+  	if(authentication == null) {
+      throw new NotLoggedInException();
+    }
+  	String username = authentication.getName();
+  	Kluch kluch = kluchService.deleteKluch(username, kluchId);
+  	notificationService.removeUserMentions(kluch);
+  	return new ResponseEntity<Object>(HttpStatus.OK);
   }
   
 }

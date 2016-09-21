@@ -22,7 +22,10 @@
 			<input type="checkbox" id="rememberme" name="remember-me">Remember me</input>
 			<input type="submit" value="log in"></input>
 		</div>
-		<c:if test = "${not empty param.error}">
+		<div class="form-register-redirect">
+			<a class="form-register-redirect-link" href="/register">Don't have an account yet? Register for free!</a>
+		</div>
+		<c:if test = "${param.error != null}">
 			<div class="form-errors">
 				Invalid username or password!
 			</div>

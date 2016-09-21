@@ -87,7 +87,7 @@
 			</div>
 		</div>
 		
-		<div class="dashboard-section dashboard-section-feed">			
+		<div class="dashboard-section dashboard-section-feed">
 			<div class="dashboard-new-kluch-alert" id="new-kluch-alert">
 				<span class="dashboard-new-kluch-alert-text">new kluchs available, click here to view!</span>
 			</div>

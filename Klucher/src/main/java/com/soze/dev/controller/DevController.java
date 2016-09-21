@@ -58,7 +58,7 @@ public class DevController {
       @RequestParam(defaultValue = "false") Boolean deleteFirst) throws Exception {
     validateInput(number, millis, fastMode);
     if(deleteFirst) {
-      kluchService.deleteAll(username);
+      //kluchService.deleteAll(username);
     }
     post(username, number, millis, fastMode, mode);
     return "dev";
@@ -146,9 +146,9 @@ public class DevController {
       @RequestParam(required = false) Integer id) {
     log.info("Removing all posts for user [{}]", username);
     if(id == null) {
-      kluchService.deleteAll(username);
+      //kluchService.deleteAll(username);
     } else {
-      kluchService.deleteKluch(id);
+      //kluchService.deleteKluch(id);
     }
   }
   

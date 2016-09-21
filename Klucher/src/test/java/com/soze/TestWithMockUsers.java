@@ -14,7 +14,9 @@ import java.util.Set;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.junit.After;
 import org.junit.Before;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -110,7 +112,9 @@ public class TestWithMockUsers {
 		return new BaseMatcher<Iterable<T>>() {
 			@Override
 			public boolean matches(Object o) {
-
+				if(o == null) {
+					return false;
+				}
 				Iterable<T> actualList = Collections.EMPTY_LIST;
 				try {
 					actualList = (Iterable<T>) o;

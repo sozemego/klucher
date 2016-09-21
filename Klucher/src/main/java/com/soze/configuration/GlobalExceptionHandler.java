@@ -26,7 +26,9 @@ import com.soze.common.exceptions.CannotDoItToYourselfException;
 import com.soze.common.exceptions.CannotLoginException;
 import com.soze.common.exceptions.ContainsWhiteSpaceException;
 import com.soze.common.exceptions.InvalidLengthException;
+import com.soze.common.exceptions.InvalidOwnerException;
 import com.soze.common.exceptions.InvalidTimestampException;
+import com.soze.common.exceptions.KluchDoesNotExistException;
 import com.soze.common.exceptions.KluchPreviouslyPostedException;
 import com.soze.common.exceptions.NotLoggedInException;
 import com.soze.common.exceptions.NullOrEmptyException;
@@ -114,6 +116,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<Object> handleIllegal(IllegalArgumentException ex) {
 		log.info("IllegalArgumentException", ex);
 		return getResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler(InvalidOwnerException.class)
+	public ResponseEntity<Object> handleInvalidOwnerException(InvalidOwnerException e) {
+		String message = "You are not the owner of " + e.getProperty();
+		return getResponse(message, HttpStatus.UNAUTHORIZED);
+	}
+	
+	@ExceptionHandler(KluchDoesNotExistException.class)
+	public ResponseEntity<Object> handleKluchDoesNotExistException(KluchDoesNotExistException e) {
+		String message = "Kluch does not exist";
+		return getResponse(message, HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)

@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -46,10 +47,11 @@ public class NotificationController {
 	}
 	
 	@RequestMapping(value = "/notifications", method = RequestMethod.GET)
-	public String getNotificationsPage(Authentication authentication) throws Exception {
+	public String getNotificationsPage(Authentication authentication, Model model) throws Exception {
 		if(authentication == null) {
 			return "redirect:/login";
 		}
+		model.addAttribute("username", authentication.getName());
 		return "notifications";
 	}
 	

@@ -1,5 +1,6 @@
 package com.soze.feed.model;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -10,21 +11,21 @@ import java.util.List;
  */
 public class Feed<T> {
 
-  private List<T> elements;
+  private Collection<T> elements;
 
   public Feed() {
 
   }
   
-  public Feed(List<T> elements) {
+  public Feed(Collection<T> elements) {
     this.elements = elements;
   }
 
-  public void setElements(List<T> elements) {
+  public void setElements(Collection<T> elements) {
     this.elements = elements;
   }
 
-  public List<T> getElements() {
+  public Collection<T> getElements() {
     return elements;
   }
 

@@ -296,6 +296,17 @@ body {
 	text-align: right;
 }
 
+.form-register-redirect {
+	text-align: right;
+	width: 100%;
+}
+
+.form-register-redirect-link {
+	text-decoration: none;
+	cursor: pointer;
+	color: black;
+}
+
 .form-errors {
 	text-align: center;
 	width: 100%;
@@ -321,6 +332,7 @@ body {
 
 .dashboard-section-user {
 	text-align: right;
+	padding-right: 50px;
 }
 
 .dashboard-section-feed {
@@ -452,6 +464,10 @@ body {
 
 .user-info-text-name {
 	font-size: 1.25em;
+}
+
+.user-feed {
+	margin-top: 200px;
 }
 
 /**
@@ -638,6 +654,25 @@ a.kluch-text-link-link {
 	color: #b71664;
 	text-decoration: none;
 	cursor: pointer;
+}
+
+.kluch-footer {
+	width: 100%;
+	height : 32px;
+	text-align: right;
+	margin-top: 4px;
+	display: inline-flex;
+	justify-content: flex-end;
+}
+
+.kluch-footer-icon-container {
+	width: 50px;
+	margin-right: 4px;
+}
+
+.kluch-footer-icon {
+	width: 30px;
+	height: 28px;
 }
 
 .kluch-no-more {

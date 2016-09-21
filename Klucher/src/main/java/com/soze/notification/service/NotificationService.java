@@ -1,6 +1,5 @@
 package com.soze.notification.service;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
@@ -36,12 +35,21 @@ public interface NotificationService {
 	public Feed<Notification> getNotifications(String username) throws NullOrEmptyException, UserDoesNotExistException;
 	
 	/**
-	 * Finds notifications (@user mentions) in a given <code>kluch</code>.
-	 * Mentions for users that don't exist don't produce notifications.
-	 * @param kluch
-	 * @return list of notifications extracted from this <code>kluch</code>. Empty if there weren't any
+	 * Finds user mentions (@) in a given <code>kluch</code>.
+	 * Notification is saved in all existing user objects, mentions for users that don't exist don't produce notifications.
+	 * @param kluch kluch from which we want to extract user mentions (@)
+	 * @return Notification for a given Kluch or null if kluch has no user mentions
+	 * @throws NullOrEmptyException if kluch is null
 	 */
-	public List<Notification> processKluch(Kluch kluch);
+	public Notification processUserMentions(Kluch kluch) throws NullOrEmptyException;
+	
+	/**
+	 * Extracts user mentions (@) from a given <code>kluch</code>.
+	 * All users which exist and are mentioned have a notification for this kluch removed.
+	 * @param kluch that was deleted
+	 * @return notification which was removed, or null if there were none
+	 */
+	public Notification removeUserMentions(Kluch kluch) throws NullOrEmptyException;
 	
 	/**
 	 * Creates a notification detailing an event of one User following another user.

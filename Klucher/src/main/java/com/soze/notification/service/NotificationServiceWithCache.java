@@ -1,7 +1,6 @@
 package com.soze.notification.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +18,9 @@ import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
 import com.soze.feed.model.Feed;
 import com.soze.kluch.model.Kluch;
+import com.soze.notification.model.FollowNotification;
+import com.soze.notification.model.MentionNotification;
 import com.soze.notification.model.Notification;
-import com.soze.notification.model.NotificationUserView;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 
@@ -28,7 +28,6 @@ import com.soze.user.model.User;
 @Primary
 public class NotificationServiceWithCache implements NotificationService {
 	
-	private static final List<Notification> EMPTY_LIST = Arrays.asList();
 	private final UserDao userDao;
 	private final Map<String, Integer> cachedUsers = new ConcurrentHashMap<>();
 	
@@ -41,46 +40,57 @@ public class NotificationServiceWithCache implements NotificationService {
 	public int poll(String username) throws NullOrEmptyException, UserDoesNotExistException {
 		validate(username);
 		if(!cachedUsers.containsKey(username)) {
-			int notifications = getNotificationsFromDb(username);
+			int notifications = pollNotificationsFromDb(username);
 			cachedUsers.put(username, notifications);
 		}
 		return cachedUsers.get(username);
 	}
 	
-	private int getNotificationsFromDb(String username) {
+	private int pollNotificationsFromDb(String username) {
 		User user = getUser(username);
-		List<Notification> notifications = user.getNotifications();
-		List<Notification> unreadNotifications = 
-				notifications
-				.stream()
-				.filter(e -> !e.isNoticed())
-				.collect(Collectors.toList());
-		return unreadNotifications.size();
+		List<MentionNotification> mentionNotifications = user.getMentionNotifications();
+		List<FollowNotification> followNotifications = user.getFollowNotifications();
+		int unreadMentionNotifications = mentionNotifications.stream()
+				.mapToInt(n -> n.isNoticed() ? 0 : 1).sum();
+		int unreadFollowNotifications = followNotifications.stream()
+				.mapToInt(n -> n.isNoticed() ? 0 : 1).sum();
+		return unreadMentionNotifications + unreadFollowNotifications;
 	}
 
 	@Override
 	public Feed<Notification> getNotifications(String username) throws NullOrEmptyException, UserDoesNotExistException {
 		User user = getUser(username);
-		List<Notification> notifications = getNotifications(user);
+		Set<Notification> notifications = getNotifications(user);
 		return new Feed<>(notifications);
 	}
 	
-	private List<Notification> getNotifications(User user) {
-		return user.getNotifications();
+	private Set<Notification> getNotifications(User user) {
+		Set<Notification> notifications = new HashSet<>();
+		notifications.addAll(user.getFollowNotifications());
+		notifications.addAll(user.getMentionNotifications());
+		return notifications;
 	}
 
 	@Override
-	public List<Notification> processKluch(Kluch kluch) {
+	public Notification processUserMentions(Kluch kluch) {
+		if(kluch == null) {
+			throw new NullOrEmptyException("Kluch");
+		}
 		Set<String> userMentions = extractUserMentions(kluch.getText());
     if(userMentions.isEmpty()) {
-      return EMPTY_LIST;
+      return null;
     }
     
-    List<User> users = getUsers(new ArrayList<>(userMentions));   
-    List<Notification> notifications = getNotifications(users, kluch);
-    userDao.save(users);
-    users.forEach(u -> cachedUsers.remove(u.getUsername()));
-    return notifications;
+    MentionNotification notification = getMentionNotification(kluch);
+    List<User> realUsers = getUsers(new ArrayList<>(userMentions));
+    if(!realUsers.isEmpty()) {
+    	realUsers.forEach(u ->  {
+    		u.getMentionNotifications().add(notification);
+    		cachedUsers.remove(u.getUsername());
+    	});
+    	userDao.save(realUsers);
+    }
+    return notification;
 	}
 	
 	private Set<String> extractUserMentions(String kluchText) {
@@ -94,24 +104,47 @@ public class NotificationServiceWithCache implements NotificationService {
     return mentions;
 	}
 	
+	@Override
+	public Notification removeUserMentions(Kluch kluch) {
+		if(kluch == null) {
+			throw new NullOrEmptyException("Kluch");
+		}
+		Set<String> userMentions = extractUserMentions(kluch.getText());
+    if(userMentions.isEmpty()) {
+      return null;
+    }
+    Notification notification = getMentionNotification(kluch);
+    List<User> realUsers = getUsers(new ArrayList<>(userMentions));
+    List<User> modifiedUsers = removeNotifications(realUsers, notification);
+    if(!modifiedUsers.isEmpty()) {
+    	userDao.save(modifiedUsers);
+    	modifiedUsers.forEach(u -> cachedUsers.remove(u.getUsername()));
+    	return notification;
+    }
+    return null;
+	}
+	
+	private MentionNotification getMentionNotification(Kluch kluch) {
+		MentionNotification n = new MentionNotification();
+		n.setKluchId(kluch.getId());
+		return n;
+	}
+	
 	/**
-	 * Creates a list of {@link Notification}'s from the mentions
-	 * and a {@link Kluch}.
-	 * @param userMentions
-	 * @param kluch
-	 * @return
+	 * Removes given notification from each user in the list <code>users</code>.
+	 * Returns a list of users who had a notification removed.
+	 * @param users
+	 * @param notification
+	 * @return List of users that have been modified
 	 */
-	private List<Notification> getNotifications(List<User> users, Kluch kluch) {
-		List<Notification> notifications = users.stream()
-				.map(
-						u -> {
-							Notification n = new Notification();
-							n.setKluchId(kluch.getId());
-							u.getNotifications().add(n);
-							return n;
-						}
-					).collect(Collectors.toList());
-		return notifications;
+	private List<User> removeNotifications(List<User> users, Notification notification) {
+		List<User> modifiedUsers = users.stream()
+			.filter(u -> { 
+				return
+						(u.getMentionNotifications().remove(notification) || u.getFollowNotifications().remove(notification));
+			})
+			.collect(Collectors.toList());
+		return modifiedUsers;
 	}
 
 	@Override
@@ -122,11 +155,17 @@ public class NotificationServiceWithCache implements NotificationService {
 		if(username.equals(follow)) {
 			throw new CannotDoItToYourselfException(username, "follow");
 		}
-		Notification n = new Notification();
-		n.setNotificationUserView(new NotificationUserView(follower.getUsername(), follower.getAvatarPath()));
-		followUser.getNotifications().add(n);
+		FollowNotification n = getFollowNotification(follower);
+		followUser.getFollowNotifications().add(n);
 		userDao.save(followUser);
 		cachedUsers.remove(follow);
+		return n;
+	}
+
+	private FollowNotification getFollowNotification(User follower) {
+		FollowNotification n = new FollowNotification();
+		n.setUsername(follower.getUsername());
+		n.setAvatarPath(follower.getAvatarPath());
 		return n;
 	}
 
@@ -136,30 +175,24 @@ public class NotificationServiceWithCache implements NotificationService {
 		getUser(username);
 		User followUser = getUser(follow);
 		if(username.equals(follow)) {
-			throw new CannotDoItToYourselfException(username, "follow");
+			throw new CannotDoItToYourselfException(username, "unfollow");
 		}
-		List<Notification> notifications = followUser.getNotifications();
-		Notification toRemove = null;
-		for(Notification n: notifications) {
-			if(n.getNotificationUserView() != null) {
-				if(username.equals(n.getNotificationUserView().getUsername())) {
-					toRemove = n;
-					break;
-				}
-			}
+		List<FollowNotification> notifications = followUser.getFollowNotifications();
+		Notification toRemove = new FollowNotification(username);
+		boolean removed = notifications.remove(toRemove);
+		if (removed) {
+			userDao.save(followUser);
+			cachedUsers.remove(follow);
+			return toRemove;
 		}
-		if(toRemove != null) {
-			notifications.remove(toRemove);
-		}
-		userDao.save(followUser);
-		cachedUsers.remove(follow);
-		return toRemove;
+		return null;
 	}
 
 	@Override
 	public void read(String username) throws NullOrEmptyException, UserDoesNotExistException {
 		User user = getUser(username);
-		user.getNotifications().forEach(n -> n.setNoticed(true));
+		user.getFollowNotifications().forEach(n -> n.setNoticed(true));
+		user.getMentionNotifications().forEach(n -> n.setNoticed(true));
 		userDao.save(user);
 		cachedUsers.remove(username);
 	}

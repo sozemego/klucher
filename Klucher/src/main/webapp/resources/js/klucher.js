@@ -200,7 +200,6 @@ function charactersRemaining(text, length) {
 function attachShareButtonListener() {
 	$("#kluch-share-button").on("click", function() {
 		ajaxPostKluch();
-		return false;
 	});
 }
 
@@ -293,6 +292,7 @@ function addKluchUserFeed(feed, append) {
 function addKluchToFeed(kluch, user, append) {
 
 	const kluchContainer = $(document.createElement("div"));
+	kluchContainer.attr("data-id", kluch.id);
 	kluchContainer.addClass("kluch-container");
 
 	const kluchAvatar = $(document.createElement("img"));
@@ -333,6 +333,65 @@ function addKluchToFeed(kluch, user, append) {
 
 	const kluchFooter = $(document.createElement("div"));
 	kluchFooter.addClass("kluch-footer");
+
+	const likeButton = $(document.createElement("div"));
+	likeButton.addClass("kluch-footer-icon-container");
+	const likeImg = $(document.createElement("img"));
+	likeImg.addClass("kluch-footer-icon");
+	likeImg.attr("src", "../../resources/images/like_2.png");
+
+	likeImg.hover(function() {
+		$(this).attr("src", "../../resources/images/like_2_hover.png");
+	}, function() {
+		$(this).attr("src", "../../resources/images/like_2.png");
+	});
+
+	const loggedIn = isLoggedIn();
+
+	likeButton.append(likeImg);
+	kluchFooter.append(likeButton);
+
+	if(loggedIn) {
+			const username = getUsername();
+			if(username === kluch.author) {
+			const deleteButton = $(document.createElement("div"));
+			deleteButton.addClass("kluch-footer-icon-container");
+			const deleteImg = $(document.createElement("img"));
+			deleteImg.addClass("kluch-footer-icon");
+			deleteImg.attr("src", "../../resources/images/delete_2.png");
+
+			deleteImg.hover(function() {
+				$(this).attr("src", "../../resources/images/delete_2_hover.png");
+			}, function() {
+				$(this).attr("src", "../../resources/images/delete_2.png");
+			});
+
+			deleteButton.click({container: kluchContainer}, function(event) {
+				const kluchId = event.data.container.attr("data-id");
+				$.ajax({
+					type: "DELETE",
+					url: "/kluch?kluchId=" + kluchId,
+					error: function(xhr, status, error) {
+						displayAlert(xhr.responseJSON.message);
+					},
+					success: function(data, status, xhr) {
+						displayAlert("Kluch deleted!");
+						event.data.container.remove();
+					}
+				});
+			});
+
+			deleteButton.append(deleteImg);
+			kluchFooter.append(deleteButton);
+		}
+	}
+
+	
+	
+
+	//configure event listeners
+
+	//check if own kluch ../../resources/images/delete_1.png kluch-footer-icon-delete
 
 	kluchBody.append(kluchContent);
 	kluchBody.append(kluchFooter);
@@ -461,7 +520,7 @@ function setGettingFeed(data) {
 function pollFeed() {
 	const isGettingFeed = $("#data").attr("data-getting-feed");
 	if(isGettingFeed == 1) {
-		setTimeout(pollFeed, 5000);
+		setTimeout(pollFeed, 10000);
 		return;
 	}
 
@@ -480,11 +539,11 @@ function pollFeed() {
 			"direction" : "after"
 		},
 		error: function(xhr, status, error) {
-			setTimeout(pollFeed, 5000);
+			setTimeout(pollFeed, 10000);
 			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
-			setTimeout(pollFeed, 5000);
+			setTimeout(pollFeed, 10000);
 			if(data) {
 				displayNewKluchElement();
 			}
@@ -511,13 +570,12 @@ function hideNewKluchElement() {
 
 // converts millisecond (unix time) difference between now and given parameter to readable text
 function millisToText(millis) {
-	const date = new Date(millis);
 	const now = new Date();
 	const millisNow = now.getTime();
-	const millisDifference = millisNow - date.getTime();
+	const millisDifference = millisNow - millis;
 	const minutesPassed = Math.floor(getMinutesPassed(millisDifference));
 	if(minutesPassed < 60) {
-		if(minutesPassed === 0) {
+		if(minutesPassed <= 0) {
 			return "less than a minute ago";
 		}
 		if(minutesPassed === 1) {
@@ -837,10 +895,10 @@ function pollNotifications() {
 		url: "/notification/poll/",
 		error: function(xhr, status, error) {
 			displayAlert(xhr.responseJSON.message);
-			setTimeout(pollNotifications, 2500);
+			setTimeout(pollNotifications, 60 * 1000);
 		},
 		success: function(data, status, xhr) {
-			setTimeout(pollNotifications, 2500);
+			setTimeout(pollNotifications, 60 * 1000);
 			displayNewNotifications(data);
 		}
 	});
@@ -875,11 +933,12 @@ function handleNotifications(notifications) {
 	const kluchIds = [];
 	const newFollowers = [];
 	for(var i = 0; i < notifications.length; i++) {
-		if(notifications[i].kluchId !== null) {
-			kluchIds.push(notifications[i].kluchId);
+		const notification = notifications[i];
+		if(notification.kluchId !== undefined) {
+			kluchIds.push(notification.kluchId);
 		}
-		if(notifications[i].notificationUserView !== null) {
-			newFollowers.push(notifications[i].notificationUserView);
+		if(notification.username !== undefined) {
+			newFollowers.push({ username: notification.username, avatarPath: notification.avatarPath });
 		}
 	}
 	getKluchs(kluchIds);

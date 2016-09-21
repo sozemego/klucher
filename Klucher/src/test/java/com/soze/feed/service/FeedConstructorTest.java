@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -87,7 +88,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(before)))
     .thenReturn(Arrays.asList());
     Feed<KluchFeedElement> feed = constructor.constructFeed("test", 0, false);
-    List<KluchFeedElement> kluchs = feed.getElements();
+    Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(0));
   }
 
@@ -137,7 +138,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(before)))
     .thenReturn(randomKluchs);
     Feed<KluchFeedElement> feed = constructor.constructFeed("test", Long.MAX_VALUE, false, FeedDirection.BEFORE);
-    List<KluchFeedElement> kluchs = feed.getElements();
+    Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs, notNullValue());
     assertThat(kluchs.size(), equalTo(1));
   }
@@ -152,7 +153,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(before)))
     .thenReturn(randomKluchs);
     Feed<KluchFeedElement> feed = constructor.constructFeed("test", Long.MAX_VALUE, false, FeedDirection.BEFORE);
-    List<KluchFeedElement> kluchs = feed.getElements();
+    Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs, notNullValue());
     assertThat(kluchs.size(), equalTo(30));
   }
@@ -167,7 +168,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(after)))
     .thenReturn(randomKluchs);
     Feed<KluchFeedElement> feed = constructor.constructFeed("test", 0, false, FeedDirection.AFTER);
-    List<KluchFeedElement> kluchs = feed.getElements();
+    Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs, notNullValue());
     assertThat(kluchs.size(), equalTo(1));
   }
@@ -182,7 +183,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(after)))
     .thenReturn(randomKluchs);
     Feed<KluchFeedElement> feed = constructor.constructFeed("test", 0, false, FeedDirection.AFTER);
-    List<KluchFeedElement> kluchs = feed.getElements();
+    Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs, notNullValue());
     assertThat(kluchs.size(), equalTo(30));
   }
@@ -207,7 +208,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
     .thenReturn(Arrays.asList());
     Feed<KluchFeedElement> feed = constructor.constructHashtagFeed(hashtagText, 0);
     assertThat(feed, notNullValue());
-    List<KluchFeedElement> kluchs = feed.getElements();
+    Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(0));
   }
   
@@ -221,7 +222,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
     .thenReturn(Arrays.asList());
     Feed<KluchFeedElement> feed = constructor.constructHashtagFeed(hashtagText, 0);
     assertThat(feed, notNullValue());
-    List<KluchFeedElement> kluchs = feed.getElements();
+    Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(0));
   }
   
@@ -237,7 +238,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
     when(hashtagDao.findOne(hashtagText)).thenReturn(new Hashtag(hashtagText));
     Feed<KluchFeedElement> feed = constructor.constructHashtagFeed(hashtagText, 0);
     assertThat(feed, notNullValue());
-    List<KluchFeedElement> kluchs = feed.getElements();
+    Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(1));
   }
   
@@ -253,7 +254,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
     when(hashtagDao.findOne(hashtagText)).thenReturn(new Hashtag(hashtagText));
     Feed<KluchFeedElement> feed = constructor.constructHashtagFeed(hashtagText, 0);
     assertThat(feed, notNullValue());
-    List<KluchFeedElement> kluchs = feed.getElements();
+    Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(30));
   }
   
