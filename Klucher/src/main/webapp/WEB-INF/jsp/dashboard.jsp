@@ -8,7 +8,7 @@
 <script src="/resources/js/klucher.js"></script>
 </head>
 <body>
-<input type = "hidden" id = "data" data-username = "${user.username}" data-avatar-path = "${user.avatarPath}" data-page = "0" data-last-timestamp="0" data-first-timestamp = "9007199254740991">
+<input type = "hidden" id = "data" data-username = "${username}" data-avatar-path = "${avatarPath}" data-page = "0" data-last-timestamp="0" data-first-timestamp = "9007199254740991">
 <c:import url="header_with_buttons.jsp"></c:import>
 <div class="page">
 	<div class="dashboard">

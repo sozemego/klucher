@@ -9,7 +9,7 @@
 <script src="/resources/js/klucher.js"></script>
 </head>
 <body>
-<input type="hidden" id="data" data-username="${user.username}"
+<input type="hidden" id="data" data-username="${username}"
 	data-page="0" data-last-timestamp="0"
 	data-first-timestamp = "9007199254740991" data-logged-in="${loggedIn}" data-follows = "${follows}">
 <div class="header">
