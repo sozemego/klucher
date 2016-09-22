@@ -43,10 +43,11 @@ public class User implements UserDetails {
 	private Set<String> following = new HashSet<>();
 
 	@ElementCollection
+	@OrderColumn(name = "mention_created_index")
 	private List<MentionNotification> mentionNotifications = new ArrayList<>();
 
 	@ElementCollection
-	@OrderColumn(name = "created_index")
+	@OrderColumn(name = "follow_created_index")
 	private List<FollowNotification> followNotifications = new ArrayList<>();
 
 	private String avatarPath;
