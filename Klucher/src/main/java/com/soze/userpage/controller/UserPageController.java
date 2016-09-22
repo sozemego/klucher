@@ -33,13 +33,14 @@ public class UserPageController {
     boolean loggedIn = authentication != null && !(authentication instanceof AnonymousAuthenticationToken);
     if (loggedIn) {
       String authorizedUsername = authentication.getName();
+      model.addAttribute("username", authorizedUsername);
       if(authorizedUsername.equals(username)) {
         return "redirect:/dashboard";
       }
       model.addAttribute("follows", doesUsernameFollow(authorizedUsername, user));
     }    
     model.addAttribute("loggedIn", loggedIn);
-    model.addAttribute("user", user);
+    
     return "user";
   }
   
