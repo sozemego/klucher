@@ -1,7 +1,6 @@
 package com.soze.kluch.service;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.HashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,7 @@ public class KluchAssembler {
     Kluch kluch = new Kluch();
     kluch.setAuthor(author);
     kluch.setText(kluchText);
-    kluch.setTimestamp(new Timestamp(Instant.now().toEpochMilli()));
+    kluch.setTimestamp(new Timestamp(System.currentTimeMillis()));
     kluch.setHashtags(new HashSet<>(hashtagService.process(kluch)));
     return kluch;
   }
