@@ -15,7 +15,7 @@
 		<div class="dashboard-section dashboard-section-user">
 			<div class="user-info-container">
 				<div class="user-avatar-container">
-					<img class="user-avatar" src="../../resources/images/${user.avatarPath}"></img>
+					<img class="user-avatar" src="../../resources/images/${avatarPath}"></img>
 				</div>
 				<div class="user-info-text">
 					<span class="user-info-text-name">${user.username}</span>
