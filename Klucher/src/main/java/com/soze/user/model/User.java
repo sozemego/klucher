@@ -11,6 +11,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderColumn;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -45,6 +46,7 @@ public class User implements UserDetails {
 	private List<MentionNotification> mentionNotifications = new ArrayList<>();
 
 	@ElementCollection
+	@OrderColumn(name = "created_index")
 	private List<FollowNotification> followNotifications = new ArrayList<>();
 
 	private String avatarPath;
