@@ -46,7 +46,7 @@ public interface KluchDao {
   
   public List<Kluch> findByAuthorInAndTimestampLessThan(Iterable<String> authors, Timestamp lessThan, Pageable pageRequest);
   
-  public List<Kluch> findByAuthorInAndTimestampGreaterThan(Iterable<String> authors, Timestamp lessThan, Pageable pageRequest);
+  public List<Kluch> findByAuthorInAndTimestampGreaterThan(Iterable<String> authors, Timestamp greaterThan, Pageable pageRequest);
   
   public void deleteByAuthor(String author);
   

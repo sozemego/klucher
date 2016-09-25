@@ -5,8 +5,6 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -110,10 +108,10 @@ public class FeedControllerTest extends TestWithMockUsers {
   
   @Test
   public void testGetKluchsWithMentionsUnauthorized() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/feed/notification")
+    mvc.perform(MockMvcRequestBuilders.get("/feed/mentions")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
-        .param("kluchIds[]", "1", "2", "3"))
+        .param("timestamp", "" + Long.MAX_VALUE))
     .andDo(print())
     .andExpect(status().is(401));
   }
@@ -121,13 +119,13 @@ public class FeedControllerTest extends TestWithMockUsers {
   @Test
   public void testGetKluchsWithMentions() throws Exception {
   	mockUser("test", true);	
-    mvc.perform(MockMvcRequestBuilders.get("/feed/notification")
+    mvc.perform(MockMvcRequestBuilders.get("/feed/mentions")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
-        .param("kluchIds[]", "1", "2", "3"))
+        .param("timestamp", "" + Long.MAX_VALUE))
     .andDo(print())
     .andExpect(status().is(200));
-    verify(feedConstructor).getKluchs(Arrays.asList(1L, 2L, 3L));
+    verify(feedConstructor).getMentions("test", Long.MAX_VALUE);
   }
   
   @Test

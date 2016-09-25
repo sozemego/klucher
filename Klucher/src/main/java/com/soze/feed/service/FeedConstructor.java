@@ -3,6 +3,7 @@ package com.soze.feed.service;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ import com.soze.hashtag.model.Hashtag;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
 import com.soze.kluch.model.KluchUserView;
+import com.soze.notification.model.MentionNotification;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 
@@ -234,28 +236,6 @@ public class FeedConstructor {
 	}
 
 	/**
-	 * Validates username and checks if user exists. If it does, returns the
-	 * {@link User}.
-	 * 
-	 * @param username
-	 * @return
-	 * @throws NullOrEmptyException
-	 *           if <code>username</code> is null or empty
-	 * @throws UserDoesNotExistException
-	 *           if username with given <code>username</code> doesn't exist
-	 */
-	private User getUser(String username) throws UserDoesNotExistException, NullOrEmptyException {
-		if (username == null || username.isEmpty()) {
-			throw new NullOrEmptyException("Username");
-		}
-		User user = userDao.findOne(username);
-		if (user == null) {
-			throw new UserDoesNotExistException("There is no user named " + username);
-		}
-		return user;
-	}
-
-	/**
 	 * Checks if given hashtagText is null or empty, and attempts to get a
 	 * {@link Hashtag} with given text.
 	 * 
@@ -292,6 +272,63 @@ public class FeedConstructor {
 		List<Kluch> kluchs = kluchDao.findAll((Iterable<Long>) ids);
 		return convertKluchsToFeedElements(kluchs);
 
+	}
+	
+	/**
+	 * Returns a feed of {@link KluchFeedElement}s which contain
+	 * a mention of a given user and were all posted before (earlier than) <code>beforeTimestamp</code>
+	 * @param username username for who we wish to retrieve Kluchs with mentions
+	 * @param beforeTimestamp
+	 * @return a feed of {@link KluchFeedElement}
+	 * @throws NullOrEmptyException if username is null or empty
+	 * @throws UserDoesNotExistException if user with <code>username</code> does not exist
+	 * @throws InvalidTimestampException if <code>beforeTimestamp</code> is negative 
+	 */
+	public Feed<KluchFeedElement> getMentions(String username, long beforeTimestamp) 
+			throws NullOrEmptyException, UserDoesNotExistException, InvalidTimestampException {
+		validateTimestamp(beforeTimestamp);
+		User user = getUser(username);
+		user.getMentionNotifications();
+		List<MentionNotification> before = getMentionsBeforeTimestamp(user, beforeTimestamp);
+		List<Long> kluchIds = extractKluchIdsFromMentions(before);
+		List<KluchFeedElement> kluchFeedElements = getKluchsAsFeedElements(kluchIds);
+		return new Feed<>(kluchFeedElements);
+	}
+	
+	private List<MentionNotification> getMentionsBeforeTimestamp(User user, long beforeTimestamp) {
+		List<MentionNotification> before = user.getMentionNotifications().stream()
+				.filter(n -> n.getKluchTimestamp() < beforeTimestamp)
+				.limit(30)
+				.collect(Collectors.toList());
+		return before;
+	}
+	
+	private List<Long> extractKluchIdsFromMentions(List<MentionNotification> notifications) {
+		return notifications.stream()
+				.map(n -> n.getKluchId())
+				.collect(Collectors.toList());
+	}
+	
+	/**
+	 * Validates username and checks if user exists. If it does, returns the
+	 * {@link User}.
+	 * 
+	 * @param username
+	 * @return
+	 * @throws NullOrEmptyException
+	 *           if <code>username</code> is null or empty
+	 * @throws UserDoesNotExistException
+	 *           if username with given <code>username</code> doesn't exist
+	 */
+	private User getUser(String username) throws UserDoesNotExistException, NullOrEmptyException {
+		if (username == null || username.isEmpty()) {
+			throw new NullOrEmptyException("Username");
+		}
+		User user = userDao.findOne(username);
+		if (user == null) {
+			throw new UserDoesNotExistException("There is no user named " + username);
+		}
+		return user;
 	}
 
 	/**
@@ -344,6 +381,17 @@ public class FeedConstructor {
 		for (Kluch k : kluchs) {
 			feedElements.add(new KluchFeedElement(k, getKluchUserView(getUserForKluch(k, users))));
 		}
+		Collections.sort(feedElements, (k1, k2) -> {
+			long k1Time = k1.getKluch().getTimestamp().getTime();
+			long k2Time = k2.getKluch().getTimestamp().getTime();
+			if(k1Time < k2Time) {
+				return 1;
+			}
+			if(k1Time > k2Time) {
+				return -1;
+			}
+			return 0;
+		});
 		return feedElements;
 	}
 

@@ -67,7 +67,6 @@ public class NotificationServiceWithCache implements NotificationService {
 	private Set<Notification> getNotifications(User user) {
 		Set<Notification> notifications = new HashSet<>();
 		notifications.addAll(user.getFollowNotifications());
-		notifications.addAll(user.getMentionNotifications());
 		return notifications;
 	}
 
@@ -127,6 +126,7 @@ public class NotificationServiceWithCache implements NotificationService {
 	private MentionNotification getMentionNotification(Kluch kluch) {
 		MentionNotification n = new MentionNotification();
 		n.setKluchId(kluch.getId());
+		n.setKluchTimestamp(kluch.getTimestamp().getTime());
 		return n;
 	}
 	

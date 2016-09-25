@@ -883,6 +883,19 @@ function removeAnimateAlertUp() {
 function notificationsOnLoad() {
 	pollNotifications();
 	getNotifications();
+	getKluchsWithMentions(Number.MAX_SAFE_INTEGER);
+	attachInifiteScrollingListenerHashtag();
+}
+
+function attachInifiteScrollingListenerHashtag() {
+	$(window).scroll(function(ev) {
+		const windowInnerHeight = window.innerHeight;
+		const scrollY = window.scrollY;
+		const bodyHeight = document.body.offsetHeight;
+			if ((windowInnerHeight + scrollY) >= bodyHeight * 0.9) {
+				getKluchsWithMentions(parseInt($("#data").attr("data-first-timestamp")), true);
+			}
+	});
 }
 
 function pollNotifications() {
@@ -930,41 +943,40 @@ function getNotifications() {
 }
 
 function handleNotifications(notifications) {
-	const kluchIds = [];
 	const newFollowers = [];
 	for(var i = 0; i < notifications.length; i++) {
 		const notification = notifications[i];
-		if(notification.kluchId !== undefined) {
-			kluchIds.push(notification.kluchId);
-		}
 		if(notification.username !== undefined) {
 			newFollowers.push({ username: notification.username, avatarPath: notification.avatarPath });
 		}
 	}
-	getKluchs(kluchIds);
 	displayNewFollowers(newFollowers);
 	setTimeout(sendMarkNotificationsAsRead, 750);
 }
 
-function getKluchs(kluchIds) {
-	if(kluchIds.length === 0) {
+function getKluchsWithMentions(timestamp) {
+	const isGettingFeed = $("#data").attr("data-getting-feed");
+	if(isGettingFeed === "1") {
 		return;
 	}
+	setGettingFeed(1);
+
 	$.ajax({
 		dataType: "json",
-		contentType : "application/json; charset=utf-8",
 		type: "GET",
+		url: "/feed/mentions",
 		data: {
-			"kluchIds" : kluchIds
+			"timestamp" : timestamp
 		},
-		url: "/feed/notification",
 		error: function(xhr, status, error) {
-			
+			displayAlert(xhr.responseJSON.message);
+			setGettingFeed(0);
 		},
 		success: function(data, status, xhr) {
-			addKluchUserFeed(data);			
+			addKluchUserFeed(data, true);
+			setGettingFeed(0);
 		}
-	});	
+	});
 }
 
 function sendMarkNotificationsAsRead() {
@@ -1092,3 +1104,4 @@ function populateRemainingFollowers(remainingFollowers) {
 	}
 
 }
+

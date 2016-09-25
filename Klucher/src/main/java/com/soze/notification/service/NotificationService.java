@@ -26,7 +26,8 @@ public interface NotificationService {
 	public int poll(String username) throws NullOrEmptyException, UserDoesNotExistException;
 	
 	/**
-	 * Finds all {@link Notification}s for a given <code>username</code>. 
+	 * Finds all {@link FollowNotification}s for a given <code>username</code>. 
+	 * This method does not return {@link MentionNotification}s.
 	 * @param username <code>username</code> for which we want to construct the <code>feed</code>
 	 * @return feed of notifications, sorted in descending order according to timestamp (latest first)
 	 * @throws NullOrEmptyException if <code>username</code> is null or empty

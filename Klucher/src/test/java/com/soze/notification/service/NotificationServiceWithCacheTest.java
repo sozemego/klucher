@@ -15,10 +15,8 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
@@ -81,7 +79,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 	
 	@Test
 	public void testNoNotifications() throws Exception {
-		User user = mockUser("test", "password");
+		mockUser("test", "password");
 		int unreadNotifications = notificationService.poll("test");
 		assertThat(unreadNotifications, equalTo(0));
 	}
@@ -167,7 +165,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		user.getMentionNotifications().add(new MentionNotification(3L));
 		user.getMentionNotifications().add(new MentionNotification(4L));
 		Feed<Notification> notifications = notificationService.getNotifications("test");
-		assertThat(notifications.getElements().size(), equalTo(8));
+		assertThat(notifications.getElements().size(), equalTo(4));
 	}
 	
 	@Test(expected = NullOrEmptyException.class)
@@ -267,7 +265,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		Kluch kluch = mock(Kluch.class);
 		when(kluch.getText()).thenReturn("@abc");
 		when(kluch.getId()).thenReturn(1L);
-		List<User> users = mockUsers(Arrays.asList("abc"));
+		mockUsers(Arrays.asList("abc"));
 		MentionNotification notification = (MentionNotification) notificationService.removeUserMentions(kluch);
 	  assertThat(notification, nullValue());
 	}

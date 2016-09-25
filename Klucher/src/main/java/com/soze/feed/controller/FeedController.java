@@ -1,7 +1,5 @@
 package com.soze.feed.controller;
 
-import java.util.Arrays;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,19 +66,25 @@ public class FeedController {
 		return feedConstructor.constructFeed(username, timestamp, onlyForUser, feedDirection);
 	}
 	
-	@RequestMapping(value = "/feed/notification", method = RequestMethod.GET)
+	@RequestMapping(value = "/feed/mentions", method = RequestMethod.GET)
 	@ResponseBody
-	public Feed<KluchFeedElement> getKluchsWithMentions(Authentication authentication, @RequestParam(value = "kluchIds[]") Long[] kluchIds) {
+	public Feed<KluchFeedElement> getKluchsWithMentions(Authentication authentication, @RequestParam Long timestamp) {
 		if(authentication == null) {
 			throw new NotLoggedInException();
 		}
-		return feedConstructor.getKluchs(Arrays.asList(kluchIds));
+		String username = authentication.getName();
+		
+		Feed<KluchFeedElement> feed = feedConstructor.getMentions(username, timestamp);
+		log.info("User [{}] requested their mentions feed with timestamp [{}]. Feed returned [{}] elements", username, timestamp, feed.getElements().size());
+		return feed;
 	}
 
   @RequestMapping(value = "/feed/hashtag/{hashtag}", method = RequestMethod.GET)
   @ResponseBody
   public Feed<KluchFeedElement> getHashtagPage(@PathVariable String hashtag, @RequestParam Long timestamp) {
-    return feedConstructor.constructHashtagFeed(hashtag.toLowerCase(), timestamp);
+  	Feed<KluchFeedElement> feed = feedConstructor.constructHashtagFeed(hashtag.toLowerCase(), timestamp);
+  	log.info("Someone requested feed of hashtags for hashtag [{}] with timestamp [{}]. Feed returned [{}] elements.", hashtag, timestamp, feed.getElements().size());
+  	return feed;
   }
 
 	/**

@@ -15,6 +15,7 @@ import com.soze.kluch.model.Kluch;
 public class MentionNotification extends Notification {
 
 	private Long kluchId;
+	private Long kluchTimestamp;
 
 	private boolean noticed;
 
@@ -24,6 +25,11 @@ public class MentionNotification extends Notification {
 
 	public MentionNotification(long kluchId) {
 		this.kluchId = kluchId;
+	}
+	
+	public MentionNotification(long kluchId, long kluchTimestamp) {
+		this.kluchId = kluchId;
+		this.kluchTimestamp = kluchTimestamp;
 	}
 
 	public Long getKluchId() {
@@ -40,6 +46,14 @@ public class MentionNotification extends Notification {
 
 	public void setNoticed(boolean noticed) {
 		this.noticed = noticed;
+	}
+
+	public Long getKluchTimestamp() {
+		return kluchTimestamp;
+	}
+
+	public void setKluchTimestamp(Long kluchTimestamp) {
+		this.kluchTimestamp = kluchTimestamp;
 	}
 
 	@Override
