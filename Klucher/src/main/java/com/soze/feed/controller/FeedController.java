@@ -16,6 +16,7 @@ import com.soze.feed.model.Feed;
 import com.soze.feed.model.KluchFeedElement;
 import com.soze.feed.service.FeedConstructor;
 import com.soze.feed.service.FeedConstructor.FeedDirection;
+import com.soze.notification.model.FollowNotification;
 
 @Controller
 public class FeedController {
@@ -75,7 +76,22 @@ public class FeedController {
 		String username = authentication.getName();
 		
 		Feed<KluchFeedElement> feed = feedConstructor.getMentions(username, timestamp);
-		log.info("User [{}] requested their mentions feed with timestamp [{}]. Feed returned [{}] elements", username, timestamp, feed.getElements().size());
+		log.info("User [{}] requested their mentions feed with timestamp [{}]. Feed returned : [{}]",
+				username, timestamp, feed);
+		return feed;
+	}
+	
+	@RequestMapping(value = "/feed/follows", method = RequestMethod.GET)
+	@ResponseBody
+	public Feed<FollowNotification> getFollowNotifications(Authentication authentication, @RequestParam Long timestamp) {
+		if(authentication == null) {
+			throw new NotLoggedInException();
+		}
+		String username = authentication.getName();
+		
+		Feed<FollowNotification> feed = feedConstructor.getFollowNotifications(username, timestamp);
+		log.info("User [{}] requested their mentions feed with timestamp [{}]. Feed returned : [{}]",
+				username, timestamp, feed);
 		return feed;
 	}
 
@@ -83,7 +99,7 @@ public class FeedController {
   @ResponseBody
   public Feed<KluchFeedElement> getHashtagPage(@PathVariable String hashtag, @RequestParam Long timestamp) {
   	Feed<KluchFeedElement> feed = feedConstructor.constructHashtagFeed(hashtag.toLowerCase(), timestamp);
-  	log.info("Someone requested feed of hashtags for hashtag [{}] with timestamp [{}]. Feed returned [{}] elements.", hashtag, timestamp, feed.getElements().size());
+  	log.info("Someone requested feed of hashtags for hashtag [{}] with timestamp [{}]. Feed returned [{}].", hashtag, timestamp, feed);
   	return feed;
   }
 

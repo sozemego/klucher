@@ -39,7 +39,7 @@ public class RandomKluchGenerator {
       Arrays.asList('b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p',
           'q', 'r', 's', 't', 'v', 'x', 'z'));
   private final Random random = new Random();
-  private final AtomicInteger atomicInteger = new AtomicInteger();
+  private final AtomicInteger atomicInteger = new AtomicInteger(1);
   
   @PostConstruct
   public void init() {

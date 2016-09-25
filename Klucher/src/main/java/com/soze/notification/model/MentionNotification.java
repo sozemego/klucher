@@ -1,6 +1,7 @@
 package com.soze.notification.model;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 
 import com.soze.kluch.model.Kluch;
 
@@ -14,9 +15,11 @@ import com.soze.kluch.model.Kluch;
 @Embeddable
 public class MentionNotification extends Notification {
 
+	@NotNull
 	private Long kluchId;
-	private Long kluchTimestamp;
-
+	@NotNull
+	private Long timestamp;
+	@NotNull
 	private boolean noticed;
 
 	public MentionNotification() {
@@ -26,10 +29,10 @@ public class MentionNotification extends Notification {
 	public MentionNotification(long kluchId) {
 		this.kluchId = kluchId;
 	}
-	
-	public MentionNotification(long kluchId, long kluchTimestamp) {
+
+	public MentionNotification(long kluchId, long timestamp) {
 		this.kluchId = kluchId;
-		this.kluchTimestamp = kluchTimestamp;
+		this.timestamp = timestamp;
 	}
 
 	public Long getKluchId() {
@@ -48,12 +51,12 @@ public class MentionNotification extends Notification {
 		this.noticed = noticed;
 	}
 
-	public Long getKluchTimestamp() {
-		return kluchTimestamp;
+	public long getTimestamp() {
+		return timestamp;
 	}
 
-	public void setKluchTimestamp(Long kluchTimestamp) {
-		this.kluchTimestamp = kluchTimestamp;
+	public void setTimestamp(Long timestamp) {
+		this.timestamp = timestamp;
 	}
 
 	@Override

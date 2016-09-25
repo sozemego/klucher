@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -25,6 +26,7 @@ import com.soze.hashtag.model.Hashtag;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
 import com.soze.kluch.model.KluchUserView;
+import com.soze.notification.model.FollowNotification;
 import com.soze.notification.model.MentionNotification;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
@@ -40,12 +42,10 @@ import com.soze.user.model.User;
 @Service
 public class FeedConstructor {
 
-	private static final int BEFORE_KLUCHS_PER_REQUEST = 30;
-	private static final int AFTER_KLUCHS_PER_REQUEST = 30;
-	private final Feed<KluchFeedElement> emptyFeed = new Feed<>(new ArrayList<>());
-	private final PageRequest before = new PageRequest(0, BEFORE_KLUCHS_PER_REQUEST,
+	private final static int ELEMENTS_PER_REQUEST = 30;
+	private final PageRequest before = new PageRequest(0, ELEMENTS_PER_REQUEST,
 			new Sort(new Order(Direction.DESC, "timestamp")));
-	private final PageRequest after = new PageRequest(0, AFTER_KLUCHS_PER_REQUEST,
+	private final PageRequest after = new PageRequest(0, ELEMENTS_PER_REQUEST,
 			new Sort(new Order(Direction.ASC, "timestamp")));
 	private final PageRequest exists = new PageRequest(0, 1);
 	private final KluchDao kluchDao;
@@ -71,6 +71,9 @@ public class FeedConstructor {
 	 * direction (descending for before and ascending for after). Relevant user
 	 * data is attached to every <code>Kluch</code>. If direction is invalid or no
 	 * kluchs are found, returns an empty feed.
+	 * 
+	 * The {@link Feed} object contains relevant fields (next, previous, total)
+	 * for paginating through the entire feed.
 	 * 
 	 * @param username
 	 *          name of the user for which we want to construct the feed
@@ -99,7 +102,7 @@ public class FeedConstructor {
 		if (direction == FeedDirection.AFTER) {
 			return constructFeedAfter(username, timestamp, onlyForUser);
 		}
-		return emptyFeed;
+		return new Feed<>(new ArrayList<>(0), null, null, 0);
 	}
 
 	/**
@@ -113,6 +116,9 @@ public class FeedConstructor {
 	 * Kluchs are sorted by timestamp in descending order. Relevant user data is
 	 * attached to every <code>Kluch</code>. If no kluchs are found, returns an
 	 * empty feed.
+	 * 
+	 * The {@link Feed} object contains relevant fields (next, previous, total)
+	 * for paginating through the entire feed.
 	 * 
 	 * @param username
 	 *          name of the user for which we want to construct the feed
@@ -134,9 +140,8 @@ public class FeedConstructor {
 		validateTimestamp(beforeTimestamp);
 		User user = getUser(username);
 		List<String> authors = getListOfAuthors(user, onlyForUser);
-		List<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampLessThan(authors, new Timestamp(beforeTimestamp), before);
-		Feed<KluchFeedElement> feed = new Feed<>();
-		feed.setElements(convertKluchsToFeedElements(kluchs));
+		Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampLessThan(authors, new Timestamp(beforeTimestamp), before);
+		Feed<KluchFeedElement> feed = constructFeed(kluchs);
 		return feed;
 	}
 
@@ -150,6 +155,9 @@ public class FeedConstructor {
 	 * otherwise it includes all users they follow too. Returned Kluchs are sorted
 	 * by timestamp in ascending order. Relevant user data is attached to every
 	 * <code>Kluch</code>. If no kluchs are found, returns an empty feed.
+	 * 
+	 * The {@link Feed} object contains relevant fields (next, previous, total)
+	 * for paginating through the entire feed.
 	 * 
 	 * @param username
 	 *          name of the user for which we want to construct the feed
@@ -171,9 +179,8 @@ public class FeedConstructor {
 		validateTimestamp(afterTimestamp);
 		User user = getUser(username);
 		List<String> authors = getListOfAuthors(user, onlyForUser);
-		List<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), after);
-		Feed<KluchFeedElement> feed = new Feed<KluchFeedElement>();
-		feed.setElements(convertKluchsToFeedElements(kluchs));
+		Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), after);
+		Feed<KluchFeedElement> feed = constructFeed(kluchs);
 		return feed;
 	}
 
@@ -199,8 +206,8 @@ public class FeedConstructor {
 		validateTimestamp(afterTimestamp);
 		User user = getUser(username);
 		List<String> authors = getListOfAuthors(user, onlyForUser);
-		List<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), exists);
-		return !kluchs.isEmpty();
+		Page<Kluch> kluchs = kluchDao.findByAuthorInAndTimestampGreaterThan(authors, new Timestamp(afterTimestamp), exists);
+		return kluchs.hasContent();
 	}
 
 	/**
@@ -211,6 +218,9 @@ public class FeedConstructor {
 	 * Retrieves <code>Kluch</code>s posted before (earlier than) given timestamp
 	 * (millis unix time). Returned Kluchs are sorted by timestamp in descending
 	 * order. If a given hashtag has never been posted, returns an empty feed.
+	 * 
+	 * The {@link Feed} object contains relevant fields (next, previous, total)
+	 * for paginating through the entire feed.
 	 * 
 	 * @param hashtagText
 	 *          does not have to contain pound character as the first character
@@ -227,12 +237,26 @@ public class FeedConstructor {
 		validateTimestamp(timestamp);
 		Hashtag hashtag = getHashtag(hashtagText);
 		if (hashtag == null) {
-			return emptyFeed;
+			return new Feed<>(new ArrayList<>(0), null, null, 0);
 		}
-		Feed<KluchFeedElement> feed = new Feed<>();
-		List<Kluch> kluchs = kluchDao.findByHashtagsInAndTimestampLessThan(hashtag, new Timestamp(timestamp), before);
-		feed.setElements(convertKluchsToFeedElements(kluchs));
+		Page<Kluch> kluchs = kluchDao.findByHashtagsInAndTimestampLessThan(hashtag, new Timestamp(timestamp), before);
+		Feed<KluchFeedElement> feed = constructFeed(kluchs);
 		return feed;
+	}
+
+	private Feed<KluchFeedElement> constructFeed(Page<Kluch> page) {
+		long totalElements = (int) page.getTotalElements();
+		Long previous = null;
+		Long next = null;
+		List<Kluch> kluchs = page.getContent();
+		if (kluchs.size() > 0) {
+			previous = kluchs.get(0).getTimestamp().getTime();
+			next = kluchs.get(kluchs.size() - 1).getTimestamp().getTime();
+		}
+		if(page.isLast()) {
+			next = null;
+		}
+		return new Feed<>(convertKluchsToFeedElements(kluchs), previous, next, totalElements);
 	}
 
 	/**
@@ -257,58 +281,165 @@ public class FeedConstructor {
 	}
 
 	/**
-	 * Returns a feed of {@link KluchFeedElement}s with given ids.
+	 * Returns a feed of {@link KluchFeedElement}s which contain a mention of a
+	 * given user and were all posted before (earlier than)
+	 * <code>beforeTimestamp</code>
 	 * 
-	 * @param ids
-	 *          a list of IDs of Kluchs you want to retrieve
-	 * @return a feed of <code>KluchFeedElement</code>s, sorted in descending
-	 *         order according to timestamp
-	 */
-	public Feed<KluchFeedElement> getKluchs(List<Long> ids) {
-		return new Feed<>(getKluchsAsFeedElements(ids));
-	}
-
-	private List<KluchFeedElement> getKluchsAsFeedElements(List<Long> ids) {
-		List<Kluch> kluchs = kluchDao.findAll((Iterable<Long>) ids);
-		return convertKluchsToFeedElements(kluchs);
-
-	}
-	
-	/**
-	 * Returns a feed of {@link KluchFeedElement}s which contain
-	 * a mention of a given user and were all posted before (earlier than) <code>beforeTimestamp</code>
-	 * @param username username for who we wish to retrieve Kluchs with mentions
+	 * The {@link Feed} object contains relevant fields (next, previous, total)
+	 * for paginating through the entire feed.
+	 * 
+	 * @param username
+	 *          username for who we wish to retrieve Kluchs with mentions
 	 * @param beforeTimestamp
 	 * @return a feed of {@link KluchFeedElement}
-	 * @throws NullOrEmptyException if username is null or empty
-	 * @throws UserDoesNotExistException if user with <code>username</code> does not exist
-	 * @throws InvalidTimestampException if <code>beforeTimestamp</code> is negative 
+	 * @throws NullOrEmptyException
+	 *           if username is null or empty
+	 * @throws UserDoesNotExistException
+	 *           if user with <code>username</code> does not exist
+	 * @throws InvalidTimestampException
+	 *           if <code>beforeTimestamp</code> is negative
 	 */
-	public Feed<KluchFeedElement> getMentions(String username, long beforeTimestamp) 
+	public Feed<KluchFeedElement> getMentions(String username, long beforeTimestamp)
 			throws NullOrEmptyException, UserDoesNotExistException, InvalidTimestampException {
 		validateTimestamp(beforeTimestamp);
 		User user = getUser(username);
-		user.getMentionNotifications();
-		List<MentionNotification> before = getMentionsBeforeTimestamp(user, beforeTimestamp);
+		List<MentionNotification> mentionNotifications = user.getMentionNotifications();
+		List<MentionNotification> before = getMentionsBeforeTimestamp(mentionNotifications, beforeTimestamp);
 		List<Long> kluchIds = extractKluchIdsFromMentions(before);
-		List<KluchFeedElement> kluchFeedElements = getKluchsAsFeedElements(kluchIds);
-		return new Feed<>(kluchFeedElements);
+		List<Kluch> kluchs = getKluchs(kluchIds);
+		Feed<KluchFeedElement> feed = constructFeed(kluchs, mentionNotifications.size());
+		return feed;
 	}
-	
-	private List<MentionNotification> getMentionsBeforeTimestamp(User user, long beforeTimestamp) {
-		List<MentionNotification> before = user.getMentionNotifications().stream()
-				.filter(n -> n.getKluchTimestamp() < beforeTimestamp)
-				.limit(30)
+
+	private List<MentionNotification> getMentionsBeforeTimestamp(List<MentionNotification> notifications,
+			long beforeTimestamp) {
+		List<MentionNotification> before = notifications.stream()
+				.filter(n -> n.getTimestamp() < beforeTimestamp)
+				.limit(ELEMENTS_PER_REQUEST)
 				.collect(Collectors.toList());
 		return before;
 	}
-	
+
+	private Feed<KluchFeedElement> constructFeed(List<Kluch> kluchs, long total) {
+		if(total == 0) {
+			return new Feed<>(new ArrayList<>(0), null, null, total);
+		}
+		Long previous = findOldestKluchTimestamp(kluchs);
+		Long next = null;
+		
+		if(kluchs.size() == ELEMENTS_PER_REQUEST && total > kluchs.size()) {
+			next = findEarliestKluchTimestamp(kluchs);
+		}
+		
+		return new Feed<>(convertKluchsToFeedElements(kluchs), previous, next, total);
+	}
+
+	private long findOldestKluchTimestamp(List<Kluch> kluchs) {
+		long oldest = 0;
+		for (Kluch kluch : kluchs) {
+			long time = kluch.getTimestamp().getTime();
+			if (time > oldest) {
+				oldest = time;
+			}
+		}
+		return oldest;
+	}
+
+	private long findEarliestKluchTimestamp(List<Kluch> kluchs) {
+		long earliest = Long.MAX_VALUE;
+		for (Kluch kluch : kluchs) {
+			long time = kluch.getTimestamp().getTime();
+			if (time < earliest) {
+				earliest = time;
+			}
+		}
+		return earliest;
+	}
+
+	/**
+	 * Finds up to 30 {@link FollowNotification}s for a given
+	 * <code>username</code>, created after a given timestamp This method does not
+	 * return {@link MentionNotification}s.
+	 * 
+	 * The {@link Feed} object contains relevant fields (next, previous, total)
+	 * for paginating through the entire feed.
+	 * 
+	 * @param username
+	 *          <code>username</code> for which we want to construct the
+	 *          <code>feed</code>
+	 * @return feed of notifications, sorted in descending order according to
+	 *         timestamp (latest first)
+	 * @throws NullOrEmptyException
+	 *           if <code>username</code> is null or empty
+	 * @throws UserDoesNotExistException
+	 *           if user with given <code>username</code> does not exist
+	 * @throws InvalidTimestampException
+	 *           if timestamp is negative
+	 */
+	public Feed<FollowNotification> getFollowNotifications(String username, long timestamp)
+			throws NullOrEmptyException, UserDoesNotExistException {
+		User user = getUser(username);
+		List<FollowNotification> followNotifications = user.getFollowNotifications();
+		List<FollowNotification> notifications = getFollowNotificationsBeforeTimestamp(followNotifications, timestamp);
+		Feed<FollowNotification> feed = constructFollowNotificationFeed(notifications, followNotifications.size());
+		return feed;
+	}
+
+	private List<FollowNotification> getFollowNotificationsBeforeTimestamp(List<FollowNotification> followNotifications,
+			long timestamp) {
+		List<FollowNotification> notifications = followNotifications.stream()
+				.filter(n -> n.getTimestamp() < timestamp)
+				.limit(ELEMENTS_PER_REQUEST)
+				.collect(Collectors.toList());
+		return notifications;
+	}
+
+	private Feed<FollowNotification> constructFollowNotificationFeed(List<FollowNotification> notifications, long total) {
+		if(total == 0) {
+			return new Feed<>(new ArrayList<>(0), null, null, total);
+		}
+		Long previous = findOldestNotificationTimestamp(notifications);
+		Long next = null;
+		
+		if(notifications.size() == ELEMENTS_PER_REQUEST && total > notifications.size()) {
+			next = findEarliestNotificationTimestamp(notifications);
+		}
+		return new Feed<>(notifications, previous, next, total);
+	}
+
+	private long findOldestNotificationTimestamp(List<FollowNotification> notifications) {
+		long oldest = 0;
+		for (FollowNotification followNotification : notifications) {
+			long time = followNotification.getTimestamp();
+			if (time > oldest) {
+				oldest = time;
+			}
+		}
+		return oldest;
+	}
+
+	private long findEarliestNotificationTimestamp(List<FollowNotification> notifications) {
+		long earliest = Long.MAX_VALUE;
+		for (FollowNotification followNotification : notifications) {
+			long time = followNotification.getTimestamp();
+			if (time < earliest) {
+				earliest = time;
+			}
+		}
+		return earliest;
+	}
+
 	private List<Long> extractKluchIdsFromMentions(List<MentionNotification> notifications) {
 		return notifications.stream()
 				.map(n -> n.getKluchId())
 				.collect(Collectors.toList());
 	}
-	
+
+	private List<Kluch> getKluchs(List<Long> ids) {
+		List<Kluch> kluchs = kluchDao.findAll((Iterable<Long>) ids);
+		return kluchs;
+	}
+
 	/**
 	 * Validates username and checks if user exists. If it does, returns the
 	 * {@link User}.
@@ -384,10 +515,10 @@ public class FeedConstructor {
 		Collections.sort(feedElements, (k1, k2) -> {
 			long k1Time = k1.getKluch().getTimestamp().getTime();
 			long k2Time = k2.getKluch().getTimestamp().getTime();
-			if(k1Time < k2Time) {
+			if (k1Time < k2Time) {
 				return 1;
 			}
-			if(k1Time > k2Time) {
+			if (k1Time > k2Time) {
 				return -1;
 			}
 			return 0;

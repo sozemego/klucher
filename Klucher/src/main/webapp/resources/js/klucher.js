@@ -208,20 +208,18 @@ function ajaxPostKluch() {
 	if(kluchText.length === 0) {
 		return;
 	}
-	setGettingFeed(1);
 	$.ajax({
 		type: "POST",
 		url: "/kluch",
 		data: {"kluchText" : kluchText },
 		error: function(xhr, status, error) {
 			displayAlert(xhr.responseJSON.message);
-			setGettingFeed(0);
 		},
 		success: function(kluch, status, xhr) {
 			clearTextArea();
 			addKluchToFeed(kluch, getUserData(), false);
 			checkCharacterCount();
-			setGettingFeed(0);
+			setLastTimestamp(kluch.timestamp);
 		}
 	});
 	focusInputArea();
@@ -257,12 +255,13 @@ function getKluch(username, timestamp, text) {
 }
 
 function getFeed(direction, timestamp, append) {
-	const isGettingFeed = $("#data").attr("data-getting-feed");
-	if(isGettingFeed == 1) {
+	if(isGettingFeed() || isFeedFinished()) {
 		return;
 	}
-	setGettingFeed(1);
+
+	setGettingFeed(true);
 	const username = getUsername();
+
 	$.ajax({
 		dataType: "json",
 		type: "GET",
@@ -273,11 +272,11 @@ function getFeed(direction, timestamp, append) {
 		},
 		error: function(xhr, status, error) {
 			displayAlert(xhr.responseJSON.message);
-			setGettingFeed(0);
+			setGettingFeed(false);
 		},
-		success: function(data, status, xhr) {
-			addKluchUserFeed(data, append);
-			setGettingFeed(0);
+		success: function(feed, status, xhr) {
+			addKluchUserFeed(feed, append);
+			setGettingFeed(false);
 		}
 	});
 }
@@ -287,6 +286,7 @@ function addKluchUserFeed(feed, append) {
 	for(let i = 0; i < feedElements.length; i++) {
 		addKluchToFeed(feedElements[i].kluch, feedElements[i].user, append);
 	}
+	assignTimestamps(feed);
 }
 
 function addKluchToFeed(kluch, user, append) {
@@ -386,13 +386,6 @@ function addKluchToFeed(kluch, user, append) {
 		}
 	}
 
-	
-	
-
-	//configure event listeners
-
-	//check if own kluch ../../resources/images/delete_1.png kluch-footer-icon-delete
-
 	kluchBody.append(kluchContent);
 	kluchBody.append(kluchFooter);
 
@@ -403,8 +396,6 @@ function addKluchToFeed(kluch, user, append) {
 	} else {
 		$("#kluch-feed").prepend(kluchContainer);
 	}
-
-	assignTimestamps(kluch);
 	
 }
 
@@ -474,10 +465,15 @@ function getUsername() {
 }
 
 // sets values for last (latest) and first (earliest) timestamps
-function assignTimestamps(kluch) {
-	const timestamp = kluch.timestamp;
-	setLastTimestamp(timestamp);
-	setFirstTimestamp(timestamp);
+function assignTimestamps(feed) {
+	if(feed.next !== null) {
+		setFirstTimestamp(feed.next);
+	} else {
+		setFeedFinished(true);
+	}
+	if(feed.previous !== null) {
+		setLastTimestamp(feed.previous);
+	}
 }
 
 function setLastTimestamp(millis) {
@@ -506,9 +502,21 @@ function attachInfiniteScrollingListener() {
 	});
 }
 
+function setFeedFinished(bool) {
+	$("#data").attr("data-feed-finished", true);
+}
+
+function isFeedFinished() {
+	const feedFinished = $("#data").attr("data-feed-finished");
+	if(feedFinished === "true") {
+		return true;
+	}
+	return false;
+}
+
 function displayLastPageMessage() {
-	const lastPage = $("#data").attr("data-page");
-	if(lastPage == -1) {
+	const feedFinished = isFeedFinished();
+	if(feedFinished) {
 		$(".kluch-no-more").addClass("kluch-no-more-visible");
 	}
 }
@@ -517,9 +525,16 @@ function setGettingFeed(data) {
 	$("#data").attr("data-getting-feed", data);
 }
 
+function isGettingFeed() {
+	const gettingFeed = $("#data").attr("data-getting-feed");
+	if(gettingFeed === "true") {
+		return true;
+	}
+	return false;
+}
+
 function pollFeed() {
-	const isGettingFeed = $("#data").attr("data-getting-feed");
-	if(isGettingFeed == 1) {
+	if(isGettingFeed()) {
 		setTimeout(pollFeed, 10000);
 		return;
 	}
@@ -561,6 +576,7 @@ function displayNewKluchElement() {
 
 function clickNewKluchs() {
 	hideNewKluchElement();
+	setFeedFinished(false);
 	getFeed("after", parseInt($("#data").attr("data-last-timestamp")), false);
 }
 
@@ -799,11 +815,10 @@ function attachInifiteScrollingListenerHashtag() {
 }
 
 function getHashtagFeed(timestamp, append) {
-	const isGettingFeed = $("#data").attr("data-getting-feed");
-	if(isGettingFeed == 1) {
+	if(isGettingFeed()) {
 		return;
 	}
-	setGettingFeed(1);
+	setGettingFeed(true);
 	const hashtag = $("#data").attr("data-hashtag");
 	$.ajax({
 		dataType: "json",
@@ -813,12 +828,12 @@ function getHashtagFeed(timestamp, append) {
 			"timestamp" : timestamp
 		},
 		error: function(xhr, status, error) {
-			setGettingFeed(0);
+			setGettingFeed(false);
 			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
 			addKluchUserFeed(data, append);
-			setGettingFeed(0);
+			setGettingFeed(false);
 		}
 	});
 }
@@ -882,12 +897,12 @@ function removeAnimateAlertUp() {
 
 function notificationsOnLoad() {
 	pollNotifications();
-	getNotifications();
+	getFollowNotificationsInitial();
 	getKluchsWithMentions(Number.MAX_SAFE_INTEGER);
-	attachInifiteScrollingListenerHashtag();
+	attachInifiteScrollingListenerMentions();
 }
 
-function attachInifiteScrollingListenerHashtag() {
+function attachInifiteScrollingListenerMentions() {
 	$(window).scroll(function(ev) {
 		const windowInnerHeight = window.innerHeight;
 		const scrollY = window.scrollY;
@@ -929,37 +944,42 @@ function displayNewNotifications(number) {
 	}
 }
 
-function getNotifications() {
+function getFollowNotificationsInitial() {
 	$.ajax({
 		type: "GET",
-		url: "/notification/",
-		error: function(xhr, status, error) {
-			displayAlert(xhr.responseJSON.message);
+		url: "/feed/follows",
+		data: {
+			timestamp: Number.MAX_SAFE_INTEGER
 		},
-		success: function(data, status, xhr) {
-			handleNotifications(data.elements);
+		error: function(xhr, status, error) {
+			displayAlert(xhr.responseJSON.message);		
+		},
+		success: function(feed, status, xhr) {
+			handleNotifications(feed);
 		}
 	});
 }
 
-function handleNotifications(notifications) {
+function handleNotifications(feed) {
 	const newFollowers = [];
-	for(var i = 0; i < notifications.length; i++) {
-		const notification = notifications[i];
+	const elements = feed.elements;
+	for(var i = 0; i < elements.length; i++) {
+		const notification = elements[i];
 		if(notification.username !== undefined) {
 			newFollowers.push({ username: notification.username, avatarPath: notification.avatarPath });
 		}
 	}
-	displayNewFollowers(newFollowers);
-	setTimeout(sendMarkNotificationsAsRead, 750);
+	displayNewFollowers(newFollowers, feed.totalElements);
+	if(elements.length !== 0) {
+		setTimeout(sendMarkNotificationsAsRead, 750);
+	}
 }
 
 function getKluchsWithMentions(timestamp) {
-	const isGettingFeed = $("#data").attr("data-getting-feed");
-	if(isGettingFeed === "1") {
+	if(isGettingFeed() || isFeedFinished()) {
 		return;
 	}
-	setGettingFeed(1);
+	setGettingFeed(true);
 
 	$.ajax({
 		dataType: "json",
@@ -969,12 +989,12 @@ function getKluchsWithMentions(timestamp) {
 			"timestamp" : timestamp
 		},
 		error: function(xhr, status, error) {
+			
 			displayAlert(xhr.responseJSON.message);
-			setGettingFeed(0);
 		},
-		success: function(data, status, xhr) {
-			addKluchUserFeed(data, true);
-			setGettingFeed(0);
+		success: function(feed, status, xhr) {
+			setGettingFeed(false);
+			addKluchUserFeed(feed, true);
 		}
 	});
 }
@@ -992,12 +1012,13 @@ function sendMarkNotificationsAsRead() {
 	});	
 }
 
-function displayNewFollowers(followers) {
+function displayNewFollowers(followers, total) {
 	if(followers.length === 0) {
 		return;
 	}
 	const users = [];
 	for(let i = 0; i < followers.length; i++) {
+		//TODO fix this, i dont have to get a style for all of them?
 		users.push(getUserLinkStyle(followers[i].username));
 	}
 	
@@ -1012,7 +1033,7 @@ function displayNewFollowers(followers) {
 		message += users[0] + " and " + users[1];
 	}
 	if(users.length > 2) {
-		const remainingFollowers = users.length - namesToDisplay;
+		const remainingFollowers = total - namesToDisplay;
 		if(remainingFollowers === 0) {
 			message += users[0] + ", " + users[1] + " and " + users[2];
 		}
@@ -1024,7 +1045,7 @@ function displayNewFollowers(followers) {
 	}
 	message += " followed you.";
 	createEventListenersForRemainingFollowersList();
-	populateRemainingFollowers(followers.slice(namesToDisplay));
+	populateRemainingFollowers(followers.slice(namesToDisplay), total, namesToDisplay);
 	$("#followers-new-text").html(message);
 }
 
@@ -1074,12 +1095,27 @@ function showRemainingFollowersList(bool) {
 	}
 }
 
-function populateRemainingFollowers(remainingFollowers) {
+function populateRemainingFollowers(remainingFollowers, total, listedAlready) {
 
 	const remainingFollowersList = $("#followers-new-free");
 	remainingFollowersList.empty();
-
+	const maxTableLength = 10;
 	for(var i = 0; i < remainingFollowers.length; i++) {
+
+		if(i === maxTableLength) {
+
+			const element = $(document.createElement("a"));
+			element.addClass("followers-new-free-element followers-new-free-element-remaining-text");
+			element.attr("href", "/#");
+
+			const remainingText = $(document.createElement("span"));
+			remainingText.text("and " + (total - listedAlready - maxTableLength) + " more...");
+			
+			element.append(remainingText);
+			remainingFollowersList.append(element);
+			break;
+
+		}
 
 		const follower = remainingFollowers[i];
 
@@ -1100,6 +1136,7 @@ function populateRemainingFollowers(remainingFollowers) {
 		text.addClass("followers-new-free-element-text");
 		text.text(follower.username);
 		element.append(text);
+
 		remainingFollowersList.append(element);
 	}
 

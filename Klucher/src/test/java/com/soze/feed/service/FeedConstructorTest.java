@@ -1,7 +1,8 @@
 package com.soze.feed.service;
 
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
@@ -23,6 +24,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -42,6 +44,7 @@ import com.soze.hashtag.dao.HashtagDao;
 import com.soze.hashtag.model.Hashtag;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
+import com.soze.notification.model.FollowNotification;
 import com.soze.notification.model.MentionNotification;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
@@ -95,8 +98,12 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(Arrays.asList("test")),
         eq(new Timestamp(0)),
         eq(before)))
-    .thenReturn(Arrays.asList());
+    .thenReturn(new PageImpl<>(Arrays.asList()));
     Feed<KluchFeedElement> feed = constructor.constructFeed("test", 0, false);
+    assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), nullValue());
+    assertThat(feed.getTotalElements(), equalTo(0L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(0));
   }
@@ -108,7 +115,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(Arrays.asList("test")),
         eq(new Timestamp(0)),
         eq(exists)))
-    .thenReturn(Arrays.asList());
+    .thenReturn(new PageImpl<>(Arrays.asList()));
     boolean exists = constructor.existsFeedAfter("test", 0, false);
     assertThat(exists, equalTo(false));
   }
@@ -120,7 +127,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(Arrays.asList("test")),
         eq(new Timestamp(0)),
         eq(exists)))
-    .thenReturn(Arrays.asList(new Kluch()));
+    .thenReturn(new PageImpl<>(Arrays.asList(new Kluch())));
     boolean exists = constructor.existsFeedAfter("test", 0, false);
     assertThat(exists, equalTo(true));
   }
@@ -132,7 +139,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(Arrays.asList("test")),
         eq(new Timestamp(Long.MAX_VALUE)),
         eq(exists)))
-    .thenReturn(Arrays.asList());
+    .thenReturn(new PageImpl<>(Arrays.asList()));
     boolean exists = constructor.existsFeedAfter("test", Long.MAX_VALUE, false);
     assertThat(exists, equalTo(false));
   }
@@ -145,10 +152,13 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(Arrays.asList("test")),
         eq(new Timestamp(Long.MAX_VALUE)),
         eq(before)))
-    .thenReturn(randomKluchs);
+    .thenReturn(new PageImpl<>(randomKluchs));
     Feed<KluchFeedElement> feed = constructor.constructFeed("test", Long.MAX_VALUE, false, FeedDirection.BEFORE);
+    assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), notNullValue());
+    assertThat(feed.getTotalElements(), equalTo(1L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
-    assertThat(kluchs, notNullValue());
     assertThat(kluchs.size(), equalTo(1));
   }
   
@@ -160,10 +170,13 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(Arrays.asList("test")),
         eq(new Timestamp(Long.MAX_VALUE)),
         eq(before)))
-    .thenReturn(randomKluchs);
+    .thenReturn(new PageImpl<>(randomKluchs));
     Feed<KluchFeedElement> feed = constructor.constructFeed("test", Long.MAX_VALUE, false, FeedDirection.BEFORE);
+    assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), notNullValue());
+    assertThat(feed.getTotalElements(), equalTo(30L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
-    assertThat(kluchs, notNullValue());
     assertThat(kluchs.size(), equalTo(30));
   }
   
@@ -175,10 +188,13 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(Arrays.asList("test")),
         eq(new Timestamp(0)),
         eq(after)))
-    .thenReturn(randomKluchs);
+    .thenReturn(new PageImpl<>(randomKluchs));
     Feed<KluchFeedElement> feed = constructor.constructFeed("test", 0, false, FeedDirection.AFTER);
+    assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), notNullValue());
+    assertThat(feed.getTotalElements(), equalTo(1L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
-    assertThat(kluchs, notNullValue());
     assertThat(kluchs.size(), equalTo(1));
   }
   
@@ -190,10 +206,13 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(Arrays.asList("test")),
         eq(new Timestamp(0)),
         eq(after)))
-    .thenReturn(randomKluchs);
+    .thenReturn(new PageImpl<>(randomKluchs));
     Feed<KluchFeedElement> feed = constructor.constructFeed("test", 0, false, FeedDirection.AFTER);
+    assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), notNullValue());
+    assertThat(feed.getTotalElements(), equalTo(30L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
-    assertThat(kluchs, notNullValue());
     assertThat(kluchs.size(), equalTo(30));
   }
 
@@ -214,9 +233,12 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(new Hashtag(hashtagText)),
         eq(new Timestamp(0)),
         eq(before)))
-    .thenReturn(Arrays.asList());
+    .thenReturn(new PageImpl<>(Arrays.asList()));
     Feed<KluchFeedElement> feed = constructor.constructHashtagFeed(hashtagText, 0);
-    assertThat(feed, notNullValue());
+    assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), nullValue());
+    assertThat(feed.getTotalElements(), equalTo(0L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(0));
   }
@@ -228,9 +250,12 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(new Hashtag(hashtagText)),
         eq(new Timestamp(0)),
         eq(before)))
-    .thenReturn(Arrays.asList());
+    .thenReturn(new PageImpl<>(Arrays.asList()));
     Feed<KluchFeedElement> feed = constructor.constructHashtagFeed(hashtagText, 0);
-    assertThat(feed, notNullValue());
+    assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), nullValue());
+    assertThat(feed.getTotalElements(), equalTo(0L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(0));
   }
@@ -243,10 +268,13 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(new Hashtag(hashtagText)),
         eq(new Timestamp(0)),
         eq(before)))
-    .thenReturn(randomKluchs);
+    .thenReturn(new PageImpl<>(randomKluchs));
     when(hashtagDao.findOne(hashtagText)).thenReturn(new Hashtag(hashtagText));
     Feed<KluchFeedElement> feed = constructor.constructHashtagFeed(hashtagText, 0);
-    assertThat(feed, notNullValue());
+    assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), notNullValue());
+    assertThat(feed.getTotalElements(), equalTo(1L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(1));
   }
@@ -259,18 +287,15 @@ public class FeedConstructorTest extends TestWithMockUsers {
         eq(new Hashtag(hashtagText)),
         eq(new Timestamp(0)),
         eq(before)))
-    .thenReturn(randomKluchs);
+    .thenReturn(new PageImpl<>(randomKluchs));
     when(hashtagDao.findOne(hashtagText)).thenReturn(new Hashtag(hashtagText));
     Feed<KluchFeedElement> feed = constructor.constructHashtagFeed(hashtagText, 0);
-    assertThat(feed, notNullValue());
+    assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), notNullValue());
+    assertThat(feed.getTotalElements(), equalTo(30L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(30));
-  }
-  
-  @Test
-  public void getKluchsDontExist() throws Exception {
-  	Feed<KluchFeedElement> feed = constructor.getKluchs(Arrays.asList(1L, 2L));
-  	assertThat(feed.getElements().size(), equalTo(0));
   }
   
   @Test(expected = NullOrEmptyException.class)
@@ -312,16 +337,23 @@ public class FeedConstructorTest extends TestWithMockUsers {
   	Kluch kluch1 = mock(Kluch.class);
   	when(kluch1.getId()).thenReturn(1L);
   	when(kluch1.getAuthor()).thenReturn("test1");
+  	when(kluch1.getTimestamp()).thenReturn(new Timestamp(1L));
   	Kluch kluch2 = mock(Kluch.class);
   	when(kluch2.getId()).thenReturn(2L);
   	when(kluch2.getAuthor()).thenReturn("test2");
+  	when(kluch2.getTimestamp()).thenReturn(new Timestamp(2L));
   	Kluch kluch3 = mock(Kluch.class);
   	when(kluch3.getId()).thenReturn(3L);
   	when(kluch3.getAuthor()).thenReturn("test3");
+  	when(kluch3.getTimestamp()).thenReturn(new Timestamp(3L));
   	List<Kluch> kluchs = Arrays.asList(kluch1, kluch2, kluch3);
   	when(kluchDao.findAll(Arrays.asList(1L, 2L, 3L))).thenReturn(kluchs);
   	Feed<KluchFeedElement> feed = constructor.getMentions("user", Long.MAX_VALUE);
-  	assertThat(feed.getElements().size(), equalTo(3));
+  	assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), notNullValue());
+    assertThat(feed.getTotalElements(), equalTo(3L));
+    assertThat(feed.getElements().size(), equalTo(3));
   }
   
   @Test
@@ -338,6 +370,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
   		Kluch kluch = mock(Kluch.class);
   		when(kluch.getId()).thenReturn(0L + i);
     	when(kluch.getAuthor()).thenReturn("test1");
+    	when(kluch.getTimestamp()).thenReturn(new Timestamp(0L + i));
     	kluchs.add(kluch);
   	}
   	when(kluchDao.findAll(argThat(sameAsSet(Arrays.asList(
@@ -345,7 +378,11 @@ public class FeedConstructorTest extends TestWithMockUsers {
   			11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L, 20L,
   			21L, 22L, 23L, 24L, 25L, 26L, 27L, 28L, 29L))))).thenReturn(kluchs);
   	Feed<KluchFeedElement> feed = constructor.getMentions("user", Long.MAX_VALUE);
-  	assertThat(feed.getElements().size(), equalTo(30));
+  	assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), notNullValue());
+    assertThat(feed.getPrevious(), notNullValue());
+    assertThat(feed.getTotalElements(), equalTo(0L + mentions));
+    assertThat(feed.getElements().size(), equalTo(30));
   }
   
   @Test
@@ -364,6 +401,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
   		Kluch kluch = mock(Kluch.class);
   		when(kluch.getId()).thenReturn(0L + i);
     	when(kluch.getAuthor()).thenReturn("test1");
+    	when(kluch.getTimestamp()).thenReturn(new Timestamp(0L + i));
     	kluchs.add(kluch);
   	}
   	when(kluchDao.findAll(argThat(sameAsSet(Arrays.asList(
@@ -371,20 +409,87 @@ public class FeedConstructorTest extends TestWithMockUsers {
   			11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L, 20L,
   			21L, 22L, 23L, 24L, 25L, 26L, 27L, 28L, 29L))))).thenReturn(kluchs);
   	Feed<KluchFeedElement> feed = constructor.getMentions("user", Long.MAX_VALUE);
-  	assertThat(feed.getElements().size(), equalTo(30));
+  	assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), notNullValue());
+    assertThat(feed.getPrevious(), notNullValue());
+    assertThat(feed.getTotalElements(), equalTo(0L + mentions));
+    assertThat(feed.getElements().size(), equalTo(30));
   	List<Kluch> laterKluchs = new ArrayList<>();
   	for(int i = 30; i < mentions; i++) {
   		Kluch kluch = mock(Kluch.class);
   		when(kluch.getId()).thenReturn(0L + i);
     	when(kluch.getAuthor()).thenReturn("test1");
+    	when(kluch.getTimestamp()).thenReturn(new Timestamp(0L + i));
     	laterKluchs.add(kluch);
   	}
   	when(kluchDao.findAll(argThat(sameAsSet(Arrays.asList(
   			30L, 31L, 32L, 33L, 34L))))).thenReturn(laterKluchs);
   	long lastTimestamp = Long.MAX_VALUE - 30;
   	Feed<KluchFeedElement> laterFeed = constructor.getMentions("user", lastTimestamp);
-  	assertThat(laterFeed.getElements().size(), equalTo(5));
+  	assertThat(laterFeed.getElements(), notNullValue());
+    assertThat(laterFeed.getNext(), nullValue());
+    assertThat(laterFeed.getPrevious(), notNullValue());
+    assertThat(laterFeed.getTotalElements(), equalTo(0L + mentions));
+    assertThat(laterFeed.getElements().size(), equalTo(5));
   }
+  
+  @Test(expected = NullOrEmptyException.class)
+	public void testNullUsernameGetNotifications() throws Exception {
+  	constructor.getFollowNotifications(null, 0);
+	}
+	
+	@Test(expected = NullOrEmptyException.class)
+	public void testEmptyUsernameGetNotifications() throws Exception {
+		constructor.getFollowNotifications("", 0);
+	}
+	
+	@Test(expected = UserDoesNotExistException.class)
+	public void testUserDoesNotExistGetNotifications() throws Exception {
+		constructor.getFollowNotifications("doesNotExist", 0);
+	}
+	
+	@Test
+	public void testGetNoNotifications() throws Exception {
+		mockUser("test", "password");
+		Feed<FollowNotification> feed = constructor.getFollowNotifications("test", Long.MAX_VALUE);
+		assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), nullValue());
+    assertThat(feed.getTotalElements(), equalTo(0L));
+    assertThat(feed.getElements().size(), equalTo(0));
+	}
+	
+	@Test
+	public void testAFewNotifications() throws Exception {
+		User user = mockUser("test", "password");
+		user.getFollowNotifications().add(new FollowNotification("user1", 1L));
+		user.getFollowNotifications().add(new FollowNotification("user2", 2L));
+		Feed<FollowNotification> feed = constructor.getFollowNotifications("test", Long.MAX_VALUE);
+		assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), notNullValue());
+    assertThat(feed.getTotalElements(), equalTo(2L));
+    assertThat(feed.getElements().size(), equalTo(2));
+	}
+	
+	@Test
+	public void testGetManyNotifications() throws Exception {
+		User user = mockUser("test", "password");
+		user.getFollowNotifications().add(new FollowNotification("user1", 1L));
+		user.getFollowNotifications().add(new FollowNotification("user2", 2L));
+		user.getFollowNotifications().add(new FollowNotification("user3", 3L));
+		user.getFollowNotifications().add(new FollowNotification("user4", 4L));
+		user.getMentionNotifications().add(new MentionNotification(1L));
+		user.getMentionNotifications().add(new MentionNotification(2L));
+		user.getMentionNotifications().add(new MentionNotification(3L));
+		user.getMentionNotifications().add(new MentionNotification(4L));
+		Feed<FollowNotification> feed = constructor.getFollowNotifications("test", Long.MAX_VALUE);
+		assertThat(feed.getElements(), notNullValue());
+    assertThat(feed.getNext(), nullValue());
+    assertThat(feed.getPrevious(), notNullValue());
+    assertThat(feed.getTotalElements(), equalTo(4L));
+    assertThat(feed.getElements().size(), equalTo(4));
+	}
   
   
   private List<Kluch> getRandomKluchs(int number) {
@@ -395,6 +500,7 @@ public class FeedConstructorTest extends TestWithMockUsers {
     	String randomUsername = getRandomUsername();
     	accumulatedUsernames.add(randomUsername);
     	kluch.setAuthor(randomUsername);
+    	kluch.setTimestamp(new Timestamp(0L + i));
       kluchs.add(kluch);
     }
     mockUsers(accumulatedUsernames);

@@ -806,6 +806,11 @@ a.followers-new-free-element {
 	display: table-cell;
 }
 
+.followers-new-free-element-remaining-text {
+	text-align: right;
+	width: 100%;
+}
+
 /**
 
 	#HOVER
