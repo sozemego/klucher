@@ -1,6 +1,8 @@
 package com.soze.feed.controller;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.soze.TestWithMockUsers;
+import com.soze.feed.model.Feed;
 import com.soze.feed.service.FeedConstructor;
 import com.soze.feed.service.FeedConstructor.FeedDirection;
 
@@ -110,10 +113,10 @@ public class FeedControllerTest extends TestWithMockUsers {
   
   @Test
   public void testGetKluchsWithMentionsUnauthorized() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/feed/notification")
+    mvc.perform(MockMvcRequestBuilders.get("/feed/mentions")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
-        .param("kluchIds[]", "1", "2", "3"))
+        .param("timestamp", "" + Long.MAX_VALUE))
     .andDo(print())
     .andExpect(status().is(401));
   }
@@ -121,13 +124,13 @@ public class FeedControllerTest extends TestWithMockUsers {
   @Test
   public void testGetKluchsWithMentions() throws Exception {
   	mockUser("test", true);	
-    mvc.perform(MockMvcRequestBuilders.get("/feed/notification")
+    mvc.perform(MockMvcRequestBuilders.get("/feed/mentions")
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_JSON)
-        .param("kluchIds[]", "1", "2", "3"))
+        .param("timestamp", "" + Long.MAX_VALUE))
     .andDo(print())
     .andExpect(status().is(200));
-    verify(feedConstructor).getKluchs(Arrays.asList(1L, 2L, 3L));
+    verify(feedConstructor).getMentions("test", Long.MAX_VALUE);
   }
   
   @Test
@@ -149,5 +152,30 @@ public class FeedControllerTest extends TestWithMockUsers {
     .andDo(print())
     .andExpect(status().isBadRequest());
   }
+  
+  @Test
+	public void testGetNoNotifications() throws Exception {
+		String username = "test";
+		mockUser(username, "password", true);
+		when(feedConstructor.getFollowNotifications(username, Long.MAX_VALUE)).thenReturn(new Feed<>(Arrays.asList(), null, null, 0));
+		mvc.perform(MockMvcRequestBuilders.get("/feed/follows")
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.param("timestamp", "" + Long.MAX_VALUE))
+			.andDo(print())
+			.andReturn();
+		verify(feedConstructor).getFollowNotifications(username, Long.MAX_VALUE);
+	}
+  
+  @Test
+	public void testNotLoggedInGetNotifications() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get("/feed/follows")
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.param("timestamp", "" + Long.MAX_VALUE))
+			.andDo(print())
+			.andExpect(status().is(401));
+		verifyZeroInteractions(feedConstructor);
+	}
 
 }

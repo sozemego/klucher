@@ -2,7 +2,7 @@
 <html>
 <head>
 <link rel="stylesheet" href="/resources/css/main.css"></link>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 <script src="/resources/js/klucher.js"></script>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

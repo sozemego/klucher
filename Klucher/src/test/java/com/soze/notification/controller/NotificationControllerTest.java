@@ -2,13 +2,10 @@ package com.soze.notification.controller;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-
-import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.soze.TestWithMockUsers;
-import com.soze.feed.model.Feed;
 import com.soze.notification.service.NotificationService;
 
 @RunWith(SpringRunner.class)
@@ -41,7 +37,7 @@ public class NotificationControllerTest extends TestWithMockUsers {
 
 	private MockMvc mvc;
 
-	@MockBean(name = "NotificationServiceWithCache")
+	@MockBean
 	private NotificationService notificationService;
 
 	@Before
@@ -83,29 +79,6 @@ public class NotificationControllerTest extends TestWithMockUsers {
 			.andExpect(status().isOk())
 			.andReturn();
 		verify(notificationService).poll(username);
-	}
-
-	@Test
-	public void testNotLoggedInGetNotifications() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get("/notification")
-				.accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON))
-			.andDo(print())
-			.andExpect(status().is(401));
-		verifyZeroInteractions(notificationService);
-	}
-
-	@Test
-	public void testGetNoNotifications() throws Exception {
-		String username = "test";
-		mockUser(username, "password", true);
-		when(notificationService.getNotifications(username)).thenReturn(new Feed<>(Arrays.asList()));
-		mvc.perform(MockMvcRequestBuilders.get("/notification")
-				.accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON))
-			.andDo(print())
-			.andReturn();
-		verify(notificationService).getNotifications(username);
 	}
 	
 	@Test

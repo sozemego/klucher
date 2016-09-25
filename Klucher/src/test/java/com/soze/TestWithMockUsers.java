@@ -14,9 +14,7 @@ import java.util.Set;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.junit.After;
 import org.junit.Before;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -123,7 +121,8 @@ public class TestWithMockUsers {
 				}
 				Set<T> expectedSet = new HashSet<T>((Collection<? extends T>) expected);
 				Set<T> actualSet = new HashSet<T>((Collection<? extends T>) actualList);
-				return actualSet.equals(expectedSet);
+				boolean equals = actualSet.equals(expectedSet);
+				return equals;
 			}
 
 			@Override

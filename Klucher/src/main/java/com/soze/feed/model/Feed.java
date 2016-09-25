@@ -1,32 +1,51 @@
 package com.soze.feed.model;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
- * Feed is a simple wrapper class for a {@link List} of your desired type.
- * This may change in the future.
+ * Feed is an object which not only contains content but also information
+ * neccessary to browse that content. It contains total number of elements, but
+ * also fields (previous, next) needed to retrieve previous or next part of that
+ * feed. If next is null, this feed has no more elements. Previous always signifies
+ * the first element, even if you can't go back anymore.
+ * 
  * @author sozek
  *
  */
 public class Feed<T> {
 
-  private Collection<T> elements;
+	private final Collection<T> elements;
+	private final Long previous;
+	private final Long next;
+	private final long totalElements;
 
-  public Feed() {
+	public Feed(Collection<T> elements, Long previous,
+			Long next, long totalElements) {
+		this.elements = elements;
+		this.previous = previous;
+		this.next = next;
+		this.totalElements = totalElements;
+	}
 
-  }
-  
-  public Feed(Collection<T> elements) {
-    this.elements = elements;
-  }
+	public Collection<T> getElements() {
+		return elements;
+	}
 
-  public void setElements(Collection<T> elements) {
-    this.elements = elements;
-  }
+	public Long getPrevious() {
+		return previous;
+	}
 
-  public Collection<T> getElements() {
-    return elements;
-  }
+	public Long getNext() {
+		return next;
+	}
+
+	public long getTotalElements() {
+		return totalElements;
+	}
+
+	@Override
+	public String toString() {
+		return "size: " + (elements == null ? 0 : elements.size());
+	}
 
 }

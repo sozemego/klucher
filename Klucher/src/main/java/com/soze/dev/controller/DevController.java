@@ -1,5 +1,6 @@
 package com.soze.dev.controller;
 
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -9,7 +10,6 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +20,10 @@ import com.soze.dev.service.RandomKluchGenerator;
 import com.soze.follow.service.FollowService;
 import com.soze.kluch.service.KluchService;
 import com.soze.notification.service.NotificationService;
+import com.soze.register.model.RegisterForm;
+import com.soze.register.service.RegisterConverter;
+import com.soze.user.dao.UserDao;
+import com.soze.user.model.User;
 
 @Controller
 @Profile("dev")
@@ -30,23 +34,48 @@ public class DevController {
   private final RandomKluchGenerator kluchGenerator;
   private final FollowService followService;
   private final NotificationService notificationService;
+  private final UserDao userDao;
+  private final RegisterConverter registerConverter;
   
   @Autowired
   public DevController(KluchService kluchService, RandomKluchGenerator kluchGenerator,
-  		FollowService followService, @Qualifier("NotificationServiceWithCache") NotificationService notificationService) {
+  		FollowService followService, NotificationService notificationService,
+  		UserDao userDao, RegisterConverter registerConverter) {
     this.kluchService = kluchService;
     this.kluchGenerator = kluchGenerator;
     this.followService = followService;
     this.notificationService = notificationService;
+    this.userDao = userDao;
+    this.registerConverter = registerConverter;
   }
   
-  @RequestMapping(value = "dev/follow", method = RequestMethod.POST)
-  public String follow(@RequestParam String username, @RequestParam(value = "followers[]") String[] followers) {
+  @RequestMapping(value = "dev/follow/list", method = RequestMethod.POST)
+  public String followList(@RequestParam String username, @RequestParam(value = "followers[]") String[] followers) {
   	for(String name: followers) {
   		followService.follow(name, username);
   		notificationService.addFollowNotification(name, username);
   	}
   	return "dev";
+  }
+  
+  @RequestMapping(value = "dev/follow/create", method = RequestMethod.POST)
+  public String followCreate(@RequestParam String username, @RequestParam int number) {	
+  	for(int i = 0; i < number; i++) {
+  		String name = createRandomUser();
+  		followService.follow(name, username);
+  		notificationService.addFollowNotification(name, username);
+  	}
+  	log.info("Created [{}] users who will follow [{}].", number, username);
+  	return "dev";
+  }
+  
+  private String createRandomUser() {
+  	String username = getRandomUserName();
+  	if(!userDao.exists(username)) {
+  		User user = registerConverter.convertRegisterForm(new RegisterForm(username, "password"));
+  		userDao.save(user);
+  	}
+  	return username;
   }
   
   @RequestMapping(value = "dev/post", method = RequestMethod.POST)
@@ -210,6 +239,19 @@ public class DevController {
       }
       log.info("Poster posted [{}] kluchs.", timesRun);
     }   
+  }
+  
+	private final Random random = new Random();
+  
+  private String getRandomUserName() {
+  	String alphabet = "qwertyuiopasdfghjklzxcvbnm";
+  	int length = random.nextInt((12 - 6) + 1) + 6; 	
+  	StringBuilder sb = new StringBuilder(length);
+  	for(int i = 0; i < length; i++) {
+  		char randomChar = alphabet.charAt(random.nextInt(alphabet.length()));
+  		sb.append(randomChar);
+  	}
+  	return sb.toString();
   }
   
 }

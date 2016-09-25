@@ -3,6 +3,7 @@ package com.soze.kluch.dao;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.soze.hashtag.model.Hashtag;
@@ -44,12 +45,12 @@ public interface KluchDao {
   
   public List<Kluch> findTop20ByAuthorOrderByTimestampDesc(String author, Pageable pageRequest);
   
-  public List<Kluch> findByAuthorInAndTimestampLessThan(Iterable<String> authors, Timestamp lessThan, Pageable pageRequest);
+  public Page<Kluch> findByAuthorInAndTimestampLessThan(Iterable<String> authors, Timestamp lessThan, Pageable pageRequest);
   
-  public List<Kluch> findByAuthorInAndTimestampGreaterThan(Iterable<String> authors, Timestamp lessThan, Pageable pageRequest);
+  public Page<Kluch> findByAuthorInAndTimestampGreaterThan(Iterable<String> authors, Timestamp greaterThan, Pageable pageRequest);
+  
+  public Page<Kluch> findByHashtagsInAndTimestampLessThan(Hashtag hashtag, Timestamp lessThan, Pageable pageRequest);
   
   public void deleteByAuthor(String author);
-  
-  public List<Kluch> findByHashtagsInAndTimestampLessThan(Hashtag hashtag, Timestamp lessThan, Pageable pageRequest);
   
 }

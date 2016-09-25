@@ -1,7 +1,6 @@
 package com.soze.kluch.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -24,7 +23,7 @@ public class KluchController {
   
   @Autowired
   public KluchController(KluchService kluchService,
-  		@Qualifier("NotificationServiceWithCache") NotificationService notificationService) {
+  		NotificationService notificationService) {
     this.kluchService = kluchService;
     this.notificationService = notificationService;
   }

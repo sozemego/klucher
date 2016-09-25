@@ -33,7 +33,7 @@ import com.soze.notification.service.NotificationService;
 @Transactional
 public class KluchControllerTest extends TestWithMockUsers {
   
-  @MockBean(name = "NotificationServiceWithCache")
+  @MockBean
   private NotificationService notificationService;
   
   @Autowired

@@ -1,6 +1,7 @@
 package com.soze.notification.model;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 
 @Embeddable
 public class FollowNotification extends Notification {
@@ -9,8 +10,12 @@ public class FollowNotification extends Notification {
 	 * Name of the user who followed another user and path to their avatar
 	 * (profile image).
 	 */
+	@NotNull
 	private String username;
+	@NotNull
 	private String avatarPath;
+	@NotNull
+	private Long timestamp;
 
 	private boolean noticed;
 
@@ -20,6 +25,11 @@ public class FollowNotification extends Notification {
 
 	public FollowNotification(String username) {
 		this.username = username;
+	}
+	
+	public FollowNotification(String username, long timestamp) {
+		this.username = username;
+		this.timestamp = timestamp;
 	}
 
 	public String getUsername() {
@@ -44,6 +54,14 @@ public class FollowNotification extends Notification {
 
 	public void setNoticed(boolean noticed) {
 		this.noticed = noticed;
+	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
 	}
 
 	@Override

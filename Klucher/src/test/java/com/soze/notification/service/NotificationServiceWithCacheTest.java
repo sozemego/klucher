@@ -13,19 +13,17 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -34,7 +32,6 @@ import com.soze.TestWithMockUsers;
 import com.soze.common.exceptions.CannotDoItToYourselfException;
 import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
-import com.soze.feed.model.Feed;
 import com.soze.kluch.model.Kluch;
 import com.soze.notification.model.FollowNotification;
 import com.soze.notification.model.MentionNotification;
@@ -51,14 +48,13 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 	private UserDao userDao;
 	
 	@Autowired
-	@Qualifier("NotificationServiceWithCache")
 	private NotificationService notificationService;
 	
 	@SuppressWarnings("rawtypes")
 	@Before
 	public void setUp() throws Exception {
-		Class aClass = NotificationServiceWithCache.class;
-		Field field = aClass.getDeclaredField("cachedUsers");
+		Class aClass = NotificationService.class;
+		Field field = aClass.getDeclaredField("cachedNotificationNumber");
 		field.setAccessible(true);
 		Map<String, Integer> toReplace = new ConcurrentHashMap<String, Integer>();
 		field.set(notificationService, toReplace);
@@ -81,7 +77,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 	
 	@Test
 	public void testNoNotifications() throws Exception {
-		User user = mockUser("test", "password");
+		mockUser("test", "password");
 		int unreadNotifications = notificationService.poll("test");
 		assertThat(unreadNotifications, equalTo(0));
 	}
@@ -125,52 +121,6 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 	}
 	
 	@Test(expected = NullOrEmptyException.class)
-	public void testNullUsernameGetNotifications() throws Exception {
-		notificationService.getNotifications(null);
-	}
-	
-	@Test(expected = NullOrEmptyException.class)
-	public void testEmptyUsernameGetNotifications() throws Exception {
-		notificationService.getNotifications("");
-	}
-	
-	@Test(expected = UserDoesNotExistException.class)
-	public void testUserDoesNotExistGetNotifications() throws Exception {
-		notificationService.getNotifications("doesNotExist");
-	}
-	
-	@Test
-	public void testGetNoNotifications() throws Exception {
-		mockUser("test", "password");
-		Feed<Notification> notifications = notificationService.getNotifications("test");
-		assertThat(notifications.getElements().size(), equalTo(0));
-	}
-	
-	@Test
-	public void testAFewNotifications() throws Exception {
-		User user = mockUser("test", "password");
-		user.getFollowNotifications().add(new FollowNotification("user1"));
-		user.getFollowNotifications().add(new FollowNotification("user2"));
-		Feed<Notification> notifications = notificationService.getNotifications("test");
-		assertThat(notifications.getElements().size(), equalTo(2));
-	}
-	
-	@Test
-	public void testGetManyNotifications() throws Exception {
-		User user = mockUser("test", "password");
-		user.getFollowNotifications().add(new FollowNotification("user1"));
-		user.getFollowNotifications().add(new FollowNotification("user2"));
-		user.getFollowNotifications().add(new FollowNotification("user3"));
-		user.getFollowNotifications().add(new FollowNotification("user4"));
-		user.getMentionNotifications().add(new MentionNotification(1L));
-		user.getMentionNotifications().add(new MentionNotification(2L));
-		user.getMentionNotifications().add(new MentionNotification(3L));
-		user.getMentionNotifications().add(new MentionNotification(4L));
-		Feed<Notification> notifications = notificationService.getNotifications("test");
-		assertThat(notifications.getElements().size(), equalTo(8));
-	}
-	
-	@Test(expected = NullOrEmptyException.class)
 	public void testProcessKluchNullKluch() throws Exception {
 		notificationService.processUserMentions(null);
 	}
@@ -189,6 +139,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		Kluch kluch = mock(Kluch.class);
 		when(kluch.getText()).thenReturn("@anotheruser");
 		when(kluch.getId()).thenReturn(1L);
+		when(kluch.getTimestamp()).thenReturn(new Timestamp(1L));
 		List<User> users = mockUsers(Arrays.asList("anotheruser"));
 		MentionNotification notification = (MentionNotification) notificationService.processUserMentions(kluch);
 		assertThat(notification, notNullValue());
@@ -201,6 +152,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		Kluch kluch = mock(Kluch.class);
 		when(kluch.getText()).thenReturn("@anotheruser @differentuser");
 		when(kluch.getId()).thenReturn(1L);
+		when(kluch.getTimestamp()).thenReturn(new Timestamp(1L));
 		List<User> users = mockUsers(Arrays.asList("anotheruser", "differentuser"));
 		MentionNotification notification = (MentionNotification) notificationService.processUserMentions(kluch);
 		assertThat(notification, notNullValue());
@@ -213,6 +165,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		Kluch kluch = mock(Kluch.class);
 		when(kluch.getText()).thenReturn("@anotheruser @user_1@user @user @abc@abc @a @a");
 		when(kluch.getId()).thenReturn(1L);
+		when(kluch.getTimestamp()).thenReturn(new Timestamp(1L));
 		List<User> users = mockUsers(Arrays.asList("anotheruser", "user_1", "user", "abc", "a"));
 		MentionNotification notification = (MentionNotification) notificationService.processUserMentions(kluch);
 		assertThat(notification, notNullValue());
@@ -225,6 +178,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		Kluch kluch = mock(Kluch.class);
 		when(kluch.getText()).thenReturn("@anotheruser");
 		when(kluch.getId()).thenReturn(1L);
+		when(kluch.getTimestamp()).thenReturn(new Timestamp(1L));
 		MentionNotification notification = (MentionNotification) notificationService.processUserMentions(kluch);
 		assertThat(notification, notNullValue());
 		assertThat(notification.getKluchId(), equalTo(1L));
@@ -236,6 +190,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		Kluch kluch = mock(Kluch.class);
 		when(kluch.getText()).thenReturn("@anotheruser @anotheruser");
 		when(kluch.getId()).thenReturn(1L);
+		when(kluch.getTimestamp()).thenReturn(new Timestamp(1L));
 		// notification service retrieves a list of users in
 		// kluch text in one DB call, so we want to mock
 		List<User> users = mockUsers(Arrays.asList("anotheruser"));
@@ -250,6 +205,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		Kluch kluch = mock(Kluch.class);
 		when(kluch.getText()).thenReturn("@anotheruser @anotheruser @a @a");
 		when(kluch.getId()).thenReturn(1L);
+		when(kluch.getTimestamp()).thenReturn(new Timestamp(1L));
 		List<User> users = mockUsers(Arrays.asList("anotheruser", "a"));
 		MentionNotification notification = (MentionNotification) notificationService.processUserMentions(kluch);
 		assertThat(notification, notNullValue());
@@ -267,7 +223,8 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		Kluch kluch = mock(Kluch.class);
 		when(kluch.getText()).thenReturn("@abc");
 		when(kluch.getId()).thenReturn(1L);
-		List<User> users = mockUsers(Arrays.asList("abc"));
+		when(kluch.getTimestamp()).thenReturn(new Timestamp(1L));
+		mockUsers(Arrays.asList("abc"));
 		MentionNotification notification = (MentionNotification) notificationService.removeUserMentions(kluch);
 	  assertThat(notification, nullValue());
 	}
@@ -277,6 +234,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		Kluch kluch = mock(Kluch.class);
 		when(kluch.getText()).thenReturn("@abc");
 		when(kluch.getId()).thenReturn(1L);
+		when(kluch.getTimestamp()).thenReturn(new Timestamp(1L));
 		List<User> users = mockUsers(Arrays.asList("abc"));
 		MentionNotification n = new MentionNotification();
 		n.setKluchId(1L);
@@ -292,6 +250,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		Kluch kluch = mock(Kluch.class);
 		when(kluch.getText()).thenReturn("@abc");
 		when(kluch.getId()).thenReturn(1L);
+		when(kluch.getTimestamp()).thenReturn(new Timestamp(1L));
 		mockUsers(Arrays.asList("user"));
 		MentionNotification notification = (MentionNotification) notificationService.removeUserMentions(kluch);
 	  assertThat(notification, nullValue());
@@ -303,6 +262,7 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		Kluch kluch = mock(Kluch.class);
 		when(kluch.getText()).thenReturn("@abc @dge @afbb");
 		when(kluch.getId()).thenReturn(1L);
+		when(kluch.getTimestamp()).thenReturn(new Timestamp(1L));
 		List<User> users = mockUsers(Arrays.asList("abc", "dge", "afbb"));
 		MentionNotification n = new MentionNotification();
 		n.setKluchId(1L);
