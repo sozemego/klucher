@@ -23,7 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.soze.TestWithMockUsers;
+import com.soze.common.feed.FeedDirection;
+import com.soze.kluch.model.FeedRequest;
 import com.soze.kluch.model.Kluch;
+import com.soze.kluch.service.KluchFeedService;
 import com.soze.kluch.service.KluchService;
 import com.soze.notification.service.NotificationService;
 
@@ -44,6 +47,9 @@ public class KluchControllerTest extends TestWithMockUsers {
   @MockBean
   private KluchService service;
   
+  @MockBean
+  private KluchFeedService kluchFeedService;
+  
   @Before
   public void setUp() throws Exception {
     mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
@@ -62,7 +68,7 @@ public class KluchControllerTest extends TestWithMockUsers {
   }
   
   @Test
-  public void testUnauthorized() throws Exception {
+  public void testUnauthorizedPostKluch() throws Exception {
   	String kluchText = "text";
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
         .param("kluchText", kluchText)
@@ -106,6 +112,87 @@ public class KluchControllerTest extends TestWithMockUsers {
   	.andDo(print());
   	verify(service).deleteKluch("username", 0L);
   	verify(notificationService).removeUserMentions(any(Kluch.class));
+  }
+  
+  @Test
+	public void testUnauthorizedFeedAfter() throws Exception {
+		String username = "test";
+		mvc.perform(MockMvcRequestBuilders.get("/kluch/" + username)
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON))
+		.andDo(print())
+		.andExpect(status().isOk());
+		verify(kluchFeedService).constructFeed(username, new FeedRequest(FeedDirection.NEXT, null), true);
+	}
+  
+  @Test
+	public void testUnauthorizedFeedBefore() throws Exception {
+		String username = "test";
+		mvc.perform(MockMvcRequestBuilders.get("/kluch/" + username)
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON))
+		.andDo(print())
+		.andExpect(status().isOk());
+		verify(kluchFeedService).constructFeed(username, new FeedRequest(FeedDirection.NEXT, null), true);
+	}
+  
+  @Test
+	public void testFeedBothIds() throws Exception {
+		String username = "test";
+		mvc.perform(MockMvcRequestBuilders.get("/kluch/" + username)
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.param("next", "0")
+				.param("previous", "5"))
+		.andDo(print())
+		.andExpect(status().isOk());
+		verify(kluchFeedService).constructFeed(username, new FeedRequest(FeedDirection.PREVIOUS, 5l), true);
+	}
+  
+  @Test
+  public void testAuthorizedAndValidId() throws Exception {
+  	String username = "test";
+    mockUser(username, "password", true);
+    mvc.perform(MockMvcRequestBuilders.get("/kluch/" + username)
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON)
+        .param("next", "5"))
+    .andDo(print())
+    .andExpect(status().isOk());
+    verify(kluchFeedService).constructFeed(username, new FeedRequest(FeedDirection.NEXT, 5L), false);
+  }
+  
+  @Test
+  public void testGetKluchsWithMentionsUnauthorized() throws Exception {
+    mvc.perform(MockMvcRequestBuilders.get("/kluch/mentions")
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON))
+    .andDo(print())
+    .andExpect(status().is(401));
+  }
+  
+  @Test
+  public void testGetKluchsWithMentions() throws Exception {
+  	mockUser("test", true);	
+    mvc.perform(MockMvcRequestBuilders.get("/kluch/mentions")
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON)
+        .param("next", "0"))
+    .andDo(print())
+    .andExpect(status().is(200));
+    verify(kluchFeedService).getMentions("test", new FeedRequest(FeedDirection.NEXT, 0L));
+  }
+  
+  @Test
+  public void testEmptyFeed() throws Exception {
+  	String hashtag = "dupa";
+    mvc.perform(MockMvcRequestBuilders.get("/kluch/hashtag/" + hashtag)
+    		.accept(MediaType.APPLICATION_JSON)
+    		.contentType(MediaType.APPLICATION_JSON)
+        .param("next", "0"))
+      .andDo(print())
+      .andExpect(status().isOk());
+    verify(kluchFeedService).constructHashtagFeed(hashtag, new FeedRequest(FeedDirection.NEXT, 0L));
   }
 
 }

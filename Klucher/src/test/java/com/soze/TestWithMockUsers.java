@@ -6,10 +6,13 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -35,6 +38,10 @@ import com.soze.user.model.User;
 public class TestWithMockUsers {
 
 	private final Random random = new Random();
+	
+	private final AtomicLong ids = new AtomicLong(1);
+	
+	private final Map<String, Long> savedUserIds = new HashMap<>();
 	
   @MockBean
   private UserDao userDao;
@@ -72,19 +79,31 @@ public class TestWithMockUsers {
   
 	protected List<User> mockUsers(List<String> usernames) {
   	List<User> users = new ArrayList<>();
+  	List<Long> ids = new ArrayList<>();
   	for(String username: usernames) {
-  		users.add(mockUser(username, "password", false));
+  		User user = mockUser(username, "password", false);
+  		users.add(user);
+  		ids.add(user.getId());
   	}
 		//when(userDao.findAll(usernames)).thenReturn(users);
-		when(userDao.findAll(argThat(sameAsSet(usernames)))).thenReturn(users);
+  	when(userDao.findByUsernameIn(argThat(sameAsSet(usernames)))).thenReturn(users);
+		when(userDao.findAll(argThat(sameAsSet(ids)))).thenReturn(users);
   	return users;
   }
 
   private User getBaseUser(String username, String password) {
+  	Long id = null;
+  	if(savedUserIds.containsKey(username)) {
+  		id = savedUserIds.get(username);
+  	} else {
+  		id = ids.getAndIncrement();
+  		savedUserIds.put(username, id);
+  	}
     RegisterForm form = new RegisterForm();
     form.setUsername(username);
     form.setPassword(password);
     User testUser = registerConverter.convertRegisterForm(form);
+    testUser.setId(id);
     return testUser;
   }
   

@@ -1,56 +1,40 @@
 package com.soze.kluch.dao;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.soze.hashtag.model.Hashtag;
 import com.soze.kluch.model.Kluch;
 
 public interface KluchDao {
 
-  public Kluch save(Kluch kluch);
+	public Kluch save(Kluch kluch);
 
-  public Iterable<Kluch> save(Iterable<Kluch> kluchs);
+	public Iterable<Kluch> save(Iterable<Kluch> kluchs);
 
-  public Kluch findOne(long id);
+	public Kluch findOne(long id);
 
-  public boolean exists(long id);
+	public List<Kluch> findAll(Iterable<Long> ids);
 
-  public List<Kluch> findAll();
+	public long count();
 
-  public List<Kluch> findAll(Iterable<Long> ids);
+	public void delete(long id);
 
-  public long count();
+	public void delete(Kluch kluch);
 
-  public void delete(long id);
+	public void delete(Iterable<Kluch> kluchs);
 
-  public void delete(Kluch kluch);
+	public void deleteAll();
 
-  public void delete(Iterable<Kluch> kluchs);
+	public Page<Kluch> findByAuthorIdInAndIdGreaterThan(Iterable<Long> authorIds, long greaterThanId, Pageable pageRequest);
+	
+	public Page<Kluch> findByAuthorIdInAndIdLessThan(Iterable<Long> authorIds, long lessThanId, Pageable pageRequest);
+	
+	public Page<Kluch> findByMentionsInAndIdLessThan(String mention, long lessThanId, Pageable pageRequest);
+	
+	public Page<Kluch> findByHashtagsInAndIdLessThan(String hashtag, long lessThanId, Pageable pageRequest);
 
-  public void deleteAll();
-  
-  public List<Kluch> findByAuthor(String author);
-  
-  public List<Kluch> findByAuthorOrderByTimestampDesc(String author);
-  
-  public List<Kluch> findByAuthorOrderByTimestampDesc(String author, Pageable pageRequest);
-  
-  public List<Kluch> findByAuthorInOrderByTimestampDesc(Iterable<String> authors, Pageable pageRequest);
-  
-  public List<Kluch> findTop20ByAuthorOrderByTimestampDesc(String author);
-  
-  public List<Kluch> findTop20ByAuthorOrderByTimestampDesc(String author, Pageable pageRequest);
-  
-  public Page<Kluch> findByAuthorInAndTimestampLessThan(Iterable<String> authors, Timestamp lessThan, Pageable pageRequest);
-  
-  public Page<Kluch> findByAuthorInAndTimestampGreaterThan(Iterable<String> authors, Timestamp greaterThan, Pageable pageRequest);
-  
-  public Page<Kluch> findByHashtagsInAndTimestampLessThan(Hashtag hashtag, Timestamp lessThan, Pageable pageRequest);
-  
-  public void deleteByAuthor(String author);
-  
+	public void deleteByAuthorId(Long authorId);
+
 }

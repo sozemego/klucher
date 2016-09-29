@@ -18,7 +18,7 @@
 </script>
 </head>
 <body>
-<input type = "hidden" id = "data" data-username = "${username}" data-avatar-path = "${avatarPath}" data-page = "0" data-last-timestamp="0" data-first-timestamp = "9007199254740991">
+<input type = "hidden" id = "data" data-username = "${username}" data-avatar-path = "${avatarPath}">
 <c:import url="header_with_buttons.jsp"></c:import>
 <div class="page">
 	<div class="dashboard">
@@ -45,7 +45,8 @@
 			<div class="dashboard-new-kluch-alert" id="new-kluch-alert">
 				<span class="dashboard-new-kluch-alert-text">new kluchs available, click here to view!</span>
 			</div>
-			<div class="kluch-feed" id="kluch-feed">
+			<div class="kluch-feed" id="kluch-feed" data-next = "9007199254740991"
+			 data-previous = "0" data-getting-feed="false" data-feed-finished="false">
 				
 			</div>
 			<div class = "kluch-no-more">

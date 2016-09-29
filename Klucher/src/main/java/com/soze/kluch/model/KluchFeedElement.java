@@ -1,4 +1,4 @@
-package com.soze.feed.model;
+package com.soze.kluch.model;
 
 import com.soze.kluch.model.Kluch;
 import com.soze.kluch.model.KluchUserView;

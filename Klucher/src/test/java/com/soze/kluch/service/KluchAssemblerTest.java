@@ -6,23 +6,26 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.junit.Test;
 
 import com.soze.hashtag.service.HashtagService;
 import com.soze.kluch.model.Kluch;
+import com.soze.user.model.User;
 
 public class KluchAssemblerTest {
   
   @Test
   public void testValidKluch() throws Exception {
     HashtagService mockService = mock(HashtagService.class);
-    when(mockService.process(any(Kluch.class))).thenReturn(new ArrayList<>());
+    when(mockService.process(any(Kluch.class))).thenReturn(new HashSet<>());
     KluchAssembler assembler = new KluchAssembler(mockService);
     String kluchText = generateString(140);
-    Kluch kluch = assembler.assembleKluch("author", kluchText);
-    assertThat(kluch.getAuthor(), equalTo("author"));
+    User user = mock(User.class);
+    when(user.getId()).thenReturn(1L);
+    Kluch kluch = assembler.assembleKluch(user, kluchText);
+    assertThat(kluch.getAuthorId(), equalTo(1L));
     assertThat(kluch.getText(), equalTo(kluchText));
   }
   

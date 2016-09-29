@@ -3,7 +3,10 @@ package com.soze.kluch.service;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +27,7 @@ import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
+import com.soze.user.model.User;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -33,25 +37,40 @@ public class KluchServiceTest extends TestWithMockUsers {
 
 	@MockBean
 	private KluchDao kluchDao;
+	
+	@MockBean
+	private KluchAssembler assembler;
 
 	@Autowired
 	@InjectMocks
 	private KluchService kluchService;
+	
+	private final AtomicLong ids = new AtomicLong(1);
 
 	@Test(expected = InvalidLengthException.class)
 	public void testTooLongKluch() throws Exception {
 		kluchService.post("author", generateString(251));
 	}
+	
+	@Test(expected = UserDoesNotExistException.class)
+	public void testValidKluchUserDoesNotExist() throws Exception {
+		String kluchText = generateString(140);
+		String author = "author";
+		kluchService.post(author, kluchText);
+	}
+	
 
 	@Test
 	public void testValidKluch() throws Exception {
 		String kluchText = generateString(140);
 		String author = "author";
-		Kluch kluch = getKluch(author, kluchText);
+		User user = mockUser(author, false);
+		Kluch kluch = getKluch(user, kluchText);
+		when(assembler.assembleKluch(user, kluchText)).thenReturn(kluch);
 		when(kluchDao.save(kluch)).thenReturn(kluch);
 		Kluch firstKluch = kluchService.post(author, kluchText);
 		assertThat(firstKluch, notNullValue());
-		assertThat(firstKluch.getAuthor(), equalTo(author));
+		assertThat(firstKluch.getAuthorId(), equalTo(user.getId()));
 		assertThat(firstKluch.getText(), equalTo(kluchText));
 	}
 
@@ -77,6 +96,7 @@ public class KluchServiceTest extends TestWithMockUsers {
 
 	@Test(expected = KluchPreviouslyPostedException.class)
 	public void testAlreadyPosted() throws Exception {
+		mockUser("author");
 		String kluchText = generateString(50);
 		kluchService.post("author", kluchText);
 		kluchService.post("author", kluchText);
@@ -86,18 +106,21 @@ public class KluchServiceTest extends TestWithMockUsers {
 	public void testPostDifferentContent() throws Exception {
 		String kluchText = generateString(50);
 		String author = "author";
-		Kluch kluch = getKluch(author, kluchText);
+		User user = mockUser(author);
+		Kluch kluch = getKluch(user, kluchText);
+		when(assembler.assembleKluch(user, kluchText)).thenReturn(kluch);
 		when(kluchDao.save(kluch)).thenReturn(kluch);
 		Kluch firstKluch = kluchService.post(author, kluchText);
 		assertThat(firstKluch, notNullValue());
-		assertThat(firstKluch.getAuthor(), equalTo(author));
+		assertThat(firstKluch.getAuthorId(), equalTo(user.getId()));
 		assertThat(firstKluch.getText(), equalTo(kluchText));
 		String secondKluchText = generateString(51);
-		kluch = getKluch(author, secondKluchText);
+		kluch = getKluch(user, secondKluchText);
 		when(kluchDao.save(kluch)).thenReturn(kluch);
+		when(assembler.assembleKluch(user, secondKluchText)).thenReturn(kluch);
 		Kluch anotherKluch = kluchService.post(author, secondKluchText);
 		assertThat(anotherKluch, notNullValue());
-		assertThat(anotherKluch.getAuthor(), equalTo(author));
+		assertThat(anotherKluch.getAuthorId(), equalTo(user.getId()));
 		assertThat(anotherKluch.getText(), equalTo(secondKluchText));
 	}
 
@@ -105,18 +128,22 @@ public class KluchServiceTest extends TestWithMockUsers {
 	public void testSameContentDifferentAuthor() throws Exception {
 		String kluchText = generateString(50);
 		String author = "author";
-		Kluch kluch = getKluch(author, kluchText);
+		User user = mockUser(author);
+		Kluch kluch = getKluch(user, kluchText);
+		when(assembler.assembleKluch(user, kluchText)).thenReturn(kluch);
 		when(kluchDao.save(kluch)).thenReturn(kluch);
 		Kluch firstKluch = kluchService.post(author, kluchText);
 		assertThat(firstKluch, notNullValue());
-		assertThat(firstKluch.getAuthor(), equalTo(author));
+		assertThat(firstKluch.getAuthorId(), equalTo(user.getId()));
 		assertThat(firstKluch.getText(), equalTo(kluchText));
 		String anotherAuthor = "author2";
-		kluch = getKluch(anotherAuthor, kluchText);
+		User anotherUser = mockUser(anotherAuthor);
+		kluch = getKluch(anotherUser, kluchText);
 		when(kluchDao.save(kluch)).thenReturn(kluch);
+		when(assembler.assembleKluch(anotherUser, kluchText)).thenReturn(kluch);
 		Kluch anotherKluch = kluchService.post(anotherAuthor, kluchText);
 		assertThat(anotherKluch, notNullValue());
-		assertThat(anotherKluch.getAuthor(), equalTo(anotherAuthor));
+		assertThat(anotherKluch.getAuthorId(), equalTo(anotherUser.getId()));
 		assertThat(anotherKluch.getText(), equalTo(kluchText));
 	}
 
@@ -147,23 +174,26 @@ public class KluchServiceTest extends TestWithMockUsers {
 		String username = "lolers";
 		mockUser(username);
 		String differentUsername = "danny";
-		Kluch kluch = getKluch(differentUsername, "text");
-		when(kluchDao.findOne(2L)).thenReturn(kluch);
-		kluchService.deleteKluch(username, 2L);
+		User anotherUser = mockUser(differentUsername);
+		Kluch kluch = getKluch(anotherUser, "text");
+		when(kluchDao.findOne(kluch.getId())).thenReturn(kluch);
+		kluchService.deleteKluch(username, kluch.getId());
 	}
 
 	@Test
 	public void deleteKluchEverythingValid() {
 		String username = "lolers";
-		mockUser(username);
-		Kluch kluch = getKluch(username, "text");
-		when(kluchDao.findOne(2L)).thenReturn(kluch);
-		kluchService.deleteKluch(username, 2L);
+		User user = mockUser(username);
+		Kluch kluch = getKluch(user, "text");
+		when(kluchDao.findOne(kluch.getId())).thenReturn(kluch);
+		kluchService.deleteKluch(username, kluch.getId());
+		verify(kluchDao).delete(kluch);
 	}
 
-	private Kluch getKluch(String author, String text) {
+	private Kluch getKluch(User user, String text) {
 		Kluch kluch = new Kluch();
-		kluch.setAuthor(author);
+		kluch.setId(ids.getAndIncrement());
+		kluch.setAuthorId(user.getId());
 		kluch.setText(text);
 		return kluch;
 	}

@@ -29,13 +29,27 @@ public class UserDatabase implements UserDao {
   }
 
   @Override
+  public User findOne(Long id) {
+    return userRepository.findOne(id);
+  }
+  
+  @Override
   public User findOne(String username) {
-    return userRepository.findOne(username);
+  	return userRepository.findOneByUsername(username);
   }
 
   @Override
+  public boolean exists(Long id) {
+    return userRepository.exists(id);
+  }
+  
+  @Override
   public boolean exists(String username) {
-    return userRepository.exists(username);
+  	User user = findOne(username);
+  	if(user != null) {
+  		return true;
+  	}
+  	return false;
   }
 
   @Override
@@ -44,18 +58,23 @@ public class UserDatabase implements UserDao {
   }
 
   @Override
-  public List<User> findAll(Iterable<String> usernames) {
-    return userRepository.findAll(usernames);
+  public List<User> findAll(Iterable<Long> ids) {
+    return userRepository.findAll(ids);
   }
 
+  @Override
+  public List<User> findByUsernameIn(Iterable<String> usernames) {
+  	return userRepository.findAllByUsernameIn(usernames);
+  }
+  
   @Override
   public long count() {
     return userRepository.count();
   }
 
   @Override
-  public void delete(String username) {
-    userRepository.delete(username);
+  public void delete(Long id) {
+    userRepository.delete(id);
   }
 
   @Override
