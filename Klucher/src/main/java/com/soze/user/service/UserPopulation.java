@@ -71,7 +71,7 @@ public class UserPopulation {
     form.setPassword(tokens.length > 1 ? tokens[1] : DEFAULT_PASSWORD);
     User user = registerConverter.convertRegisterForm(form);
     UserRoles userRoles = new UserRoles();
-    userRoles.setUsername(tokens[0]);
+    //userRoles.setUsername(tokens[0]);
     userRoles.setUser(tokens.length > 2 ? (tokens[2].equals("1") ? true : false) : true);
     userRoles.setAdmin(tokens.length > 3 ? (tokens[3].equals("1") ? true : false) : false);
     user.setUserRoles(userRoles);

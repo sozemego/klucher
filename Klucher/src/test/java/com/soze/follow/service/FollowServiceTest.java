@@ -2,10 +2,6 @@ package com.soze.follow.service;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
-
-import java.util.Arrays;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +16,7 @@ import com.soze.TestWithMockUsers;
 import com.soze.common.exceptions.CannotDoItToYourselfException;
 import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
-import com.soze.user.dao.UserDao;
+import com.soze.follow.model.Follow;
 import com.soze.user.model.User;
 
 @RunWith(SpringRunner.class)
@@ -30,9 +26,6 @@ public class FollowServiceTest extends TestWithMockUsers {
 	
 	@Autowired
 	private FollowService followService;
-	
-	@Autowired
-	private UserDao userDao;
 	
 	@Before
 	public void setUp() {
@@ -74,18 +67,17 @@ public class FollowServiceTest extends TestWithMockUsers {
 	
 	@Test(expected = CannotDoItToYourselfException.class)
 	public void testUsernameAndFollowEqualFollow() throws Exception {
+		mockUser("user");
 		followService.follow("user", "user");
 	}
 	
 	@Test
 	public void testValidUsersFollow() throws Exception {
-		List<User> users = mockUsers(Arrays.asList("user", "user1"));
-		User user = users.get(0);
-		User user1 = users.get(1);
-		followService.follow("user", "user1");
-		verify(userDao).save(users);
-		assertThat(user.getFollowing().contains(user1.getUsername()), equalTo(true));
-		assertThat(user1.getFollowers().contains(user.getUsername()), equalTo(true));
+		User follower = mockUser("follower");
+		User followee = mockUser("followee");
+		Follow follow = followService.follow("follower", "followee");
+		assertThat(follow.getFollowerId(), equalTo(follower.getId()));
+		assertThat(follow.getFolloweeId(), equalTo(followee.getId()));
 	}
 	
 	@Test(expected = NullOrEmptyException.class)
@@ -123,19 +115,16 @@ public class FollowServiceTest extends TestWithMockUsers {
 	
 	@Test(expected = CannotDoItToYourselfException.class)
 	public void testUsernameAndFollowEqualUnfollow() throws Exception {
+		mockUser("user");
 		followService.unfollow("user", "user");
 	}
 	
 	@Test
 	public void testValidUsersUnfollow() throws Exception {
-		List<User> users = mockUsers(Arrays.asList("user", "user1"));
-		User user = users.get(0);
-		user.getFollowing().add("user1");
-		User user1 = users.get(1);
-		user1.getFollowers().add("user");
-		followService.unfollow("user", "user1");
-		verify(userDao).save(users);
-		assertThat(user.getFollowing().contains(user1.getUsername()), equalTo(false));
-		assertThat(user1.getFollowers().contains(user.getUsername()), equalTo(false));
+		User follower = mockUser("follower");
+		User followee = mockUser("followee");
+		Follow follow = followService.follow("follower", "followee");
+		assertThat(follow.getFollowerId(), equalTo(follower.getId()));
+		assertThat(follow.getFolloweeId(), equalTo(followee.getId()));
 	}
 }

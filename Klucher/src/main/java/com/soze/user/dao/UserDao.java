@@ -10,17 +10,23 @@ public interface UserDao {
   
   public Iterable<User> save(Iterable<User> users);
   
+  public User findOne(Long id);
+  
   public User findOne(String username);
+  
+  public boolean exists(Long id);
   
   public boolean exists(String username);
   
   public Iterable<User> findAll();
   
-  public List<User> findAll(Iterable<String> usernames);
+  public List<User> findAll(Iterable<Long> ids);
+  
+  public List<User> findByUsernameIn(Iterable<String> usernames);
   
   public long count();
   
-  public void delete(String username);
+  public void delete(Long username);
   
   public void delete(User user);
   

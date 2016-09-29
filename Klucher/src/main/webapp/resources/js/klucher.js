@@ -30,7 +30,6 @@ function checkAvailability(lastUsername) {
 		type: "GET",
 		url: "/register/available/" + currentUsername,
 		error: function(xhr, status, error) {
-			// slow down the checks to let server breathe
 			setTimeout(checkAvailability, 10000, currentUsername);
 		},
 		success: function(data) {
@@ -254,21 +253,27 @@ function getKluch(username, timestamp, text) {
 	};
 }
 
-function getFeed(direction, timestamp, append) {
+function getFeed(direction, id, append) {
 	if(isGettingFeed() || isFeedFinished()) {
 		return;
 	}
-
+	let next = null;
+	let previous = null;
+	if(direction === "before") {
+		next = id;
+	} else if (direction === "after") {
+		previous = id;
+	}
 	setGettingFeed(true);
 	const username = getUsername();
 
 	$.ajax({
 		dataType: "json",
 		type: "GET",
-		url: "/feed/" + username,
+		url: "/kluch/" + username,
 		data: {
-			"timestamp" : timestamp,
-			"direction" : direction
+			"next" : next,
+			"previous" : previous
 		},
 		error: function(xhr, status, error) {
 			displayAlert(xhr.responseJSON.message);
@@ -286,7 +291,7 @@ function addKluchUserFeed(feed, append) {
 	for(let i = 0; i < feedElements.length; i++) {
 		addKluchToFeed(feedElements[i].kluch, feedElements[i].user, append);
 	}
-	assignTimestamps(feed);
+	setFeedIds(feed);
 }
 
 function addKluchToFeed(kluch, user, append) {
@@ -308,8 +313,8 @@ function addKluchToFeed(kluch, user, append) {
 
 	const kluchAuthor = $(document.createElement("a"));
 	kluchAuthor.addClass("kluch-header-author");
-	kluchAuthor.attr("href", "/u/" + kluch.author);
-	kluchAuthor.text(kluch.author);
+	kluchAuthor.attr("href", "/u/" + user.username);
+	kluchAuthor.text(user.username);
 	
 
 	const kluchTime = $(document.createElement("span"));
@@ -353,36 +358,36 @@ function addKluchToFeed(kluch, user, append) {
 
 	if(loggedIn) {
 			const username = getUsername();
-			if(username === kluch.author) {
-			const deleteButton = $(document.createElement("div"));
-			deleteButton.addClass("kluch-footer-icon-container");
-			const deleteImg = $(document.createElement("img"));
-			deleteImg.addClass("kluch-footer-icon");
-			deleteImg.attr("src", "../../resources/images/delete_2.png");
+			if(username === user.username) {
+				const deleteButton = $(document.createElement("div"));
+				deleteButton.addClass("kluch-footer-icon-container");
+				const deleteImg = $(document.createElement("img"));
+				deleteImg.addClass("kluch-footer-icon");
+				deleteImg.attr("src", "../../resources/images/delete_2.png");
 
-			deleteImg.hover(function() {
-				$(this).attr("src", "../../resources/images/delete_2_hover.png");
-			}, function() {
-				$(this).attr("src", "../../resources/images/delete_2.png");
-			});
-
-			deleteButton.click({container: kluchContainer}, function(event) {
-				const kluchId = event.data.container.attr("data-id");
-				$.ajax({
-					type: "DELETE",
-					url: "/kluch?kluchId=" + kluchId,
-					error: function(xhr, status, error) {
-						displayAlert(xhr.responseJSON.message);
-					},
-					success: function(data, status, xhr) {
-						displayAlert("Kluch deleted!");
-						event.data.container.remove();
-					}
+				deleteImg.hover(function() {
+					$(this).attr("src", "../../resources/images/delete_2_hover.png");
+				}, function() {
+					$(this).attr("src", "../../resources/images/delete_2.png");
 				});
-			});
 
-			deleteButton.append(deleteImg);
-			kluchFooter.append(deleteButton);
+				deleteButton.click({container: kluchContainer}, function(event) {
+					const kluchId = event.data.container.attr("data-id");
+					$.ajax({
+						type: "DELETE",
+						url: "/kluch?kluchId=" + kluchId,
+						error: function(xhr, status, error) {
+							displayAlert(xhr.responseJSON.message);
+						},
+						success: function(data, status, xhr) {
+							displayAlert("Kluch deleted!");
+							event.data.container.remove();
+						}
+					});
+				});
+
+				deleteButton.append(deleteImg);
+				kluchFooter.append(deleteButton);
 		}
 	}
 
@@ -464,30 +469,21 @@ function getUsername() {
 	return $("#data").attr("data-username");
 }
 
-// sets values for last (latest) and first (earliest) timestamps
-function assignTimestamps(feed) {
-	if(feed.next !== null) {
-		setFirstTimestamp(feed.next);
-	} else {
+// sets values for feed pagination. next/previous id. next id is the earliest kluch id ()
+function setFeedIds(feed) {
+		setNextId(feed.next);
+		setPreviousId(feed.previous);
+}
+
+function setNextId(next) {
+	$("#kluch-feed").attr("data-next", next);
+	if(next === null || next === undefined) {
 		setFeedFinished(true);
 	}
-	if(feed.previous !== null) {
-		setLastTimestamp(feed.previous);
-	}
 }
 
-function setLastTimestamp(millis) {
-	const currentLastTimestamp = parseInt($("#data").attr("data-last-timestamp"));
-	if(millis > currentLastTimestamp) {
-		$("#data").attr("data-last-timestamp", millis);
-	}
-}
-
-function setFirstTimestamp(millis) {
-	const currentFirstTimestamp = parseInt($("#data").attr("data-first-timestamp"));
-	if(millis < currentFirstTimestamp) {
-		$("#data").attr("data-first-timestamp", millis);
-	}
+function setPreviousId(previous) {
+	$("#kluch-feed").attr("data-previous", previous);
 }
 
 function attachInfiniteScrollingListener() {
@@ -496,18 +492,18 @@ function attachInfiniteScrollingListener() {
 		const scrollY = window.scrollY;
 		const bodyHeight = document.body.offsetHeight;
 		if ((windowInnerHeight + scrollY) >= bodyHeight * 0.9) {
-			getFeed("before", parseInt($("#data").attr("data-first-timestamp")), true);
+			getFeed("before", parseInt($("#kluch-feed").attr("data-next")), true);
 		}
 		displayLastPageMessage();
 	});
 }
 
 function setFeedFinished(bool) {
-	$("#data").attr("data-feed-finished", true);
+	$("#kluch-feed").attr("data-feed-finished", true);
 }
 
 function isFeedFinished() {
-	const feedFinished = $("#data").attr("data-feed-finished");
+	const feedFinished = $("#kluch-feed").attr("data-feed-finished");
 	if(feedFinished === "true") {
 		return true;
 	}
@@ -522,11 +518,11 @@ function displayLastPageMessage() {
 }
 
 function setGettingFeed(data) {
-	$("#data").attr("data-getting-feed", data);
+	$("#kluch-feed").attr("data-getting-feed", data);
 }
 
 function isGettingFeed() {
-	const gettingFeed = $("#data").attr("data-getting-feed");
+	const gettingFeed = $("#kluch-feed").attr("data-getting-feed");
 	if(gettingFeed === "true") {
 		return true;
 	}
@@ -539,7 +535,7 @@ function pollFeed() {
 		return;
 	}
 
-	const timestamp = $("#data").attr("data-last-timestamp");
+	const previous = $("#kluch-feed").attr("data-previous");
 	const username = getUsername();
 	if(username === undefined || username === null || username === "") {
 		return;
@@ -548,10 +544,9 @@ function pollFeed() {
 	$.ajax({
 		dataType: "json",
 		type: "GET",
-		url: "/feed/poll/" + username,
+		url: "/kluch/poll/" + username,
 		data: {
-			"timestamp" : timestamp,
-			"direction" : "after"
+			"previous" : previous
 		},
 		error: function(xhr, status, error) {
 			setTimeout(pollFeed, 10000);
@@ -577,7 +572,7 @@ function displayNewKluchElement() {
 function clickNewKluchs() {
 	hideNewKluchElement();
 	setFeedFinished(false);
-	getFeed("after", parseInt($("#data").attr("data-last-timestamp")), false);
+	getFeed("after", parseInt($("#kluch-feed").attr("data-previous")), false);
 }
 
 function hideNewKluchElement() {
@@ -799,7 +794,7 @@ function hashtagOnLoad() {
 	attachInifiteScrollingListenerHashtag();
 	configureSubheaderButtons();
 	setUpLoginForm();
-	getHashtagFeed(parseInt($("#data").attr("data-first-timestamp")), true);
+	getHashtagFeed(parseInt($("#kluch-feed").attr("data-next")), true);
 	pollNotifications();
 }
 
@@ -809,12 +804,12 @@ function attachInifiteScrollingListenerHashtag() {
 		const scrollY = window.scrollY;
 		const bodyHeight = document.body.offsetHeight;
 			if ((windowInnerHeight + scrollY) >= bodyHeight * 0.9) {
-				getHashtagFeed(parseInt($("#data").attr("data-first-timestamp")), true);
+				getHashtagFeed(parseInt($("#kluch-feed").attr("data-next")), true);
 			}
 	});
 }
 
-function getHashtagFeed(timestamp, append) {
+function getHashtagFeed(id, append) {
 	if(isGettingFeed()) {
 		return;
 	}
@@ -823,9 +818,9 @@ function getHashtagFeed(timestamp, append) {
 	$.ajax({
 		dataType: "json",
 		type: "GET",
-		url: "/feed/hashtag/" + hashtag,
+		url: "/kluch/hashtag/" + hashtag,
 		data: {
-			"timestamp" : timestamp
+			"next" : id
 		},
 		error: function(xhr, status, error) {
 			setGettingFeed(false);
@@ -897,7 +892,6 @@ function removeAnimateAlertUp() {
 
 function notificationsOnLoad() {
 	pollNotifications();
-	getFollowNotificationsInitial();
 	getKluchsWithMentions(Number.MAX_SAFE_INTEGER);
 	attachInifiteScrollingListenerMentions();
 }
@@ -908,7 +902,7 @@ function attachInifiteScrollingListenerMentions() {
 		const scrollY = window.scrollY;
 		const bodyHeight = document.body.offsetHeight;
 			if ((windowInnerHeight + scrollY) >= bodyHeight * 0.9) {
-				getKluchsWithMentions(parseInt($("#data").attr("data-first-timestamp")), true);
+				getKluchsWithMentions(parseInt($("#kluch-feed").attr("data-next")), true);
 			}
 	});
 }
@@ -944,22 +938,6 @@ function displayNewNotifications(number) {
 	}
 }
 
-function getFollowNotificationsInitial() {
-	$.ajax({
-		type: "GET",
-		url: "/feed/follows",
-		data: {
-			timestamp: Number.MAX_SAFE_INTEGER
-		},
-		error: function(xhr, status, error) {
-			displayAlert(xhr.responseJSON.message);		
-		},
-		success: function(feed, status, xhr) {
-			handleNotifications(feed);
-		}
-	});
-}
-
 function handleNotifications(feed) {
 	const newFollowers = [];
 	const elements = feed.elements;
@@ -975,7 +953,7 @@ function handleNotifications(feed) {
 	}
 }
 
-function getKluchsWithMentions(timestamp) {
+function getKluchsWithMentions(id) {
 	if(isGettingFeed() || isFeedFinished()) {
 		return;
 	}
@@ -984,12 +962,11 @@ function getKluchsWithMentions(timestamp) {
 	$.ajax({
 		dataType: "json",
 		type: "GET",
-		url: "/feed/mentions",
+		url: "/kluch/mentions",
 		data: {
-			"timestamp" : timestamp
+			"next" : id
 		},
 		error: function(xhr, status, error) {
-			
 			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(feed, status, xhr) {

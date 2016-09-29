@@ -19,9 +19,7 @@
 </script>
 </head>
 <body>
-<input type="hidden" id="data" data-username="${username}"
-	data-page="0" data-last-timestamp="0"
-	data-first-timestamp = "9007199254740991" data-logged-in="${loggedIn}" data-follows = "${follows}">
+<input type="hidden" id="data" data-username="${username}" data-logged-in="${loggedIn}" data-follows = "${follows}">
 <div class="header">
 	<div class="header-buttons-wrapper">
 		<div class="header-buttons-left">
@@ -101,7 +99,8 @@
 			<div class="dashboard-new-kluch-alert" id="new-kluch-alert">
 				<span class="dashboard-new-kluch-alert-text">new kluchs available, click here to view!</span>
 			</div>
-			<div class="kluch-feed" id="kluch-feed">
+			<div class="kluch-feed" id="kluch-feed" data-next = "9007199254740991"
+			 data-previous = "0" data-getting-feed="false" data-feed-finished="false">
 				
 			</div>
 			<div class = "kluch-no-more">

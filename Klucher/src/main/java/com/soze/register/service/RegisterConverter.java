@@ -64,7 +64,7 @@ public class RegisterConverter {
     String hashedPassword = passwordEncoder.encode(form.getPassword());
     user.setHashedPassword(hashedPassword);
     UserRoles userRoles = new UserRoles();
-    userRoles.setUsername(form.getUsername());
+    //userRoles.setUsername(form.getUsername());
     userRoles.setUser(true);
     userRoles.setAdmin(false);
     user.setUserRoles(userRoles);

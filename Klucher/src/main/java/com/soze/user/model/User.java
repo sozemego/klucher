@@ -2,16 +2,15 @@ package com.soze.user.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -19,14 +18,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.soze.notification.model.FollowNotification;
-import com.soze.notification.model.MentionNotification;
-
 @SuppressWarnings("serial")
 @Entity
 public class User implements UserDetails {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@NotNull
 	@Size(min = 1, max = 32)
 	private String username;
 
@@ -37,23 +37,22 @@ public class User implements UserDetails {
 	@NotNull
 	private UserRoles userRoles;
 
-	@ElementCollection
-	private Set<String> followers = new HashSet<>();
-	@ElementCollection
-	private Set<String> following = new HashSet<>();
-
-	@ElementCollection
-	@OrderBy("timestamp DESC")
-	private List<MentionNotification> mentionNotifications = new ArrayList<>();
-
-	@ElementCollection
-	@OrderBy("timestamp DESC")
-	private List<FollowNotification> followNotifications = new ArrayList<>();
-
 	private String avatarPath;
+
+	@NotNull
+	@Min(0)
+	private Integer notifications = 0;
 
 	public User() {
 
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
 	}
 
 	public String getHashedPassword() {
@@ -76,32 +75,6 @@ public class User implements UserDetails {
 		this.username = username;
 	}
 
-	/**
-	 * Names of users that follow this user.
-	 * 
-	 * @return
-	 */
-	public Set<String> getFollowers() {
-		return followers;
-	}
-
-	public void setFollowers(Set<String> followers) {
-		this.followers = followers;
-	}
-
-	/**
-	 * Names of users this user follows.
-	 * 
-	 * @return
-	 */
-	public Set<String> getFollowing() {
-		return following;
-	}
-
-	public void setFollowing(Set<String> following) {
-		this.following = following;
-	}
-
 	public String getAvatarPath() {
 		return avatarPath;
 	}
@@ -110,20 +83,27 @@ public class User implements UserDetails {
 		this.avatarPath = avatarPath;
 	}
 
-	public List<MentionNotification> getMentionNotifications() {
-		return mentionNotifications;
+	public Integer getNotifications() {
+		return notifications;
 	}
 
-	public void setMentionNotifications(List<MentionNotification> mentionNotifications) {
-		this.mentionNotifications = mentionNotifications;
+	public void setNotifications(Integer notifications) {
+		this.notifications = notifications;
+	}
+	
+	public void addNotification() {
+		notifications++;
+	}
+	
+	public void removeNotification() {
+		notifications--;
+		if(notifications < 0) {
+			notifications = 0;
+		}
 	}
 
-	public List<FollowNotification> getFollowNotifications() {
-		return followNotifications;
-	}
-
-	public void setFollowNotifications(List<FollowNotification> followNotifications) {
-		this.followNotifications = followNotifications;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	@Override
@@ -170,21 +150,27 @@ public class User implements UserDetails {
 
 	@Override
 	public int hashCode() {
-		return username.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
 	}
 
 	@Override
-	public boolean equals(Object second) {
-		if (second == null) {
-			return false;
-		}
-		if (this == second) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (second instanceof User) {
-			return username.equals(((User) second).username);
-		}
-		return false;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		User other = (User) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
 	}
 
 }

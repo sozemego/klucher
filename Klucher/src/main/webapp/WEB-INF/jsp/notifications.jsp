@@ -16,7 +16,7 @@
 </script>
 </head>
 <body>
-<input type = "hidden" id = "data" data-username = "${username}" data-page = "0" data-last-timestamp="0" data-first-timestamp = "9007199254740991">
+<input type = "hidden" id = "data" data-username = "${username}">
 <c:import url="header_with_buttons.jsp"></c:import>
 <div class="page">
 	<div class="dashboard">
@@ -32,7 +32,8 @@
 
 				</span>
 			</div>
-			<div class="kluch-feed" id="kluch-feed">
+			<div class="kluch-feed" id="kluch-feed" data-next = "9007199254740991"
+			 data-previous = "0" data-getting-feed="false" data-feed-finished="false">
 				
 			</div>
 			<div class = "kluch-no-more">
