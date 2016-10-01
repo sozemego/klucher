@@ -47,7 +47,7 @@ public class KluchController {
 		}
 		String username = authentication.getName();
 		Kluch kluch = kluchService.post(username, kluchText);
-		notificationService.processUserMentions(kluch);
+		notificationService.addNotifications(kluch.getMentions());
 		return kluch;
 	}
 
@@ -60,7 +60,7 @@ public class KluchController {
 		}
 		String username = authentication.getName();
 		Kluch kluch = kluchService.deleteKluch(username, kluchId);
-		notificationService.removeUserMentions(kluch);
+		notificationService.removeNotifications(kluch.getMentions());
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 

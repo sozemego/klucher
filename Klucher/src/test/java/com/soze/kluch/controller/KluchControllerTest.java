@@ -1,8 +1,9 @@
 package com.soze.kluch.controller;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -84,14 +85,15 @@ public class KluchControllerTest extends TestWithMockUsers {
   public void testValidKluch() throws Exception {
   	String kluchText = "text";
     mockUser("username", "password", true); 
+    when(service.post("username", kluchText)).thenReturn(new Kluch());
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
         .param("kluchText", kluchText)
         .accept(MediaType.APPLICATION_JSON)
     		.contentType(MediaType.APPLICATION_JSON))
     .andDo(print())
-    .andExpect(status().isOk());
+    .andExpect(status().isOk());   
     verify(service).post("username", kluchText);
-    verify(notificationService).processUserMentions(any(Kluch.class));
+    verify(notificationService).addNotifications(anyListOf(String.class));
   }
   
   @Test
@@ -107,11 +109,12 @@ public class KluchControllerTest extends TestWithMockUsers {
   @Test
   public void testAuthorizedDeleteKluch() throws Exception {
   	mockUser("username", true);
+  	when(service.deleteKluch("username", 0L)).thenReturn(new Kluch());
   	mvc.perform(MockMvcRequestBuilders.delete("/kluch")
   			.param("kluchId", "0"))
   	.andDo(print());
   	verify(service).deleteKluch("username", 0L);
-  	verify(notificationService).removeUserMentions(any(Kluch.class));
+  	verify(notificationService).removeNotifications(anyListOf(String.class));
   }
   
   @Test

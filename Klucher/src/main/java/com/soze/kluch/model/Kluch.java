@@ -1,9 +1,7 @@
 package com.soze.kluch.model;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -37,7 +35,7 @@ public class Kluch {
 
 	@JsonIgnore
 	@ElementCollection
-	private List<String> mentions = new ArrayList<>();
+	private Set<String> mentions = new HashSet<>();
 
 	public Kluch() {
 
@@ -83,11 +81,11 @@ public class Kluch {
 		return hashtags;
 	}
 
-	public List<String> getMentions() {
+	public Set<String> getMentions() {
 		return mentions;
 	}
 
-	public void setMentions(List<String> mentions) {
+	public void setMentions(Set<String> mentions) {
 		this.mentions = mentions;
 	}
 
