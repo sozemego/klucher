@@ -53,7 +53,7 @@ public class DevController {
   public String followList(@RequestParam String username, @RequestParam(value = "followers[]") String[] followers) {
   	for(String name: followers) {
   		followService.follow(name, username);
-  		notificationService.addFollowNotification(name, username);
+  		notificationService.addNotification(username);
   	}
   	return "dev";
   }
@@ -63,7 +63,7 @@ public class DevController {
   	for(int i = 0; i < number; i++) {
   		String name = createRandomUser();
   		followService.follow(name, username);
-  		notificationService.addFollowNotification(name, username);
+  		notificationService.addNotification(username);
   	}
   	log.info("Created [{}] users who will follow [{}].", number, username);
   	return "dev";

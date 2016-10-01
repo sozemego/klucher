@@ -3,6 +3,10 @@ package com.soze.follow.dao;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import com.soze.follow.model.Follow;
@@ -19,21 +23,28 @@ public class FollowDatabase implements FollowDao {
 	}
 
 	@Override
+	@Cacheable(cacheNames = "followers")
 	public List<Follow> findAllByFollowerId(Long followerId) {
 		return repository.findAllByFollowerId(followerId);
 	}
 
 	@Override
+	@Cacheable(cacheNames = "followees")
 	public List<Follow> findAllByFolloweeId(Long followeeId) {
 		return repository.findAllByFolloweeId(followeeId);
 	}
 
 	@Override
+	@Cacheable(cacheNames = "followRelationships")
 	public Follow findByFollowerIdAndFolloweeId(Long followerId, Long followeeId) {
 		return repository.findByFollowerIdAndFolloweeId(followerId, followeeId);
 	}
 
 	@Override
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "followers", key = "#follow.followerId"),
+			@CacheEvict(cacheNames = "followees", key = "#follow.followeeId"),
+			@CacheEvict(cacheNames = "followRelationships")})
 	public void delete(Follow follow) {
 		repository.delete(follow);
 	}
@@ -44,6 +55,7 @@ public class FollowDatabase implements FollowDao {
 	}
 
 	@Override
+	@CachePut("followRelationships")
 	public Follow save(Follow follow) {
 		return repository.save(follow);
 	}

@@ -47,7 +47,7 @@ public class KluchController {
 		}
 		String username = authentication.getName();
 		Kluch kluch = kluchService.post(username, kluchText);
-		notificationService.processUserMentions(kluch);
+		notificationService.addNotifications(kluch.getMentions());
 		return kluch;
 	}
 
@@ -60,7 +60,7 @@ public class KluchController {
 		}
 		String username = authentication.getName();
 		Kluch kluch = kluchService.deleteKluch(username, kluchId);
-		notificationService.removeUserMentions(kluch);
+		notificationService.removeNotifications(kluch.getMentions());
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 
@@ -102,13 +102,12 @@ public class KluchController {
 	@RequestMapping(value = "/kluch/mentions", method = RequestMethod.GET)
 	@ResponseBody
 	public Feed<KluchFeedElement> getKluchsWithMentions(Authentication authentication,
-			@RequestParam(required = false) Long previous,
 			@RequestParam(required = false) Long next) {
 		if (authentication == null) {
 			throw new NotLoggedInException();
 		}
 		String username = authentication.getName();
-		FeedRequest feedRequest = createFeedRequest(previous, next);
+		FeedRequest feedRequest = createFeedRequest(null, next);
 		Feed<KluchFeedElement> feed = kluchFeedService.getMentions(username, feedRequest);
 		log.info("User [{}] requested their mentions feed with feed request [{}]. Feed returned : [{}]", username, feedRequest, feed);
 		return feed;
@@ -117,9 +116,8 @@ public class KluchController {
 	@RequestMapping(value = "/kluch/hashtag/{hashtag}", method = RequestMethod.GET)
 	@ResponseBody
 	public Feed<KluchFeedElement> getHashtagPage(@PathVariable String hashtag,
-			@RequestParam(required = false) Long previous,
 			@RequestParam(required = false) Long next) {
-		FeedRequest feedRequest = createFeedRequest(previous, next);
+		FeedRequest feedRequest = createFeedRequest(null, next);
 		Feed<KluchFeedElement> feed = kluchFeedService.constructHashtagFeed(hashtag.toLowerCase(), feedRequest);
 		log.info("Someone requested feed of hashtags for hashtag [{}] with feed request [{}]. Feed returned [{}].", hashtag, feedRequest,
 				feed);

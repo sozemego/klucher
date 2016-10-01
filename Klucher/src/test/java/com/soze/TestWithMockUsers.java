@@ -77,8 +77,19 @@ public class TestWithMockUsers {
     return user;
   }
   
-	protected List<User> mockUsers(List<String> usernames) {
-  	List<User> users = new ArrayList<>();
+  protected List<User> mockUsers(List<String> usernames) {
+  	return mockUsers(usernames, false);
+  }
+  
+	protected List<User> mockUsers(List<String> usernames, boolean alreadyExist) {
+  	if(alreadyExist) {
+  		mockExistingUsers(usernames);
+  	}
+  	return mockNewUsers(usernames);
+  }
+	
+	protected List<User> mockNewUsers(List<String> usernames) {
+		List<User> users = new ArrayList<>();
   	List<Long> ids = new ArrayList<>();
   	for(String username: usernames) {
   		User user = mockUser(username, "password", false);
@@ -89,7 +100,20 @@ public class TestWithMockUsers {
   	when(userDao.findByUsernameIn(argThat(sameAsSet(usernames)))).thenReturn(users);
 		when(userDao.findAll(argThat(sameAsSet(ids)))).thenReturn(users);
   	return users;
-  }
+	}
+	
+	protected List<User> mockExistingUsers(List<String> usernames) {
+		List<User> users = new ArrayList<>();
+		List<Long> userIds = new ArrayList<>();
+		for(String username: usernames) {
+			User user = userDao.findOne(username);
+			users.add(user);
+			userIds.add(user.getId());
+		}
+		when(userDao.findByUsernameIn(argThat(sameAsSet(usernames)))).thenReturn(users);
+		when(userDao.findAll(argThat(sameAsSet(userIds)))).thenReturn(users);
+		return users;
+	}
 
   private User getBaseUser(String username, String password) {
   	Long id = null;

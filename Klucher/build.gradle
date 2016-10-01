@@ -10,7 +10,7 @@ apply plugin: 'spring-boot'
 
 jar {
 	baseName = 'Klucher'
-	version = '0.6.0'
+	version = '0.7.0'
 }
 sourceCompatibility = 1.8
 targetCompatibility = 1.8

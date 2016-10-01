@@ -71,7 +71,7 @@ public class FollowControllerTest extends TestWithMockUsers {
   	.andDo(print())
   	.andExpect(status().isOk());
   	verify(followService).follow(username, follow);
-  	verify(notificationService).addFollowNotification(username, follow);
+  	verify(notificationService).addNotification(username);
   }
   
   @Test
@@ -84,7 +84,7 @@ public class FollowControllerTest extends TestWithMockUsers {
   	.andDo(print())
   	.andExpect(status().isOk());
   	verify(followService).unfollow(username, follow);
-  	verify(notificationService).removeFollowNotification(username, follow);
+  	verify(notificationService).removeNotification(username);
   }
 
 }

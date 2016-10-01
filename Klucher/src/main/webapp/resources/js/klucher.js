@@ -313,7 +313,7 @@ function addKluchToFeed(kluch, user, append) {
 
 	const kluchAuthor = $(document.createElement("a"));
 	kluchAuthor.addClass("kluch-header-author");
-	kluchAuthor.attr("href", "/u/" + user.username);
+	kluchAuthor.attr("href", "/u/profile/" + user.username);
 	kluchAuthor.text(user.username);
 	
 
@@ -454,7 +454,7 @@ function hashtagWithoutPound(hashtag) {
 }
 
 function getUserLinkStyle(user) {
-	return "<a class = 'kluch-text-user-link' href = '/u/" + userWithoutAt(user) + "'>" + user + "</a>";
+	return "<a class = 'kluch-text-user-link' href = '/u/profile/" + userWithoutAt(user) + "'>" + user + "</a>";
 }
 
 function userWithoutAt(user) {
@@ -729,7 +729,7 @@ function isLoggedIn() {
 	return $("#data").attr("data-logged-in") === "true";
 }
 
-// data-follows should store whether or not you follow the current user (at /u/* mappings)
+// data-follows should store whether or not you follow the current user
 function doesFollow() {
 	return $("#data").attr("data-follows") === "true";
 }
@@ -892,6 +892,7 @@ function removeAnimateAlertUp() {
 
 function notificationsOnLoad() {
 	pollNotifications();
+	getNewFollowers();
 	getKluchsWithMentions(Number.MAX_SAFE_INTEGER);
 	attachInifiteScrollingListenerMentions();
 }
@@ -938,7 +939,24 @@ function displayNewNotifications(number) {
 	}
 }
 
-function handleNotifications(feed) {
+function getNewFollowers(id) {
+	const username = getUsername();
+	$.ajax({
+		type: "GET",
+		url: "/u/followers/" + username,
+		data: {
+			"id": id
+		},
+		error: function(xhr, status, error) {
+			displayAlert(xhr.responseJSON.message);
+		},
+		success: function(data, status, xhr) {
+			handleNewFollowers(data);
+		}
+	});
+}
+
+function handleNewFollowers(feed) {
 	const newFollowers = [];
 	const elements = feed.elements;
 	for(var i = 0; i < elements.length; i++) {
@@ -1098,7 +1116,7 @@ function populateRemainingFollowers(remainingFollowers, total, listedAlready) {
 
 		const element = $(document.createElement("a"));
 		element.addClass("followers-new-free-element");
-		element.attr("href", "/u/" + follower.username);
+		element.attr("href", "/u/profile/" + follower.username);
 
 		const avatarContainer = $(document.createElement("div"));
 		avatarContainer.addClass("followers-new-free-element-image-container");

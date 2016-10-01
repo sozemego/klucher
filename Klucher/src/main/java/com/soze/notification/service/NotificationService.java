@@ -1,6 +1,7 @@
 package com.soze.notification.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,10 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.soze.common.exceptions.CannotDoItToYourselfException;
 import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
-import com.soze.kluch.model.Kluch;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 
@@ -51,25 +50,47 @@ public class NotificationService {
 	}
 
 	/**
-	 * Finds user mentions (@) in a given <code>kluch</code>. Notification is
-	 * added to every mentioned, existing user.
-	 * 
-	 * @param kluch
-	 *          kluch from which we want to extract user mentions (@)
-	 * @return int number of real users who were mentioned
-	 * @throws NullOrEmptyException
-	 *           if kluch is null
+	 * Adds a notification to a given user.
+	 * Returns true if a notification was successfuly added to this user.
+	 * @param username
+	 * @return
+	 * @throws NullOrEmptyException if username is either null or empty
+	 * @throws UserDoesNotExistException if user with username does not exist
 	 */
-	public int processUserMentions(Kluch kluch) throws NullOrEmptyException {
-		if (kluch == null) {
-			throw new NullOrEmptyException("Kluch");
-		}
-		List<String> userMentions = kluch.getMentions();
-		if (userMentions.isEmpty()) {
-			return 0;
-		}
+	public boolean addNotification(String username) throws NullOrEmptyException, UserDoesNotExistException {
+		User user = getUser(username);
+		user.addNotification();
+		userDao.save(user);
+		return true;
+	}
 
-		List<User> realUsers = getUsers(new ArrayList<>(userMentions));
+	/**
+	 * Removes a notification from a given user.
+	 * Returns true if a notification was successfuly removed from this user,
+	 * returns false if this user already had 0 unread notifications.
+	 * @param username
+	 * @return 
+	 * @throws NullOrEmptyException if username is either null or empty 
+	 * @throws UserDoesNotExistException if user with username does not exist
+	 */
+	public boolean removeNotification(String username) throws NullOrEmptyException, UserDoesNotExistException {
+		User user = getUser(username);
+		if(user.getNotifications() > 0) {
+			user.removeNotification();
+			userDao.save(user);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Finds all users in a given list and adds a notification to them.
+	 * 
+	 * @param usernames
+	 * @return number of real, existing users who had a notification added
+	 */
+	public int addNotifications(Collection<String> usernames) {
+		List<User> realUsers = getUsers(new ArrayList<>(usernames));
 		if (!realUsers.isEmpty()) {
 			realUsers.forEach(u -> {
 				u.addNotification();
@@ -81,23 +102,13 @@ public class NotificationService {
 	}
 
 	/**
-	 * Extracts user mentions (@) from this Kluch and for each real user, removes
-	 * a notification.
+	 * Finds all users in a given list and removes a notification from them.
 	 * 
-	 * @param kluch
-	 * @return int number of real users who had a notification removed, even if their unread notification count was already 0
-	 * @throws NullOrEmptyException
-	 *           if kluch is null
+	 * @param usernames
+	 * @return number of real, existing users who had a notification removed
 	 */
-	public int removeUserMentions(Kluch kluch) throws NullOrEmptyException {
-		if (kluch == null) {
-			throw new NullOrEmptyException("Kluch");
-		}
-		List<String> userMentions = kluch.getMentions();
-		if (userMentions.isEmpty()) {
-			return 0;
-		}
-		List<User> realUsers = getUsers(new ArrayList<>(userMentions));
+	public int removeNotifications(Collection<String> usernames) {
+		List<User> realUsers = getUsers(new ArrayList<>(usernames));
 		if (!realUsers.isEmpty()) {
 			realUsers.forEach(u -> {
 				u.removeNotification();
@@ -109,75 +120,21 @@ public class NotificationService {
 	}
 
 	/**
-	 * Adds a notification to a user named <code>follow</code> (if it exists).
-	 * 
-	 * @param username
-	 *          name of the user who followed
-	 * @param follow
-	 *          name of the user who was followed
-	 * @throws NullOrEmptyException
-	 *           if either username or follow are null or empty
-	 * @throws UserDoesNotExistException
-	 *           if either username or follow don't exist
-	 * @throws CannotDoItToYourselfException
-	 *           if username and follow are equal
-	 */
-	public void addFollowNotification(String username, String follow)
-			throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException {
-		getUser(username);
-		User followUser = getUser(follow);
-		if (username.equals(follow)) {
-			throw new CannotDoItToYourselfException(username, "follow");
-		}
-		followUser.addNotification();
-		userDao.save(followUser);
-		cachedNotificationNumber.remove(follow);
-	}
-
-	/**
-	 * remove a notification to a user named <code>follow</code> (if it exists).
-	 * 
-	 * @param username
-	 *          name of the user who followed
-	 * @param follow
-	 *          name of the user who was followed
-	 * @throws NullOrEmptyException
-	 *           if either username or follow are null or empty
-	 * @throws UserDoesNotExistException
-	 *           if either username or follow don't exist
-	 * @throws CannotDoItToYourselfException
-	 *           if username and follow are equal
-	 */
-	public void removeFollowNotification(String username, String follow)
-			throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException {
-		getUser(username);
-		User followUser = getUser(follow);
-		if (username.equals(follow)) {
-			throw new CannotDoItToYourselfException(username, "unfollow");
-		}
-		followUser.removeNotification();
-		userDao.save(followUser);
-		cachedNotificationNumber.remove(follow);
-	}
-
-	/**
 	 * Removes all unread notifications from an user named <code>username</code>
 	 * (if it exists).
-	 * @param username name of the user we want to remove notifications from
-	 * @throws NullOrEmptyException if username is null or empty
-	 * @throws UserDoesNotExistException if user named <code>
+	 * 
+	 * @param username
+	 *          name of the user we want to remove notifications from
+	 * @throws NullOrEmptyException
+	 *           if username is null or empty
+	 * @throws UserDoesNotExistException
+	 *           if user named <code>
 	 */
 	public void read(String username) throws NullOrEmptyException, UserDoesNotExistException {
 		User user = getUser(username);
 		user.setNotifications(0);
 		userDao.save(user);
 		cachedNotificationNumber.remove(username);
-	}
-
-	private void validate(String username) throws NullOrEmptyException {
-		if (username == null || username.isEmpty()) {
-			throw new NullOrEmptyException("Username");
-		}
 	}
 
 	private User getUser(String username) throws NullOrEmptyException, UserDoesNotExistException {
@@ -187,6 +144,12 @@ public class NotificationService {
 			throw new UserDoesNotExistException(username);
 		}
 		return user;
+	}
+
+	private void validate(String username) throws NullOrEmptyException {
+		if (username == null || username.isEmpty()) {
+			throw new NullOrEmptyException("Username");
+		}
 	}
 
 	private List<User> getUsers(List<String> usernames) {
