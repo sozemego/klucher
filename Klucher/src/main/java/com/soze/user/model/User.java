@@ -1,5 +1,6 @@
 package com.soze.user.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,9 +19,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@SuppressWarnings("serial")
 @Entity
-public class User implements UserDetails {
+public class User implements UserDetails, Serializable {
+	
+	private static final long serialVersionUID = 6539127499242225817L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,7 +53,7 @@ public class User implements UserDetails {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -100,10 +102,6 @@ public class User implements UserDetails {
 		if(notifications < 0) {
 			notifications = 0;
 		}
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	@Override

@@ -35,7 +35,7 @@ public class UserDatabase implements UserDao {
   
   @Override
   public User findOne(String username) {
-  	return userRepository.findOneByUsername(username);
+  	return userRepository.findByUsername(username);
   }
 
   @Override

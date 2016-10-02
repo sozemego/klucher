@@ -10,7 +10,7 @@ apply plugin: 'spring-boot'
 
 jar {
 	baseName = 'Klucher'
-	version = '0.7.0'
+	version = '0.7.5'
 }
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -39,6 +39,7 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-devtools')
 	compile('org.springframework.security:spring-security-test')
 	compile('mysql:mysql-connector-java')
+	compile('org.flywaydb:flyway-core')
 	testCompile('org.springframework.boot:spring-boot-starter-test') 
 	testCompile('com.jayway.jsonpath:json-path')
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'

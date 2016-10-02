@@ -8,7 +8,7 @@ import com.soze.user.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-	public User findOneByUsername(String username);
+	public User findByUsername(String username);
 
 	public List<User> findAllByUsernameIn(Iterable<String> usernames);
 
