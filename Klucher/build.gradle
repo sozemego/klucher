@@ -9,9 +9,15 @@ apply plugin: 'eclipse'
 apply plugin: 'spring-boot'
 
 jar {
-	baseName = 'Klucher'
 	version = '0.7.6'
+	baseName = 'Klucher'
 }
+
+war {
+	version = '0.7.6'
+	baseName = 'Klucher'
+}
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
