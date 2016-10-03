@@ -5,7 +5,7 @@ CREATE TABLE `user` (
   `avatar_path` varchar(255) DEFAULT NULL,
   `hashed_password` varchar(255) NOT NULL,
   `notifications` int(11) NOT NULL,
-  `username` varchar(32) NOT NULL,
+  `username` varchar(32) NOT NULL UNIQUE,
   `user_roles_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FKhmd3yu14haupqtsyri0gjpehi` (`user_roles_id`),

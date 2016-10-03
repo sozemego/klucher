@@ -46,7 +46,9 @@ public class UserPopulation {
     log.info("Prepopulating database with users.");
     List<User> users = constructTestUsers();
     for (User user : users) {
-      userDao.save(user);
+    	if(userDao.findOne(user.getUsername()) == null) {
+    		userDao.save(user);
+    	}
     }
     log.info("Added [{}] users", users.size());
   }
