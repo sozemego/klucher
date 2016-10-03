@@ -2,9 +2,9 @@
 
 function registerOnLoad() {
 	checkAvailability(null);
+	validateRegisterForm();
 	attachValidationListeners();
 	attachSubmitRegisterListener();
-	validateRegisterForm();
 }
 
 //sends an Ajax request to check if given username is available
@@ -218,7 +218,7 @@ function ajaxPostKluch() {
 			clearTextArea();
 			addKluchToFeed(kluch, getUserData(), false);
 			checkCharacterCount();
-			setLastTimestamp(kluch.timestamp);
+			setPreviousId(kluch.id);
 		}
 	});
 	focusInputArea();
@@ -895,6 +895,7 @@ function notificationsOnLoad() {
 	getNewFollowers();
 	getKluchsWithMentions(Number.MAX_SAFE_INTEGER);
 	attachInifiteScrollingListenerMentions();
+	markNotificationsAsRead();
 }
 
 function attachInifiteScrollingListenerMentions() {
@@ -957,18 +958,7 @@ function getNewFollowers(id) {
 }
 
 function handleNewFollowers(feed) {
-	const newFollowers = [];
-	const elements = feed.elements;
-	for(var i = 0; i < elements.length; i++) {
-		const notification = elements[i];
-		if(notification.username !== undefined) {
-			newFollowers.push({ username: notification.username, avatarPath: notification.avatarPath });
-		}
-	}
-	displayNewFollowers(newFollowers, feed.totalElements);
-	if(elements.length !== 0) {
-		setTimeout(sendMarkNotificationsAsRead, 750);
-	}
+	displayNewFollowers(feed.elements, feed.totalElements);
 }
 
 function getKluchsWithMentions(id) {
@@ -992,6 +982,20 @@ function getKluchsWithMentions(id) {
 			addKluchUserFeed(feed, true);
 		}
 	});
+}
+
+function markNotificationsAsRead() {
+	const isVisible = isWindowVisible();
+	if(isVisible) {
+		sendMarkNotificationsAsRead();
+	} else {
+		setTimeout(2500, markNotificationsAsRead);
+	}
+}
+
+function isWindowVisible() {
+	//TODO actually check if window is visible
+	return true;
 }
 
 function sendMarkNotificationsAsRead() {
