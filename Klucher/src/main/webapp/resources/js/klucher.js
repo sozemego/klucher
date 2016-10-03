@@ -531,7 +531,7 @@ function isGettingFeed() {
 
 function pollFeed() {
 	if(isGettingFeed()) {
-		setTimeout(pollFeed, 10000);
+		setTimeout(pollFeed, 30000);
 		return;
 	}
 
@@ -549,11 +549,11 @@ function pollFeed() {
 			"previous" : previous
 		},
 		error: function(xhr, status, error) {
-			setTimeout(pollFeed, 10000);
+			setTimeout(pollFeed, 30000);
 			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
-			setTimeout(pollFeed, 10000);
+			setTimeout(pollFeed, 30000);
 			if(data) {
 				displayNewKluchElement();
 			}
