@@ -5,7 +5,7 @@ A website (built using Spring Boot), which allows users to post their thoughts, 
 
 ## Live version ##
 
-Live version can be found at: [klucher.pl](http://klucher.pl). It's hosted on AWS Elastic Beanstalk (one instance at the moment). It also uses their DNS services (Route 53). Feel free to make an account, but permament purges of the database are to be expected this early in development. Accounts are free, no email required and your password is hashed.
+Live version can be found at: [klucher.pl](http://klucher.pl). It's hosted on AWS Elastic Beanstalk (one instance at the moment). It also uses their DNS services (Route 53). Feel free to make an account, but permanent purges of the database are to be expected this early in development. Accounts are free, no email required and your password is hashed.
 
 ## License ##
 
