@@ -45,16 +45,16 @@ public class FollowService {
 	 * @throws CannotDoItToYourselfException
 	 *           if username equals to follow
 	 */
-	public Follow follow(String username, String follow)
+	public Follow follow(String follower, String followee)
 			throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException {
-		validateInput(username, follow);
-		User user = userDao.findOne(username);
+		validateInput(follower, followee);
+		User user = userDao.findOne(follower);
 		if (user == null) {
-			throw new UserDoesNotExistException(username);
+			throw new UserDoesNotExistException(follower);
 		}
-		User followUser = userDao.findOne(follow);
+		User followUser = userDao.findOne(followee);
 		if (followUser == null) {
-			throw new UserDoesNotExistException(follow);
+			throw new UserDoesNotExistException(followee);
 		}
 		Follow followEntity = new Follow();
 		followEntity.setFollowerId(user.getId());

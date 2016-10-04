@@ -35,7 +35,7 @@ public class FollowDatabase implements FollowDao {
 	}
 
 	@Override
-	@Cacheable(cacheNames = "followRelationships")
+	@Cacheable(cacheNames = "followRelationships", key = "{#followerId, #followeeId}")
 	public Follow findByFollowerIdAndFolloweeId(Long followerId, Long followeeId) {
 		return repository.findByFollowerIdAndFolloweeId(followerId, followeeId);
 	}
@@ -44,7 +44,7 @@ public class FollowDatabase implements FollowDao {
 	@Caching(evict = {
 			@CacheEvict(cacheNames = "followers", key = "#follow.followerId"),
 			@CacheEvict(cacheNames = "followees", key = "#follow.followeeId"),
-			@CacheEvict(cacheNames = "followRelationships")})
+			@CacheEvict(cacheNames = "followRelationships", key = "{#follow.followerId, #follow.followeeId}")})
 	public void delete(Follow follow) {
 		repository.delete(follow);
 	}
@@ -55,7 +55,12 @@ public class FollowDatabase implements FollowDao {
 	}
 
 	@Override
-	@CachePut("followRelationships")
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "followers", key = "#follow.followerId"),
+			@CacheEvict(cacheNames = "followees", key = "#follow.followeeId")},
+					put = {
+			@CachePut(cacheNames = "followRelationships", key = "{#follow.followerId, #follow.followeeId}")
+					})
 	public Follow save(Follow follow) {
 		return repository.save(follow);
 	}
