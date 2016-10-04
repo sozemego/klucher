@@ -9,12 +9,12 @@ apply plugin: 'eclipse'
 apply plugin: 'spring-boot'
 
 jar {
-	version = '0.7.6'
+	version = klucherVersion
 	baseName = 'Klucher'
 }
 
 war {
-	version = '0.7.6'
+	version = klucherVersion
 	baseName = 'Klucher'
 }
 
