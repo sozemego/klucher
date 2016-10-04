@@ -9,9 +9,11 @@
 	<root level="info">
 		<appender-ref ref="STDOUT"></appender-ref>
 	</root>
-    <logger name="org.springframework.cache" level="TRACE">
-        <appender-ref ref="STDOUT" />
-    </logger>
+	<springProfile name = "dev">
+    	<logger name="org.springframework.cache" level="TRACE">
+     	   <appender-ref ref="STDOUT" />
+   	 </logger>
+    </springProfile>
     <logger name="org.hibernate" level="WARN">
         <appender-ref ref="STDOUT" />
     </logger>
