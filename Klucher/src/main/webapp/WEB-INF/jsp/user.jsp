@@ -19,7 +19,8 @@
 </script>
 </head>
 <body>
-<input type="hidden" id="data" data-username="${username}" data-logged-in="${loggedIn}" data-follows = "${follows}">
+<input type="hidden" id="data" data-username="${username}" data-logged-in="${loggedIn}" data-follows = "${follows}"
+	data-created-date="${createdAt}">
 <div class="header">
 	<div class="header-buttons-wrapper">
 		<div class="header-buttons-left">
@@ -90,7 +91,8 @@
 					<img class="user-avatar" src="../../resources/images/${avatarPath}"></img>
 				</div>
 				<div class="user-info-text">
-					<span class="user-info-text-name">${username}</span>
+					<p class="user-info-text-name">${username}</p>
+					<p class="user-date-created" id="user-date-created"></p>
 				</div>
 			</div>
 		</div>

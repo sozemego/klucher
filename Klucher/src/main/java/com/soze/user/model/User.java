@@ -1,6 +1,7 @@
 package com.soze.user.model;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +43,10 @@ public class User implements UserDetails, Serializable {
 	private UserRoles userRoles;
 
 	private String avatarPath;
+	
+	@NotNull
+	@Column(name = "createdAt")
+	private Timestamp createdAt;
 
 	@NotNull
 	@Min(0)
@@ -52,10 +57,11 @@ public class User implements UserDetails, Serializable {
 
 	}
 	
-	public User(String username, String hashedPassword, UserRoles userRoles) {
+	public User(String username, String hashedPassword, UserRoles userRoles, Timestamp createdAt) {
 		this.username = username;
 		this.hashedPassword = hashedPassword;
 		this.userRoles = userRoles;
+		this.createdAt = createdAt;
 	}
 
 	public long getId() {
@@ -111,6 +117,14 @@ public class User implements UserDetails, Serializable {
 		if(notifications < 0) {
 			notifications = 0;
 		}
+	}
+	
+	public Timestamp getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Timestamp createdAt) {
+		this.createdAt = createdAt;
 	}
 
 	@Override

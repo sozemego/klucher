@@ -170,6 +170,7 @@ function dashboardOnLoad() {
 	attachNewKluchElementListener();
 	pollFeed();
 	pollNotifications();
+	displayTimeCreated();
 }
 
 function attachCharacterCountListener() {
@@ -629,6 +630,7 @@ function userOnLoad() {
 	setUpUserButtons();
 	setUpLoginForm();
 	configureSubheaderButtons();
+	displayTimeCreated();
 }
 
 function setUpUserButtons() {
@@ -1139,5 +1141,19 @@ function populateRemainingFollowers(remainingFollowers, total, listedAlready) {
 		remainingFollowersList.append(element);
 	}
 
+}
+
+function displayTimeCreated() {
+	const timestamp = $("#data").attr("data-created-date");
+	const convertedTimestamp = convertTimestampToMonthYear(timestamp);
+	const userDateCreated = $("#user-date-created");
+	userDateCreated.text("joined " + convertedTimestamp);
+}
+
+function convertTimestampToMonthYear(timestamp) {
+	const date = new Date(timestamp);
+	const month = date.getMonth() + 1;
+	const year = date.getFullYear();
+	return month + "." + year;
 }
 

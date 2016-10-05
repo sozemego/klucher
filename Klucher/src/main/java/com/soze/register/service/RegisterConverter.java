@@ -1,6 +1,8 @@
 package com.soze.register.service;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -63,7 +65,11 @@ public class RegisterConverter {
     UserRoles userRoles = new UserRoles();
     userRoles.setUser(true);
     userRoles.setAdmin(false);
-    User user = new User(form.getUsername(), hashedPassword, userRoles);
+    User user = new User(
+    		form.getUsername(),
+    		hashedPassword,
+    		userRoles,
+    		new Timestamp(Instant.now().toEpochMilli()));
     user.setAvatarPath(getRandomAvatarPath());
     return user;
   }

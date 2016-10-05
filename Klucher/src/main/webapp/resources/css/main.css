@@ -466,6 +466,11 @@ body {
 	font-size: 1.25em;
 }
 
+.user-date-created {
+	font-size: 0.95em;
+	color: gray;
+}
+
 .user-feed {
 	margin-top: 200px;
 }

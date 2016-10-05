@@ -25,6 +25,7 @@ public class DashboardController {
     User user = userDao.findOne(username);
     model.addAttribute("username", user.getUsername());
     model.addAttribute("avatarPath", user.getAvatarPath());
+    model.addAttribute("createdAt", user.getCreatedAt());
     return "dashboard";
   }
 

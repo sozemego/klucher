@@ -7,6 +7,7 @@ CREATE TABLE `user` (
   `notifications` int(11) NOT NULL,
   `username` varchar(32) NOT NULL UNIQUE,
   `user_roles_id` bigint(20) NOT NULL,
+  created_at datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FKhmd3yu14haupqtsyri0gjpehi` (`user_roles_id`),
   CONSTRAINT `FKhmd3yu14haupqtsyri0gjpehi` FOREIGN KEY (`user_roles_id`) REFERENCES `user_roles` (`id`)

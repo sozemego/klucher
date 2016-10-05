@@ -51,6 +51,7 @@ public class UserController {
     model.addAttribute("username", username);
     model.addAttribute("loggedIn", loggedIn);
     model.addAttribute("avatarPath", user.getAvatarPath());
+    model.addAttribute("createdAt", user.getCreatedAt());
     return "user";
   }
   

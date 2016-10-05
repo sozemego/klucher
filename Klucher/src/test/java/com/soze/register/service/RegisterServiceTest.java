@@ -105,7 +105,7 @@ public class RegisterServiceTest {
   }
   
   private User getUser(RegisterForm form) {
-    User user = new User(form.getUsername(), form.getPassword(), null);
+    User user = new User(form.getUsername(), form.getPassword(), null, null);
     return user;
   }
   
