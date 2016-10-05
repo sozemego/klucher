@@ -23,7 +23,7 @@ public class Kluch {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	@NotNull
-	private Long authorId;
+	private long authorId;
 	@NotNull
 	private String text;
 	@NotNull
@@ -37,8 +37,15 @@ public class Kluch {
 	@ElementCollection
 	private Set<String> mentions = new HashSet<>();
 
-	public Kluch() {
+	@SuppressWarnings("unused")
+	private Kluch() {
 
+	}
+	
+	public Kluch(long authorId, String text, Timestamp timestamp) {
+		this.authorId = authorId;
+		this.text = text;
+		this.timestamp = timestamp;
 	}
 
 	public long getId() {
@@ -49,11 +56,11 @@ public class Kluch {
 		this.id = id;
 	}
 
-	public Long getAuthorId() {
+	public long getAuthorId() {
 		return authorId;
 	}
 
-	public void setAuthorId(Long authorId) {
+	public void setAuthorId(long authorId) {
 		this.authorId = authorId;
 	}
 

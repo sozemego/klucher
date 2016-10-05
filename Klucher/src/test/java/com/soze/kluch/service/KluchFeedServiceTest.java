@@ -87,7 +87,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(Arrays.asList(user.getId())),
         eq(0L),
         eq(exists)))
-    .thenReturn(new PageImpl<>(Arrays.asList(new Kluch())));
+    .thenReturn(new PageImpl<>(Arrays.asList(new Kluch(0, null, null))));
     boolean exists = feedService.existsFeedAfter("test", new FeedRequest(FeedDirection.PREVIOUS, null), false);
     assertThat(exists, equalTo(true));
   }
@@ -316,12 +316,10 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
     List<Kluch> kluchs = new ArrayList<>();
     List<String> accumulatedUsernames = new ArrayList<>();
     for(int i = 0; i < number; i++) {
-    	Kluch kluch = new Kluch();
     	String randomUsername = getRandomUsername();
     	accumulatedUsernames.add(randomUsername);
     	User user = mockUser(randomUsername);
-    	kluch.setAuthorId(user.getId());
-    	kluch.setTimestamp(new Timestamp(0L + i));
+    	Kluch kluch = new Kluch(user.getId(), null, new Timestamp(0L + i));
       kluchs.add(kluch);
     }
     mockUsers(accumulatedUsernames);

@@ -129,10 +129,8 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 		List<Follow> follows = new ArrayList<>();
 		int i = 0;
 		for(Long id: randomUserIds) {
-			Follow follow = new Follow();
+			Follow follow = new Follow(id, user.getId());
 			follow.setId(i++);
-			follow.setFollowerId(id);
-			follow.setFolloweeId(user.getId());
 			follows.add(follow);
 		}
 		return follows;

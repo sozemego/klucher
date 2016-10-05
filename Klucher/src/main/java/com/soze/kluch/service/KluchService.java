@@ -134,7 +134,7 @@ public class KluchService {
 		if (kluch == null) {
 			throw new KluchDoesNotExistException();
 		}
-		if (!user.getId().equals(kluch.getAuthorId())) {
+		if (user.getId() != kluch.getAuthorId()) {
 			throw new InvalidOwnerException("Kluch");
 		}
 		kluchDao.delete(kluch);

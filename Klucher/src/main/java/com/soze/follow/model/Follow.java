@@ -25,16 +25,22 @@ public class Follow {
 	 * Name of the user who follows.
 	 */
 	@NotNull
-	private Long followerId;
+	private long followerId;
 
 	/**
 	 * Name of the user who is being followed.
 	 */
 	@NotNull
-	private Long followeeId;
+	private long followeeId;
 
-	public Follow() {
+	@SuppressWarnings("unused")
+	private Follow() {
 
+	}
+	
+	public Follow(long followerId, long followeeId) {
+		this.followerId = followerId;
+		this.followeeId = followeeId;
 	}
 
 	public long getId() {
@@ -45,19 +51,19 @@ public class Follow {
 		this.id = id;
 	}
 
-	public Long getFollowerId() {
+	public long getFollowerId() {
 		return followerId;
 	}
 
-	public void setFollowerId(Long followerId) {
+	public void setFollowerId(long followerId) {
 		this.followerId = followerId;
 	}
 
-	public Long getFolloweeId() {
+	public long getFolloweeId() {
 		return followeeId;
 	}
 
-	public void setFolloweeId(Long followeeId) {
+	public void setFolloweeId(long followeeId) {
 		this.followeeId = followeeId;
 	}
 

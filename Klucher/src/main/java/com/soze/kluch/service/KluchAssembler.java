@@ -33,10 +33,7 @@ public class KluchAssembler {
 	 *         persistence
 	 */
 	public Kluch assembleKluch(User author, String kluchText) {
-		Kluch kluch = new Kluch();
-		kluch.setAuthorId(author.getId());
-		kluch.setText(kluchText);
-		kluch.setTimestamp(new Timestamp(Instant.now().toEpochMilli()));
+		Kluch kluch = new Kluch(author.getId(), kluchText, new Timestamp(Instant.now().toEpochMilli()));
 		kluch.setHashtags(extractHashtags(kluchText));
 		kluch.setMentions(extractUserMentions(kluchText));
 		return kluch;

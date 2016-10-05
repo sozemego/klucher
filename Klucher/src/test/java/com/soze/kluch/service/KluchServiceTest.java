@@ -191,10 +191,8 @@ public class KluchServiceTest extends TestWithMockUsers {
 	}
 
 	private Kluch getKluch(User user, String text) {
-		Kluch kluch = new Kluch();
+		Kluch kluch = new Kluch(user.getId(), text, null);
 		kluch.setId(ids.getAndIncrement());
-		kluch.setAuthorId(user.getId());
-		kluch.setText(text);
 		return kluch;
 	}
 

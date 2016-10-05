@@ -27,7 +27,7 @@ public class User implements UserDetails, Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private long id;
 
 	@NotNull
 	@Size(min = 1, max = 32)
@@ -47,15 +47,22 @@ public class User implements UserDetails, Serializable {
 	@Min(0)
 	private Integer notifications = 0;
 
-	public User() {
+	@SuppressWarnings("unused")
+	private User() {
 
 	}
+	
+	public User(String username, String hashedPassword, UserRoles userRoles) {
+		this.username = username;
+		this.hashedPassword = hashedPassword;
+		this.userRoles = userRoles;
+	}
 
-	public Long getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
@@ -152,7 +159,7 @@ public class User implements UserDetails, Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + (int) (id ^ (id >>> 32));
 		return result;
 	}
 
@@ -165,10 +172,7 @@ public class User implements UserDetails, Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		User other = (User) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
+		if (id != other.id)
 			return false;
 		return true;
 	}

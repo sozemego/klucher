@@ -85,7 +85,7 @@ public class KluchControllerTest extends TestWithMockUsers {
   public void testValidKluch() throws Exception {
   	String kluchText = "text";
     mockUser("username", "password", true); 
-    when(service.post("username", kluchText)).thenReturn(new Kluch());
+    when(service.post("username", kluchText)).thenReturn(new Kluch(0, null, null));
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
         .param("kluchText", kluchText)
         .accept(MediaType.APPLICATION_JSON)
@@ -109,7 +109,7 @@ public class KluchControllerTest extends TestWithMockUsers {
   @Test
   public void testAuthorizedDeleteKluch() throws Exception {
   	mockUser("username", true);
-  	when(service.deleteKluch("username", 0L)).thenReturn(new Kluch());
+  	when(service.deleteKluch("username", 0L)).thenReturn(new Kluch(0, null, null));
   	mvc.perform(MockMvcRequestBuilders.delete("/kluch")
   			.param("kluchId", "0"))
   	.andDo(print());

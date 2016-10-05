@@ -105,9 +105,7 @@ public class RegisterServiceTest {
   }
   
   private User getUser(RegisterForm form) {
-    User user = new User();
-    user.setUsername(form.getUsername());
-    user.setHashedPassword(form.getPassword());
+    User user = new User(form.getUsername(), form.getPassword(), null);
     return user;
   }
   

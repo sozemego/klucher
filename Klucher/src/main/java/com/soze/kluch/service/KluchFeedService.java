@@ -340,7 +340,7 @@ public class KluchFeedService {
 	
 	private User getUserForKluch(Kluch kluch, List<User> users) throws UserDoesNotExistException {
 		for (User user : users) {
-			if (user.getId().equals(kluch.getAuthorId())) {
+			if (user.getId() == kluch.getAuthorId()) {
 				return user;
 			}
 		}

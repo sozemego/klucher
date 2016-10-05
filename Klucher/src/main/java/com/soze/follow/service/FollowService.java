@@ -34,9 +34,9 @@ public class FollowService {
 	 * Creates and persists a {@link Follow} entity, which represents a
 	 * follower/followee relationship.
 	 * 
-	 * @param username
+	 * @param follower
 	 *          name of the user who followed (follower)
-	 * @param follow
+	 * @param followee
 	 *          name of the user who was followed (followee)
 	 * @throws NullOrEmptyException
 	 *           if either username or follow are null or empty
@@ -48,17 +48,15 @@ public class FollowService {
 	public Follow follow(String follower, String followee)
 			throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException {
 		validateInput(follower, followee);
-		User user = userDao.findOne(follower);
-		if (user == null) {
+		User followerUser = userDao.findOne(follower);
+		if (followerUser == null) {
 			throw new UserDoesNotExistException(follower);
 		}
-		User followUser = userDao.findOne(followee);
-		if (followUser == null) {
+		User followeeUser = userDao.findOne(followee);
+		if (followeeUser == null) {
 			throw new UserDoesNotExistException(followee);
 		}
-		Follow followEntity = new Follow();
-		followEntity.setFollowerId(user.getId());
-		followEntity.setFolloweeId(followUser.getId());
+		Follow followEntity = new Follow(followerUser.getId(), followeeUser.getId());
 		return followDao.save(followEntity);
 	}
 
@@ -67,7 +65,7 @@ public class FollowService {
 	 * relationship between them.
 	 * 
 	 * @param username
-	 * @param follow
+	 * @param followee
 	 * @return removed Follow entity or null if it didn't exist
 	 * @throws NullOrEmptyException
 	 *           if username or follow are either null or empty
@@ -76,18 +74,18 @@ public class FollowService {
 	 * @throws CannotDoItToYourselfException
 	 *           if username equals follow
 	 */
-	public Follow unfollow(String username, String follow)
+	public Follow unfollow(String follower, String followee)
 			throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException {
-		validateInput(username, follow);
-		User user = userDao.findOne(username);
-		if (user == null) {
-			throw new UserDoesNotExistException(username);
+		validateInput(follower, followee);
+		User followerUser = userDao.findOne(follower);
+		if (followerUser == null) {
+			throw new UserDoesNotExistException(follower);
 		}
-		User followUser = userDao.findOne(follow);
-		if (followUser == null) {
-			throw new UserDoesNotExistException(follow);
+		User followeeUser = userDao.findOne(followee);
+		if (followeeUser == null) {
+			throw new UserDoesNotExistException(followee);
 		}
-		Follow f = followDao.findByFollowerIdAndFolloweeId(user.getId(), followUser.getId());
+		Follow f = followDao.findByFollowerIdAndFolloweeId(followerUser.getId(), followeeUser.getId());
 		if (f != null) {
 			followDao.delete(f);
 		}

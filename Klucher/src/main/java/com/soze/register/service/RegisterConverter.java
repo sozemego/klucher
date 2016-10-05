@@ -58,16 +58,12 @@ public class RegisterConverter {
    * @param form
    * @return
    */
-  public User convertRegisterForm(RegisterForm form) {
-    User user = new User();
-    user.setUsername(form.getUsername());
+  public User convertRegisterForm(RegisterForm form) { 
     String hashedPassword = passwordEncoder.encode(form.getPassword());
-    user.setHashedPassword(hashedPassword);
     UserRoles userRoles = new UserRoles();
-    //userRoles.setUsername(form.getUsername());
     userRoles.setUser(true);
     userRoles.setAdmin(false);
-    user.setUserRoles(userRoles);
+    User user = new User(form.getUsername(), hashedPassword, userRoles);
     user.setAvatarPath(getRandomAvatarPath());
     return user;
   }
