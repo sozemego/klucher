@@ -816,6 +816,58 @@ a.followers-new-free-element {
 	width: 100%;
 }
 
+/** 
+
+	#FOOTER
+
+*/
+
+.footer {
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	z-index: 1000;
+	height: 24px;
+	width: 100%;
+	background-color: white;
+	text-align: center;
+}
+
+
+.footer-wrapper {
+
+}
+
+.footer-link {
+	text-decoration: none;
+	color: black;
+}
+
+/**
+
+	#ABOUT
+
+*/
+
+.about {
+	//text-align: center;
+	width: 100%;
+	margin-top: 200px;
+}
+
+.about-link {
+	text-decoration: none;
+	color: black;
+}
+
+.about-element {
+	width: 750px;
+	margin: auto;
+	padding: 10px;
+	text-align: justify;
+  text-justify: inter-word;
+}
+
 /**
 
 	#HOVER

@@ -140,6 +140,7 @@
 			value="${_csrf.token}">
 	</form>
 </div>
+<c:import url="footer.jsp"></c:import>
 <script>
 $(userOnLoad());
 </script>

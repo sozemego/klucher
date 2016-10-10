@@ -48,6 +48,7 @@
 <div class="followers-new-free" id="followers-new-free">
 	
 </div>
+<c:import url="footer.jsp"></c:import>
 <script>
 $(notificationsOnLoad());
 </script>	

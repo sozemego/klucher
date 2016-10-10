@@ -64,9 +64,9 @@
 		<span class="alert-text" id="alert-text"></span>
 	</div>
 </div>
+<c:import url="footer.jsp"></c:import>
 <script>
-$(dashboardOnLoad());
-	
+$(dashboardOnLoad());	
 </script>
 </body>
 </html>
