@@ -23,19 +23,48 @@
 <div class = "about">
 	<p class = "about-element">Hi! My name is Kamil Jurek and I'm a self-thought developer. I built this Twitter-like service
 	as a way to learn Spring (and get some front-end experience). All of the code is open-sourced
-	and if you want to dive right in, here's a link:<a class = "about-link" href = "https://bitbucket.org/sozemego/klucher">https://bitbucket.org/sozemego/klucher</a></p>
-	<p class = "about-element">In this project I've used the following languages/technologies/frameworks/libraries: Java, Spring Boot, JPA, Hibernate, MySQL, Mockito, git,	Gradle, Amazon Web Services, Tomcat, Flyway, HTML, CSS, JavaScript, jQuery, JSP. Here's a short explanation of what most of them do:</p>
-	<p class = "about-element">Spring Boot - klucher's heart. Provides dependency injection and MVC capabilities. Allows access to JPA and Hibernate technologies, has support for Flyway and renders JSP content (through either embedded or provided Tomcat). </p>
+	and if you want to dive right in, here's a link: <a class = "about-link" href = "https://bitbucket.org/sozemego/klucher">https://bitbucket.org/sozemego/klucher</a></p>
+	<p class = "about-element">In this project I've used the following languages/technologies/frameworks/libraries/buzzwords: Java, Spring Boot, JPA, Hibernate, MySQL, Mockito, git,	Gradle, Amazon Web Services, Tomcat, JSP, Flyway, HTML, CSS, JavaScript, jQuery. Here's a short explanation of what most of them do:</p>
+	<p class = "about-element">Spring Boot - klucher's heart. Provides dependency injection and MVC capabilities. Abstracts a lot of things and is mostly configured out of the box. It still lets you change any aspect of your app, if you desire. </p>
 	<p class = "about-element">JPA, Hibernate, MySQL - persistent data storage (MySQL) and ways to generate queries (JPA), map DB results to Java objects (Hibernate). </p>
-	<p class = "about-element">Mockito - excellent library used for testing. Provides an easy way to create mocked objects, methods. Allows for easy verification of
+	<p class = "about-element">Mockito - an excellent library used for testing. Provides an easy way to create mocked objects, methods. Allows for easy verification of
 	called methods and their arguments.</p>
-	<p class = "about-element">git - version control. Bitbucket is the service used to provide git.</p>
-	<p class = "about-element">Tomcat, Jasper, JSP - a web container for the app. Jasper is the engine rendering JavaServer Pages (JSP). </p>
-	<p class = "about-element">Gradle - a build and dependency tool. Among many things, it manages dependencies for you, builds your app, runs tests and many more.</p>
-	<p class = "about-element">Amazon Web Services - This website runs on an Elastic Beanstalk, which is a service provided by AWS. It provides an Elastic Load Balancer, monitors your app's health and provides auto-scaling. A database is provided by another AWS service, RDS. DNS is provided by Route 53.</p>
-	<p class = "about-element">Flyway - database versioning system. Easy to use, makes sure all your databases (production, staging, dev etc) follow the same schema.</p>
-	<p class = "about-element">HTML, CSS, JavaScript, jQuery - fundamental tools (except for jQuery) for building a front-facing part of your site. </p>
+	<p class = "about-element">git - version control provided by bitbucket.</p>
+	<p class = "about-element">Tomcat, JSP - a web container for the app. Jasper is the engine rendering JavaServer Pages (JSP). </p>
+	<p class = "about-element">Gradle - a build tool. Among many things, it manages dependencies for you, builds your app, runs tests and many more. I have not used this tool to maximum of its capabilities. </p>
+	<p class = "about-element">Amazon Web Services - This website runs on an Elastic Beanstalk, which is a service provided by AWS. It lets you auto-scale (spin up new instances of this app), manages load-balancing, monitors your instances health etc. Deploying a new app is easy and quite fast. Databases are using amazon's RDS, DNS is managed through their Route 53 service. </p>
+	<p class = "about-element">Flyway - database versioning system. Easy to use, makes sure all your databases (production, staging, dev etc) have the same schema.</p>
+	<p class = "about-element">HTML, CSS, JavaScript, jQuery - fundamental tools (except for jQuery) for building the front-facing part of your site. </p>
 
+</div>
+<div id="page-overlay" class="page-overlay page-overlay-form page-overlay-inactive">
+</div>
+<div class="form form-overlay form-overlay-inactive" id="form-login">
+	<form action="${pageContext.servletContext.contextPath}/login" method="post">
+		<span class="form-welcome-text">Welcome back!</span>
+		<div class="form-input-field-container">
+			<span class="form-input-field-name">username</span>
+			<input name="username" class="form-input-field" type="text">
+		</div>
+		<div class="form-input-field-container">
+			<span class="form-input-field-name">password</span>
+			<input name="password" class="form-input-field" type="password">
+		</div>
+		<div class="form-submit-container">
+			<input type="checkbox" id="rememberme" name="remember-me">Remember me</input>
+			<input type="submit" value="log in"></input>
+		</div>
+		<div class="form-register-redirect">
+			<a class="form-register-redirect-link" href="/register">Don't have an account yet? Register for free!</a>
+		</div>
+		<c:if test = "${not empty param.error}">
+			<div class="form-errors">
+				Invalid username or password!
+			</div>
+		</c:if>
+		<input type="hidden" name="${_csrf.parameterName}"
+			value="${_csrf.token}">
+	</form>
 </div>
 <c:import url="footer.jsp"></c:import>
 <script>

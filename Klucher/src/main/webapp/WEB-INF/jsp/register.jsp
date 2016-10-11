@@ -43,6 +43,7 @@
 				
 			</div>
 		</div>
+<c:import url="footer.jsp"></c:import>
 <script>
 $(registerOnLoad());
 </script>
