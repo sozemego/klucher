@@ -120,7 +120,7 @@ public class KluchFeedService {
 		User user = getUser(username);
 		List<Long> authorIds = getIdsOfAuthors(user.getId(), onlyForUser);
 		Page<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdGreaterThan(authorIds, id, previous);
-		Feed<KluchFeedElement> feed = constructFeed(kluchs);
+		Feed<KluchFeedElement> feed = constructFeed(user.getId(), kluchs);
 		return feed;
 	}
 
@@ -156,7 +156,7 @@ public class KluchFeedService {
 		User user = getUser(username);
 		List<Long> authorIds = getIdsOfAuthors(user.getId(), onlyForUser);
 		Page<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdLessThan(authorIds, id, next);
-		Feed<KluchFeedElement> feed = constructFeed(kluchs);
+		Feed<KluchFeedElement> feed = constructFeed(user.getId(), kluchs);
 		return feed;
 	}
 	
@@ -202,9 +202,9 @@ public class KluchFeedService {
 	 */
 	public Feed<KluchFeedElement> getMentions(String username, FeedRequest feedRequest)
 			throws NullOrEmptyException, UserDoesNotExistException {
-		getUser(username);
+		User user = getUser(username);
 		Page<Kluch> kluchs = kluchDao.findByMentionsInAndIdLessThan(username, feedRequest.getId(), next);
-		Feed<KluchFeedElement> feed = constructFeed(kluchs);
+		Feed<KluchFeedElement> feed = constructFeed(user.getId(), kluchs);
 		return feed;
 	}
 	
@@ -230,15 +230,28 @@ public class KluchFeedService {
 	 * @throws NullOrEmptyException
 	 *           if <code>hashtagText</code> is null or empty
 	 */
-	public Feed<KluchFeedElement> constructHashtagFeed(String hashtagText, FeedRequest feedRequest)
+	public Feed<KluchFeedElement> constructHashtagFeed(String username, String hashtagText, FeedRequest feedRequest)
 			throws UserDoesNotExistException, NullOrEmptyException {
 		boolean hasPoundCharacter = hashtagText.startsWith("#");
 		if (hasPoundCharacter) {
 			hashtagText = hashtagText.substring(1);
-		}
+		} 
 		Page<Kluch> kluchs = kluchDao.findByHashtagsInAndIdLessThan(hashtagText, feedRequest.getId(), next);
-		Feed<KluchFeedElement> feed = constructFeed(kluchs);
+		Feed<KluchFeedElement> feed = constructFeed(getUserId(username), kluchs);
 		return feed;
+	}
+	
+	/**
+	 * Finds a user with given name and if it exists, returns its userId.
+	 * @param username
+	 * @return userId if user exists, null otherwise
+	 */
+	private Long getUserId(String username) {
+		User user = userDao.findOne(username);
+		if(user == null) {
+			return null;
+		}
+		return user.getId();
 	}
 	
 	/**
@@ -290,7 +303,7 @@ public class KluchFeedService {
 	 * @param page
 	 * @return
 	 */
-	private Feed<KluchFeedElement> constructFeed(Page<Kluch> page) {
+	private Feed<KluchFeedElement> constructFeed(Long userId, Page<Kluch> page) {
 		long totalElements = (int) page.getTotalElements();
 		Long previous = null;
 		Long next = null;
@@ -302,7 +315,7 @@ public class KluchFeedService {
 		if(page.isLast()) {
 			next = null;
 		}
-		return new Feed<>(convertKluchsToFeedElements(kluchs), previous, next, totalElements);
+		return new Feed<>(convertKluchsToFeedElements(userId, kluchs), previous, next, totalElements);
 	}
 	
 	/**
@@ -315,12 +328,12 @@ public class KluchFeedService {
 	 * @throws UserDoesNotExistException
 	 *           if any of the Kluchs' authors don't exist
 	 */
-	private List<KluchFeedElement> convertKluchsToFeedElements(List<Kluch> kluchs) throws UserDoesNotExistException {
+	private List<KluchFeedElement> convertKluchsToFeedElements(Long userId, List<Kluch> kluchs) throws UserDoesNotExistException {
 		Set<Long> authorIds = kluchs.stream().map(k -> k.getAuthorId()).collect(Collectors.toSet());
 		List<User> users = userDao.findAll(authorIds);
 		List<KluchFeedElement> feedElements = new ArrayList<>(kluchs.size());
 		for (Kluch k : kluchs) {
-			feedElements.add(new KluchFeedElement(k, getKluchUserView(getUserForKluch(k, users))));
+			feedElements.add(new KluchFeedElement(k, getKluchUserView(getUserForKluch(k, users)), doesUserLikeKluch(userId, k), k.getLikes().size()));
 		}
 		/**
 		Collections.sort(feedElements, (k1, k2) -> {
@@ -336,6 +349,16 @@ public class KluchFeedService {
 		});
 		*/
 		return feedElements;
+	}
+
+	/**
+	 * Checks if user with userId likes a given kluch.
+	 * @param userId
+	 * @param kluch
+	 * @return true if user likes this kluch, false if userId is null or this user does not like kluch
+	 */
+	private boolean doesUserLikeKluch(Long userId, Kluch kluch) {
+		return userId == null ? false : kluch.getLikes().contains(userId);
 	}
 	
 	private User getUserForKluch(Kluch kluch, List<User> users) throws UserDoesNotExistException {

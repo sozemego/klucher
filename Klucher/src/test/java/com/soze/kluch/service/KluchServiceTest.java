@@ -3,6 +3,7 @@ package com.soze.kluch.service;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -97,6 +98,7 @@ public class KluchServiceTest extends TestWithMockUsers {
 	@Test(expected = KluchPreviouslyPostedException.class)
 	public void testAlreadyPosted() throws Exception {
 		mockUser("author");
+		when(kluchDao.save(any(Kluch.class))).thenReturn(new Kluch(0L, null, null));
 		String kluchText = generateString(50);
 		kluchService.post("author", kluchText);
 		kluchService.post("author", kluchText);
@@ -188,6 +190,118 @@ public class KluchServiceTest extends TestWithMockUsers {
 		when(kluchDao.findOne(kluch.getId())).thenReturn(kluch);
 		kluchService.deleteKluch(username, kluch.getId());
 		verify(kluchDao).delete(kluch);
+	}
+	
+	@Test(expected = NullOrEmptyException.class)
+	public void testLikeKluchNullUsername() {
+		kluchService.likeKluch(null, 0L);
+	}
+	
+	@Test(expected = NullOrEmptyException.class)
+	public void testLikeKluchEmptyUsername() {
+		kluchService.likeKluch("", 0L);
+	}
+	
+	@Test(expected = KluchDoesNotExistException.class)
+	public void testLikeKluchKluchDoesNotExist() {
+		mockUser("user");
+		kluchService.likeKluch("user", 0L);
+	}
+	
+	@Test
+	public void testLikeKluchValid() {
+		mockUser("user");
+		User anotherUser = mockUser("liked");
+		Kluch kluch = getKluch(anotherUser, "text");
+		when(kluchDao.findOne(1L)).thenReturn(kluch);
+		when(kluchDao.save(kluch)).thenReturn(kluch);
+		int liked = kluchService.likeKluch("user", 1L);
+		assertThat(liked, equalTo(1));
+	}
+	
+	@Test
+	public void testLikeKluchValidTwice() {
+		mockUser("user");
+		mockUser("secondUser");
+		User anotherUser = mockUser("liked");
+		Kluch kluch = getKluch(anotherUser, "text");
+		when(kluchDao.findOne(1L)).thenReturn(kluch);
+		when(kluchDao.save(kluch)).thenReturn(kluch);
+		int liked = kluchService.likeKluch("user", 1L);
+		assertThat(liked, equalTo(1));
+		liked = kluchService.likeKluch("secondUser", 1L);
+		assertThat(liked, equalTo(2));
+	}
+	
+	@Test
+	public void testLikeKluchValidTwiceSameUser() {
+		mockUser("user");
+		User anotherUser = mockUser("liked");
+		Kluch kluch = getKluch(anotherUser, "text");
+		when(kluchDao.findOne(1L)).thenReturn(kluch);
+		when(kluchDao.save(kluch)).thenReturn(kluch);
+		int liked = kluchService.likeKluch("user", 1L);
+		assertThat(liked, equalTo(1));
+		liked = kluchService.likeKluch("user", 1L);
+		assertThat(liked, equalTo(1));
+	}
+	
+	@Test(expected = NullOrEmptyException.class)
+	public void testUnlikeKluchNullUsername() {
+		kluchService.unlikeKluch(null, 0L);
+	}
+	
+	@Test(expected = NullOrEmptyException.class)
+	public void testUnlikeKluchEmptyUsername() {
+		kluchService.unlikeKluch("", 0L);
+	}
+	
+	@Test(expected = KluchDoesNotExistException.class)
+	public void testUnlikeKluchKluchDoesNotExist() {
+		mockUser("user");
+		kluchService.unlikeKluch("user", 0L);
+	}
+	
+	@Test
+	public void testUnlikeKluchValid() {
+		User user = mockUser("user");
+		User anotherUser = mockUser("liked");
+		Kluch kluch = getKluch(anotherUser, "text");
+		kluch.getLikes().add(user.getId());
+		when(kluchDao.findOne(1L)).thenReturn(kluch);
+		when(kluchDao.save(kluch)).thenReturn(kluch);
+		int liked = kluchService.unlikeKluch("user", 1L);
+		assertThat(liked, equalTo(0));
+	}
+	
+	@Test
+	public void testUnlikeKluchValidTwice() {
+		User user = mockUser("user");
+		User secondUser = mockUser("secondUser");
+		User anotherUser = mockUser("liked");
+		Kluch kluch = getKluch(anotherUser, "text");
+		kluch.getLikes().add(user.getId());
+		kluch.getLikes().add(secondUser.getId());
+		when(kluchDao.findOne(1L)).thenReturn(kluch);
+		when(kluchDao.save(kluch)).thenReturn(kluch);
+		int liked = kluchService.unlikeKluch("user", 1L);
+		assertThat(liked, equalTo(1));
+		liked = kluchService.unlikeKluch("secondUser", 1L);
+		assertThat(liked, equalTo(0));
+	}
+	
+	@Test
+	public void testUnlikeKluchValidTwiceSameUser() {
+		User user = mockUser("user");
+		User anotherUser = mockUser("liked");
+		Kluch kluch = getKluch(anotherUser, "text");
+		kluch.getLikes().add(user.getId());
+		when(kluchDao.findOne(1L)).thenReturn(kluch);
+		when(kluchDao.save(kluch)).thenReturn(kluch);
+		int liked = kluchService.unlikeKluch("user", 1L);
+		assertThat(liked, equalTo(0));
+		liked = kluchService.unlikeKluch("user", 1L);
+		assertThat(liked, equalTo(0));
 	}
 
 	private Kluch getKluch(User user, String text) {

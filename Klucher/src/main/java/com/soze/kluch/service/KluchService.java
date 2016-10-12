@@ -18,6 +18,7 @@ import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
+import com.soze.notification.service.NotificationService;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 
@@ -39,13 +40,15 @@ public class KluchService {
 	private final KluchDao kluchDao;
 	private final UserDao userDao;
 	private final KluchAssembler kluchAssembler;
+	private final NotificationService notificationService;
 	private final Map<String, String> pastKluchs = new ConcurrentHashMap<>();
 
 	@Autowired
-	public KluchService(KluchDao kluchDao, KluchAssembler kluchAssembler, UserDao userDao) {
+	public KluchService(KluchDao kluchDao, KluchAssembler kluchAssembler, UserDao userDao, NotificationService notificationService) {
 		this.kluchDao = kluchDao;
 		this.kluchAssembler = kluchAssembler;
 		this.userDao = userDao;
+		this.notificationService = notificationService;
 	}
 
 	/**
@@ -74,6 +77,7 @@ public class KluchService {
 		Kluch kluch = kluchAssembler.assembleKluch(user, kluchText);
 		kluch = kluchDao.save(kluch);
 		saveLastKluch(username, kluchText);
+		notificationService.addNotifications(kluch.getMentions());
 		log.info("User [{}] successfuly posted a Kluch with text [{}].", username, kluchText);
 		return kluch;
 	}
@@ -117,7 +121,6 @@ public class KluchService {
 	 *          owner of kluch
 	 * @param id
 	 *          id of kluch
-	 * @return deleted Kluch
 	 * @throws NullOrEmptyException
 	 *           username is empty or null
 	 * @throws UserDoesNotExistException
@@ -127,7 +130,7 @@ public class KluchService {
 	 * @throws KluchDoesNotExistException
 	 *           kluch with given id does not exist
 	 */
-	public Kluch deleteKluch(String username, long id)
+	public void deleteKluch(String username, long id)
 			throws NullOrEmptyException, UserDoesNotExistException, InvalidOwnerException, KluchDoesNotExistException {
 		User user = getUser(username);
 		Kluch kluch = kluchDao.findOne(id);
@@ -138,7 +141,57 @@ public class KluchService {
 			throw new InvalidOwnerException("Kluch");
 		}
 		kluchDao.delete(kluch);
-		return kluch;
+		notificationService.removeNotifications(kluch.getMentions());
+	}
+	
+	/**
+	 * Adds a like from this user to a kluch with kluchId.
+	 * 
+	 * @param username
+	 *          name of the user who likes a kluch
+	 * @param kluchId
+	 *          id of the kluch to be liked
+	 * @return number of likes after this user likes this kluch
+	 * @throws UserDoesNotExistException
+	 *           if user with username does not exist
+	 * @throws KluchDoesNotExistException
+	 * 					if kluch does not exist
+	 */
+	public int likeKluch(String username, long kluchId) throws UserDoesNotExistException, KluchDoesNotExistException {
+		User user = getUser(username);
+		Kluch kluch = kluchDao.findOne(kluchId);
+		if (kluch == null) {
+			throw new KluchDoesNotExistException();
+		}
+		kluch.getLikes().add(user.getId());
+		kluch = kluchDao.save(kluch);
+		notificationService.addNotification(kluch.getAuthorId());
+		return kluch.getLikes().size();
+	}
+	
+	/**
+	 * Removes a like from this user to a kluch with kluchId.
+	 * 
+	 * @param username
+	 *          name of the user who unlikes a kluch
+	 * @param kluchId
+	 *          id of the kluch to be unliked
+	 * @return number of likes after this user unlikes this kluch
+	 * @throws UserDoesNotExistException
+	 *           if user with username does not exist
+	 * @throws KluchDoesNotExistException
+	 *           if kluch does not exist
+	 */
+	public int unlikeKluch(String username, long kluchId) throws UserDoesNotExistException, KluchDoesNotExistException {
+		User user = getUser(username);
+		Kluch kluch = kluchDao.findOne(kluchId);
+		if (kluch == null) {
+			throw new KluchDoesNotExistException();
+		}
+		kluch.getLikes().remove(user.getId());
+		kluch = kluchDao.save(kluch);
+		notificationService.removeNotification(kluch.getAuthorId());
+		return kluch.getLikes().size();
 	}
 
 	/**

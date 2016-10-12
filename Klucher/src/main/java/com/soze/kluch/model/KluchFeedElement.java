@@ -13,10 +13,14 @@ public class KluchFeedElement {
 
 	private final Kluch kluch;
 	private final KluchUserView user;
+	private final boolean liked;
+	private final int likes;
 
-	public KluchFeedElement(Kluch kluch, KluchUserView user) {
+	public KluchFeedElement(Kluch kluch, KluchUserView user, boolean liked, int likes) {
 		this.kluch = kluch;
 		this.user = user;
+		this.liked = liked;
+		this.likes = likes;
 	}
 
 	public Kluch getKluch() {
@@ -25,6 +29,14 @@ public class KluchFeedElement {
 
 	public KluchUserView getUser() {
 		return user;
+	}
+	
+	public boolean isLiked() {
+		return liked;
+	}
+	
+	public int getLikes() {
+		return likes;
 	}
 
 }

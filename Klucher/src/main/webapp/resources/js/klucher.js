@@ -217,7 +217,7 @@ function ajaxPostKluch() {
 		},
 		success: function(kluch, status, xhr) {
 			clearTextArea();
-			addKluchToFeed(kluch, getUserData(), false);
+			addKluchToFeed(getKluchElement(kluch), false);
 			checkCharacterCount();
 			setPreviousId(kluch.id);
 		}
@@ -225,12 +225,20 @@ function ajaxPostKluch() {
 	focusInputArea();
 }
 
-function getUserData() {
+function getKluchElement(kluch) {
+	return {
+		"kluch": kluch,
+		"liked": false,
+		"user": getUser()
+	};
+}
+
+function getUser() {
 	const username = getUsername();
 	const avatarPath = getAvatarPath();
-	return  {
-		"username" : username,
-		"avatarPath" : avatarPath
+	return {
+		"username": username,
+		"avatarPath": avatarPath
 	};
 }
 
@@ -290,12 +298,15 @@ function getFeed(direction, id, append) {
 function addKluchUserFeed(feed, append) {
 	const feedElements = feed.elements;
 	for(let i = 0; i < feedElements.length; i++) {
-		addKluchToFeed(feedElements[i].kluch, feedElements[i].user, append);
+		addKluchToFeed(feedElements[i], append);
 	}
 	setFeedIds(feed);
 }
 
-function addKluchToFeed(kluch, user, append) {
+function addKluchToFeed(kluchElement, append) {
+
+	const kluch = kluchElement.kluch;
+	const user = kluchElement.user;
 
 	const kluchContainer = $(document.createElement("div"));
 	kluchContainer.attr("data-id", kluch.id);
@@ -340,23 +351,7 @@ function addKluchToFeed(kluch, user, append) {
 	const kluchFooter = $(document.createElement("div"));
 	kluchFooter.addClass("kluch-footer");
 
-	const likeButton = $(document.createElement("div"));
-	likeButton.addClass("kluch-footer-icon-container");
-	const likeImg = $(document.createElement("img"));
-	likeImg.addClass("kluch-footer-icon");
-	likeImg.attr("src", "../../resources/images/like_2.png");
-
-	likeImg.hover(function() {
-		$(this).attr("src", "../../resources/images/like_2_hover.png");
-	}, function() {
-		$(this).attr("src", "../../resources/images/like_2.png");
-	});
-
 	const loggedIn = isLoggedIn();
-
-	likeButton.append(likeImg);
-	kluchFooter.append(likeButton);
-
 	if(loggedIn) {
 			const username = getUsername();
 			if(username === user.username) {
@@ -391,6 +386,31 @@ function addKluchToFeed(kluch, user, append) {
 				kluchFooter.append(deleteButton);
 		}
 	}
+
+	const likeButton = $(document.createElement("div"));
+	likeButton.addClass("kluch-footer-icon-container");
+	const likeImg = $(document.createElement("img"));
+	likeImg.addClass("kluch-footer-icon");
+	likeButton.append(likeImg);
+
+	const likes = kluchElement.likes;
+	const likesNumber = $(document.createElement("span"));
+	likesNumber.addClass("kluch-footer-text");
+	likesNumber.text(likes == 0 ? "" : likes);
+	likeButton.append(likesNumber);
+
+	const liked = kluchElement.liked;
+	configureLikeImg(likeImg, liked);
+
+	if(loggedIn) {
+		attachLikeListener(likeButton, liked, kluch.id);
+	} else {
+		likeButton.click(function() {
+			showLoginForm();
+		});
+	}
+
+	kluchFooter.append(likeButton);
 
 	kluchBody.append(kluchContent);
 	kluchBody.append(kluchFooter);
@@ -468,6 +488,80 @@ function getLinkStyle(link) {
 
 function getUsername() {
 	return $("#data").attr("data-username");
+}
+
+function attachLikeListener(button, liked, id) {
+	button.off();
+	if(!liked) {
+		button.click(function() {
+			ajaxLike(id);
+			configureLikeImg(button.find(".kluch-footer-icon"), true);
+			attachLikeListener(button, true, id);
+			const likesElement = button.find(".kluch-footer-text");
+			const currentLikesText = parseInt(likesElement.text());
+			likesElement.text(currentLikesText + 1);
+		});
+	} else {
+		button.click(function() {
+			ajaxUnlike(id);
+			configureLikeImg(button.find(".kluch-footer-icon"), false);
+			attachLikeListener(button, false, id);
+			const likesElement = button.find(".kluch-footer-text");
+			const currentLikesText = parseInt(likesElement.text());
+			likesElement.text(currentLikesText - 1);
+		});
+	}
+}
+
+function ajaxLike(kluchId) {
+	$.ajax({
+		type: "POST",
+		url: "/kluch/like/",
+		data: {
+			"kluchId" : kluchId
+		},
+		error: function(xhr, status, error) {
+			displayAlert(xhr.responseJSON.message);
+		},
+		success: function(data, status, xhr) {
+			console.log(data);
+		}
+	});
+}
+
+function ajaxUnlike(kluchId) {
+	$.ajax({
+		type: "POST",
+		url: "/kluch/unlike/",
+		data: {
+			"kluchId" : kluchId
+		},
+		error: function(xhr, status, error) {
+			displayAlert(xhr.responseJSON.message);
+		},
+		success: function(data, status, xhr) {
+			console.log(data);
+		}
+	});
+}
+
+function configureLikeImg(imgElement, liked) {
+	imgElement.off();
+	if(liked) {
+			imgElement.attr("src", "../../resources/images/like_2_active.png");
+			imgElement.hover(function() {
+				$(this).attr("src", "../../resources/images/like_2.png");
+			}, function() {
+				$(this).attr("src", "../../resources/images/like_2_active.png");
+			});
+		} else {
+			imgElement.attr("src", "../../resources/images/like_2.png");
+			imgElement.hover(function() {
+				$(this).attr("src", "../../resources/images/like_2_active.png");
+			}, function() {
+				$(this).attr("src", "../../resources/images/like_2.png");
+			});
+		}
 }
 
 // sets values for feed pagination. next/previous id. next id is the earliest kluch id ()
@@ -828,8 +922,8 @@ function getHashtagFeed(id, append) {
 			setGettingFeed(false);
 			displayAlert(xhr.responseJSON.message);
 		},
-		success: function(data, status, xhr) {
-			addKluchUserFeed(data, append);
+		success: function(feed, status, xhr) {
+			addKluchUserFeed(feed, append);
 			setGettingFeed(false);
 		}
 	});
@@ -1156,4 +1250,3 @@ function convertTimestampToMonthYear(timestamp) {
 	const year = date.getFullYear();
 	return month + "." + year;
 }
-

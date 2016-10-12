@@ -1,6 +1,5 @@
 package com.soze.kluch.controller;
 
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -29,16 +28,12 @@ import com.soze.kluch.model.FeedRequest;
 import com.soze.kluch.model.Kluch;
 import com.soze.kluch.service.KluchFeedService;
 import com.soze.kluch.service.KluchService;
-import com.soze.notification.service.NotificationService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
 public class KluchControllerTest extends TestWithMockUsers {
-  
-  @MockBean
-  private NotificationService notificationService;
   
   @Autowired
   private WebApplicationContext webApplicationContext;
@@ -65,7 +60,6 @@ public class KluchControllerTest extends TestWithMockUsers {
       .andDo(print())
       .andExpect(status().isBadRequest());
     verifyZeroInteractions(service);
-    verifyZeroInteractions(notificationService);
   }
   
   @Test
@@ -78,7 +72,6 @@ public class KluchControllerTest extends TestWithMockUsers {
     .andDo(print())
     .andExpect(status().isUnauthorized());
     verifyZeroInteractions(service);
-    verifyZeroInteractions(notificationService);
   }
   
   @Test
@@ -93,7 +86,6 @@ public class KluchControllerTest extends TestWithMockUsers {
     .andDo(print())
     .andExpect(status().isOk());   
     verify(service).post("username", kluchText);
-    verify(notificationService).addNotifications(anyListOf(String.class));
   }
   
   @Test
@@ -103,18 +95,15 @@ public class KluchControllerTest extends TestWithMockUsers {
   	.andDo(print())
   	.andExpect(status().isUnauthorized());
   	verifyZeroInteractions(service);
-  	verifyZeroInteractions(notificationService);
   }
   
   @Test
   public void testAuthorizedDeleteKluch() throws Exception {
   	mockUser("username", true);
-  	when(service.deleteKluch("username", 0L)).thenReturn(new Kluch(0, null, null));
   	mvc.perform(MockMvcRequestBuilders.delete("/kluch")
   			.param("kluchId", "0"))
   	.andDo(print());
   	verify(service).deleteKluch("username", 0L);
-  	verify(notificationService).removeNotifications(anyListOf(String.class));
   }
   
   @Test
@@ -195,7 +184,7 @@ public class KluchControllerTest extends TestWithMockUsers {
         .param("next", "0"))
       .andDo(print())
       .andExpect(status().isOk());
-    verify(kluchFeedService).constructHashtagFeed(hashtag, new FeedRequest(FeedDirection.NEXT, 0L));
+    verify(kluchFeedService).constructHashtagFeed(null, hashtag, new FeedRequest(FeedDirection.NEXT, 0L));
   }
 
 }

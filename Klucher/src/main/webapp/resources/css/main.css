@@ -671,13 +671,21 @@ a.kluch-text-link-link {
 }
 
 .kluch-footer-icon-container {
-	width: 50px;
+	width: 75px;
+	text-align: center;
 	margin-right: 4px;
+	display: inline-flex;
+	align-items: center;
 }
 
 .kluch-footer-icon {
 	width: 30px;
 	height: 28px;
+}
+
+.kluch-footer-text {
+	color: gray;
+	width: 32px;
 }
 
 .kluch-no-more {

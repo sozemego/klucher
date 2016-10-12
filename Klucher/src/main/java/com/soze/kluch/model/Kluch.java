@@ -36,6 +36,10 @@ public class Kluch {
 	@JsonIgnore
 	@ElementCollection
 	private Set<String> mentions = new HashSet<>();
+	
+	@JsonIgnore
+	@ElementCollection
+	private Set<Long> likes = new HashSet<>();
 
 	@SuppressWarnings("unused")
 	private Kluch() {
@@ -94,6 +98,14 @@ public class Kluch {
 
 	public void setMentions(Set<String> mentions) {
 		this.mentions = mentions;
+	}
+
+	public Set<Long> getLikes() {
+		return likes;
+	}
+
+	public void setLikes(Set<Long> likes) {
+		this.likes = likes;
 	}
 
 	@Override

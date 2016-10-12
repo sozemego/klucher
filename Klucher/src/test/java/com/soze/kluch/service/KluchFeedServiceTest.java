@@ -184,7 +184,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(0L),
         eq(next)))
     .thenReturn(new PageImpl<>(Arrays.asList()));
-    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.PREVIOUS, null));
+    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(null, hashtagText, new FeedRequest(FeedDirection.PREVIOUS, null));
     assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), nullValue());
@@ -201,7 +201,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(Long.MAX_VALUE),
         eq(next)))
     .thenReturn(new PageImpl<>(Arrays.asList()));
-    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.NEXT, null));
+    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(null, hashtagText, new FeedRequest(FeedDirection.NEXT, null));
     assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), nullValue());
@@ -219,7 +219,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(Long.MAX_VALUE),
         eq(next)))
     .thenReturn(new PageImpl<>(randomKluchs));
-    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.NEXT, null));
+    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(null, hashtagText, new FeedRequest(FeedDirection.NEXT, null));
     assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), notNullValue());
@@ -237,7 +237,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(Long.MAX_VALUE),
         eq(next)))
     .thenReturn(new PageImpl<>(randomKluchs));
-    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.NEXT, null));
+    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(null, hashtagText, new FeedRequest(FeedDirection.NEXT, null));
     assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), notNullValue());

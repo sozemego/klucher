@@ -69,6 +69,7 @@ public class TestWithMockUsers {
   protected User mockUser(String username, String password, boolean login) {
     User user = getBaseUser(username, password);
     when(userDao.findOne(username)).thenReturn(user);
+    when(userDao.findOne(user.getId())).thenReturn(user);
     if(login) {
       SecurityContextHolder.getContext().setAuthentication(
           new UsernamePasswordAuthenticationToken(username,

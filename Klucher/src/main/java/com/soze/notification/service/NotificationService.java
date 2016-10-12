@@ -63,6 +63,21 @@ public class NotificationService {
 		userDao.save(user);
 		return true;
 	}
+	
+	/**
+	 * Adds a notification to a given user.
+	 * Returns true if a notification was successfuly added to this user.
+	 * @param userId id of the user to add the notification to
+	 * @return
+	 * @throws NullOrEmptyException if username is either null or empty
+	 * @throws UserDoesNotExistException if user with username does not exist
+	 */
+	public boolean addNotification(long userId) throws UserDoesNotExistException {
+		User user = getUser(userId);
+		user.addNotification();
+		userDao.save(user);
+		return true;
+	}
 
 	/**
 	 * Removes a notification from a given user.
@@ -75,6 +90,25 @@ public class NotificationService {
 	 */
 	public boolean removeNotification(String username) throws NullOrEmptyException, UserDoesNotExistException {
 		User user = getUser(username);
+		if(user.getNotifications() > 0) {
+			user.removeNotification();
+			userDao.save(user);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Removes a notification from a given user.
+	 * Returns true if a notification was successfuly removed from this user,
+	 * returns false if this user already had 0 unread notifications.
+	 * @param userId id of the user we want to remove the notification from
+	 * @return 
+	 * @throws NullOrEmptyException if username is either null or empty 
+	 * @throws UserDoesNotExistException if user with username does not exist
+	 */
+	public boolean removeNotification(long userId) throws UserDoesNotExistException {
+		User user = getUser(userId);
 		if(user.getNotifications() > 0) {
 			user.removeNotification();
 			userDao.save(user);
@@ -142,6 +176,14 @@ public class NotificationService {
 		User user = userDao.findOne(username);
 		if (user == null) {
 			throw new UserDoesNotExistException(username);
+		}
+		return user;
+	}
+	
+	private User getUser(long userId) throws UserDoesNotExistException {
+		User user = userDao.findOne(userId);
+		if (user == null) {
+			throw new UserDoesNotExistException("ID " + userId);
 		}
 		return user;
 	}

@@ -21,21 +21,18 @@ import com.soze.kluch.model.Kluch;
 import com.soze.kluch.model.KluchFeedElement;
 import com.soze.kluch.service.KluchFeedService;
 import com.soze.kluch.service.KluchService;
-import com.soze.notification.service.NotificationService;
 
 @Controller
 public class KluchController {
 
 	private static final Logger log = LoggerFactory.getLogger(KluchController.class);
 	private final KluchService kluchService;
-	private final NotificationService notificationService;
 	private final KluchFeedService kluchFeedService;
 
 	@Autowired
-	public KluchController(KluchService kluchService, NotificationService notificationService,
+	public KluchController(KluchService kluchService,
 			KluchFeedService kluchFeedService) {
 		this.kluchService = kluchService;
-		this.notificationService = notificationService;
 		this.kluchFeedService = kluchFeedService;
 	}
 
@@ -47,7 +44,6 @@ public class KluchController {
 		}
 		String username = authentication.getName();
 		Kluch kluch = kluchService.post(username, kluchText);
-		notificationService.addNotifications(kluch.getMentions());
 		return kluch;
 	}
 
@@ -59,8 +55,7 @@ public class KluchController {
 			throw new NotLoggedInException();
 		}
 		String username = authentication.getName();
-		Kluch kluch = kluchService.deleteKluch(username, kluchId);
-		notificationService.removeNotifications(kluch.getMentions());
+		kluchService.deleteKluch(username, kluchId);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 
@@ -115,13 +110,34 @@ public class KluchController {
 
 	@RequestMapping(value = "/kluch/hashtag/{hashtag}", method = RequestMethod.GET)
 	@ResponseBody
-	public Feed<KluchFeedElement> getHashtagPage(@PathVariable String hashtag,
+	public Feed<KluchFeedElement> getHashtagPage(Authentication authentication, @PathVariable String hashtag,
 			@RequestParam(required = false) Long next) {
+		String username = authentication == null ? null : authentication.getName();
 		FeedRequest feedRequest = createFeedRequest(null, next);
-		Feed<KluchFeedElement> feed = kluchFeedService.constructHashtagFeed(hashtag.toLowerCase(), feedRequest);
+		Feed<KluchFeedElement> feed = kluchFeedService.constructHashtagFeed(username, hashtag.toLowerCase(), feedRequest);
 		log.info("Someone requested feed of hashtags for hashtag [{}] with feed request [{}]. Feed returned [{}].", hashtag, feedRequest,
 				feed);
 		return feed;
+	}
+	
+	@RequestMapping(value = "/kluch/like", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<Object> like(Authentication authentication, @RequestParam Long kluchId) {
+		if (authentication == null) {
+			throw new NotLoggedInException();
+		}
+		kluchService.likeKluch(authentication.getName(), kluchId);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/kluch/unlike", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<Object> unlike(Authentication authentication, @RequestParam Long kluchId) {
+		if (authentication == null) {
+			throw new NotLoggedInException();
+		}
+		kluchService.unlikeKluch(authentication.getName(), kluchId);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	/**
