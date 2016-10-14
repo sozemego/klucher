@@ -69,15 +69,6 @@ public class DevController {
   	return "dev";
   }
   
-  private String createRandomUser() {
-  	String username = getRandomUserName();
-  	if(!userDao.exists(username)) {
-  		User user = registerConverter.convertRegisterForm(new RegisterForm(username, "password"));
-  		userDao.save(user);
-  	}
-  	return username;
-  }
-  
   @RequestMapping(value = "dev/post", method = RequestMethod.POST)
   public String postDev(@RequestParam(required = true) String username,
       @RequestParam(required = true) Integer number,
@@ -181,8 +172,25 @@ public class DevController {
     }
   }
   
+  @RequestMapping(value = "/dev/kluch/like", method = RequestMethod.POST)
+  public void likeKluch(@RequestParam Long kluchId, @RequestParam Integer number) {
+  	for(int i = 0; i < number; i++) {
+  		String username = createRandomUser();
+  		kluchService.likeKluch(username, kluchId);
+  	}
+  }
+  
+  private String createRandomUser() {
+  	String username = getRandomUserName();
+  	if(!userDao.exists(username)) {
+  		User user = registerConverter.convertRegisterForm(new RegisterForm(username, "password"));
+  		userDao.save(user);
+  	}
+  	return username;
+  }
+  
   /**
-   * A simple runnable which posts random Kluchs (specified amount of times) and then shuts the executor which contains it down.
+   * A simple runnable which posts random Kluchs (specified amount of times) and then shuts the executor, which contains it, down.
    * @author sozek
    *
    */

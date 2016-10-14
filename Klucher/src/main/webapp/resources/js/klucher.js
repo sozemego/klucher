@@ -497,18 +497,14 @@ function attachLikeListener(button, liked, id) {
 			ajaxLike(id);
 			configureLikeImg(button.find(".kluch-footer-icon"), true);
 			attachLikeListener(button, true, id);
-			const likesElement = button.find(".kluch-footer-text");
-			const currentLikesText = parseInt(likesElement.text());
-			likesElement.text(currentLikesText + 1);
+			changeLikeCounter(button, 1);
 		});
 	} else {
 		button.click(function() {
 			ajaxUnlike(id);
 			configureLikeImg(button.find(".kluch-footer-icon"), false);
 			attachLikeListener(button, false, id);
-			const likesElement = button.find(".kluch-footer-text");
-			const currentLikesText = parseInt(likesElement.text());
-			likesElement.text(currentLikesText - 1);
+			changeLikeCounter(button, -1);
 		});
 	}
 }
@@ -524,7 +520,7 @@ function ajaxLike(kluchId) {
 			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
-			console.log(data);
+			
 		}
 	});
 }
@@ -540,7 +536,7 @@ function ajaxUnlike(kluchId) {
 			displayAlert(xhr.responseJSON.message);
 		},
 		success: function(data, status, xhr) {
-			console.log(data);
+			
 		}
 	});
 }
@@ -562,6 +558,12 @@ function configureLikeImg(imgElement, liked) {
 				$(this).attr("src", "../../resources/images/like_2.png");
 			});
 		}
+}
+
+function changeLikeCounter(button, change) {
+	const likesElement = button.find(".kluch-footer-text");
+	const currentLikesText = parseInt(likesElement.text());
+	likesElement.text(currentLikesText + change);
 }
 
 // sets values for feed pagination. next/previous id. next id is the earliest kluch id ()
