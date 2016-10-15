@@ -229,6 +229,7 @@ function getKluchElement(kluch) {
 	return {
 		"kluch": kluch,
 		"liked": false,
+		"likes": 0,
 		"user": getUser()
 	};
 }
@@ -396,7 +397,7 @@ function addKluchToFeed(kluchElement, append) {
 	const likes = kluchElement.likes;
 	const likesNumber = $(document.createElement("span"));
 	likesNumber.addClass("kluch-footer-text");
-	likesNumber.text(likes == 0 ? "" : likes);
+	likesNumber.text(likes === 0 ? "" : likes);
 	likeButton.append(likesNumber);
 
 	const liked = kluchElement.liked;
@@ -562,8 +563,15 @@ function configureLikeImg(imgElement, liked) {
 
 function changeLikeCounter(button, change) {
 	const likesElement = button.find(".kluch-footer-text");
-	const currentLikesText = parseInt(likesElement.text());
-	likesElement.text(currentLikesText + change);
+	let currentLikesText = parseInt(likesElement.text());
+	if(isNaN(currentLikesText)) {
+		currentLikesText = 0;
+	}
+	let finalText = currentLikesText + change;
+	if(finalText === 0) {
+		finalText = "";
+	}
+	likesElement.text(finalText);
 }
 
 // sets values for feed pagination. next/previous id. next id is the earliest kluch id ()
