@@ -107,6 +107,15 @@ public class FollowService {
 		}
 		return false;
 	}
+	
+	/**
+	 * Returns a number of followers of a user with userId.
+	 * @param userId
+	 * @return
+	 */
+	public long getNumberOfFollowers(long userId) {
+		return followDao.countByFolloweeId(userId);
+	}
 
 	private User getUser(String username) throws UserDoesNotExistException {
 		User user = userDao.findOne(username);

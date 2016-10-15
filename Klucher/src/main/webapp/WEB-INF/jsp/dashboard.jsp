@@ -18,7 +18,9 @@
 </script>
 </head>
 <body>
-<input type = "hidden" id = "data" data-username = "${username}" data-avatar-path = "${avatarPath}" data-created-date="${createdAt}">
+<input type = "hidden" id = "data" data-username = "${username}"
+ data-avatar-path = "${avatarPath}" data-created-date="${createdAt}" data-logged-username="${loggedUsername}"
+ data-likes-number="${numberOfLikes}" data-followers-number="${numberOfFollowers}">
 <c:import url="header_with_buttons.jsp"></c:import>
 <div class="page">
 	<div class="dashboard">

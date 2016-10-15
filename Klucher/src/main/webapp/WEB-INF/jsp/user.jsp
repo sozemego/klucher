@@ -19,50 +19,10 @@
 </script>
 </head>
 <body>
-<input type="hidden" id="data" data-username="${username}" data-logged-in="${loggedIn}" data-follows = "${follows}"
-	data-created-date="${createdAt}">
-<div class="header">
-	<div class="header-buttons-wrapper">
-		<div class="header-buttons-left">
-			<span class="header-button" id="header-button-dashboard">
-				<a href="/dashboard" class="header-button-link">
-					<div class="header-button-content">
-						<img class="header-button-image" src="../../resources/images/dashboard_2.png"></img>
-						<span class="header-button-text">dashboard</span>
-					</div>
-				</a>
-			</span>
-			<span class="header-button"  id="header-button-notifications">
-				<a href="/notifications" class="header-button-link">
-					<div class="header-button-content">
-						<img class="header-button-image" src="../../resources/images/messages_5.png"></img>
-						<span class="header-button-text">notifications</span>
-					</div>
-				</a>
-			</span>
-		</div>
-		<div class="header-buttons-right">
-			<span class="header-button"  id="header-button-settings">
-				<a href="/" class="header-button-link">
-					<div class="header-button-content">
-						<img class="header-button-image" src="../../resources/images/settings.png"></img>
-						<span class="header-button-text">settings</span>
-					</div>
-				</a>
-			</span>
-			<span class="header-button" id="header-logout-button">
-				<a href="/logout" class="header-button-link">
-					<div class="header-button-content">
-						<img class="header-button-image" src="../../resources/images/logout.png"></img>
-						<span class="header-button-text">logout</span>
-					</div>
-				</a>
-			</span>
-		</div>
-	</div>
-	<img class="logo logo-header" src="../../resources/images/logo_2.png" alt = "logo">
-	<div class="header-bottom-underline"></div>
-</div>
+<input type="hidden" id="data" data-username="${username}" data-logged-username="${loggedUsername}" data-logged-in="${loggedIn}" 	data-follows = "${follows}"
+	data-created-date="${createdAt}" data-likes="${likes}"
+	data-likes-number="${numberOfLikes}" data-followers-number="${numberOfFollowers}">
+<c:import url="header_with_buttons.jsp"></c:import>
 <div class="page">
 	<div class="dashboard">
 		<div class="dashboard-section dashboard-section-user">
@@ -75,7 +35,7 @@
 				</div>
 				<div class="user-button" id="user-button-like">
 					<div class="user-button-image-container">
-						<img id = "user-button-like-image" class="user-button-image" src = "../../resources/images/follow_1.png"></img>
+						<img id = "user-button-like-image" class="user-button-image" src = "../../resources/images/like_2.png"></img>
 					</div>
 					<span id = "user-button-like-text" class="user-button-text">like</span>
 				</div>
@@ -90,8 +50,9 @@
 				<div class="user-avatar-container">
 					<img class="user-avatar" src="../../resources/images/${avatarPath}"></img>
 				</div>
-				<div class="user-info-text">
+				<div class="user-info-text" id = "user-info-text">
 					<p class="user-info-text-name">${username}</p>
+					<p class="user-info-text-social-stats"></p>
 					<p class="user-date-created" id="user-date-created"></p>
 				</div>
 			</div>

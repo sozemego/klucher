@@ -27,6 +27,7 @@ import com.soze.common.feed.FeedDirection;
 import com.soze.kluch.model.FeedRequest;
 import com.soze.user.model.User;
 import com.soze.user.service.UserFeedService;
+import com.soze.user.service.UserService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -41,6 +42,9 @@ public class UserControllerTest extends TestWithMockUsers {
 	
 	@MockBean
 	private UserFeedService userFeedService;
+	
+	@MockBean
+	private UserService userService;
 
 	@Before
 	public void setUp() throws Exception {
@@ -49,7 +53,7 @@ public class UserControllerTest extends TestWithMockUsers {
 	}
 
 	@Test
-	public void getProfileUserDoesNotExist() throws Exception {
+	public void testGetProfileUserDoesNotExist() throws Exception {
 		String username = "user";
 		mvc.perform(MockMvcRequestBuilders.get("/u/profile/" + username))
 			.andDo(print())
@@ -58,7 +62,7 @@ public class UserControllerTest extends TestWithMockUsers {
 	}
 	
 	@Test
-	public void getProfileUserExistChecksOwnProfileIsLoggedIn() throws Exception {
+	public void testGetProfileUserExistChecksOwnProfileIsLoggedIn() throws Exception {
 		String username = "user";
 		mockUser(username, true);
 		mvc.perform(MockMvcRequestBuilders.get("/u/profile/" + username))
@@ -68,7 +72,7 @@ public class UserControllerTest extends TestWithMockUsers {
 	}
 	
 	@Test
-	public void getProfileUserExistsNotOwnProfileLoggedIn() throws Exception {
+	public void testGetProfileUserExistsNotOwnProfileLoggedIn() throws Exception {
 		String username = "user";
 		mockUser(username, true);
 		String anotherUsername = "anotherUser";
@@ -80,11 +84,15 @@ public class UserControllerTest extends TestWithMockUsers {
 			.andExpect(model().attribute("follows", equalTo(false)))
 			.andExpect(model().attribute("username", equalTo(anotherUsername)))
 			.andExpect(model().attribute("avatarPath", equalTo(anotherUser.getAvatarPath())))
-			.andExpect(model().attribute("loggedIn", equalTo(true)));
+			.andExpect(model().attribute("loggedIn", equalTo(true)))
+			.andExpect(model().attribute("likes", equalTo(false)))
+			.andExpect(model().attribute("loggedUsername", equalTo(username)))
+			.andExpect(model().attribute("numberOfLikes", equalTo(0)))
+			.andExpect(model().attribute("numberOfFollowers", equalTo(0L)));
 	}
 	
 	@Test
-	public void getProfileUserExistsNotLoggedIn() throws Exception {
+	public void testGetProfileUserExistsNotLoggedIn() throws Exception {
 		String username = "username";
 		User user = mockUser(username, false);
 		mvc.perform(MockMvcRequestBuilders.get("/u/profile/" + username))
@@ -94,11 +102,15 @@ public class UserControllerTest extends TestWithMockUsers {
 			.andExpect(model().attributeDoesNotExist("follows"))
 			.andExpect(model().attribute("username", equalTo(username)))
 			.andExpect(model().attribute("avatarPath", equalTo(user.getAvatarPath())))
-			.andExpect(model().attribute("loggedIn", equalTo(false)));
+			.andExpect(model().attribute("loggedIn", equalTo(false)))
+			.andExpect(model().attribute("likes", equalTo(null)))
+			.andExpect(model().attribute("loggedUsername", equalTo(null)))
+			.andExpect(model().attribute("numberOfLikes", equalTo(0)))
+			.andExpect(model().attribute("numberOfFollowers", equalTo(0L)));
 	}
 	
 	@Test
-	public void getFollowersFeed() throws Exception {
+	public void testGetFollowersFeed() throws Exception {
 		String username = "user";
 		mockUser(username);
 		mvc.perform(MockMvcRequestBuilders.get("/u/followers/" + username)
@@ -106,6 +118,42 @@ public class UserControllerTest extends TestWithMockUsers {
 		.andDo(print())
 		.andExpect(status().isOk());
 		verify(userFeedService).getFollowerFeed(username, new FeedRequest(FeedDirection.NEXT, Long.MAX_VALUE));
+	}
+	
+	@Test
+	public void testLikeUserUnauthorized() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.post("/u/like/")
+				.param("username", "username"))
+		.andDo(print())
+		.andExpect(status().is(401));
+	}
+	
+	@Test
+	public void testLikeUser() throws Exception {
+		mockUser("user", true);
+		mvc.perform(MockMvcRequestBuilders.post("/u/like/")
+				.param("username", "username"))
+		.andDo(print())
+		.andExpect(status().isOk());
+		verify(userService).like("user", "username");
+	}
+	
+	@Test
+	public void testUnlikeUserUnauthorized() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.post("/u/unlike/")
+				.param("username", "username"))
+		.andDo(print())
+		.andExpect(status().is(401));
+	}
+	
+	@Test
+	public void testUnlikeUser() throws Exception {
+		mockUser("user", true);
+		mvc.perform(MockMvcRequestBuilders.post("/u/unlike/")
+				.param("username", "username"))
+		.andDo(print())
+		.andExpect(status().isOk());
+		verify(userService).unlike("user", "username");
 	}
 	
 

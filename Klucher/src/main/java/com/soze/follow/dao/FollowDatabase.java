@@ -64,5 +64,10 @@ public class FollowDatabase implements FollowDao {
 	public Follow save(Follow follow) {
 		return repository.save(follow);
 	}
+	
+	@Override
+	public Long countByFolloweeId(Long followeeId) {
+		return repository.countByFolloweeId(followeeId);
+	}
 
 }

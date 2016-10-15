@@ -17,5 +17,7 @@ public interface FollowDao {
 	public void delete(Long id);
 	
 	public Follow save(Follow follow);
+	
+	public Long countByFolloweeId(Long followeeId);
 
 }

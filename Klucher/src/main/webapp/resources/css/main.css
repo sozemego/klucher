@@ -466,6 +466,11 @@ body {
 	font-size: 1.25em;
 }
 
+.user-info-text-social-stats {
+	font-size: 0.95em;
+	color: gray;
+}
+
 .user-date-created {
 	font-size: 0.95em;
 	color: gray;
@@ -681,6 +686,14 @@ a.kluch-text-link-link {
 .kluch-footer-icon {
 	width: 30px;
 	height: 28px;
+}
+
+.kluch-footer-icon-delete {
+	
+}
+
+.kluch-footer-icon-delete-inactive {
+	display: none;
 }
 
 .kluch-footer-text {

@@ -24,6 +24,7 @@ import com.soze.register.model.RegisterForm;
 import com.soze.register.service.RegisterConverter;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
+import com.soze.user.service.UserService;
 
 @Controller
 @Profile("dev")
@@ -36,17 +37,19 @@ public class DevController {
   private final NotificationService notificationService;
   private final UserDao userDao;
   private final RegisterConverter registerConverter;
+  private final UserService userService;
   
   @Autowired
   public DevController(KluchService kluchService, RandomKluchGenerator kluchGenerator,
   		FollowService followService, NotificationService notificationService,
-  		UserDao userDao, RegisterConverter registerConverter) {
+  		UserDao userDao, RegisterConverter registerConverter, UserService userService) {
     this.kluchService = kluchService;
     this.kluchGenerator = kluchGenerator;
     this.followService = followService;
     this.notificationService = notificationService;
     this.userDao = userDao;
     this.registerConverter = registerConverter;
+    this.userService = userService;
   }
   
   @RequestMapping(value = "dev/follow/list", method = RequestMethod.POST)
@@ -177,6 +180,14 @@ public class DevController {
   	for(int i = 0; i < number; i++) {
   		String username = createRandomUser();
   		kluchService.likeKluch(username, kluchId);
+  	}
+  }
+  
+  @RequestMapping(value = "/dev/user/like", method = RequestMethod.POST)
+  public void likeUser(@RequestParam String username, @RequestParam Integer number) {
+  	for(int i = 0; i < number; i++) {
+  		String randomUsername = createRandomUser();
+  		userService.like(randomUsername, username);
   	}
   }
   

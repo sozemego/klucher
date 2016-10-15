@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.soze.common.exceptions.NotLoggedInException;
 import com.soze.common.feed.Feed;
 import com.soze.common.feed.FeedDirection;
 import com.soze.follow.service.FollowService;
@@ -19,6 +20,7 @@ import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 import com.soze.user.model.UserFollowerView;
 import com.soze.user.service.UserFeedService;
+import com.soze.user.service.UserService;
 
 @Controller
 public class UserController {
@@ -26,12 +28,14 @@ public class UserController {
   private final UserDao userDao;
   private final FollowService followService;
   private final UserFeedService userFeedService;
+  private final UserService userService;
   
   @Autowired
-  public UserController(UserDao userDao, FollowService followService, UserFeedService userFeedService) {
+  public UserController(UserDao userDao, FollowService followService, UserFeedService userFeedService, UserService userService) {
     this.userDao = userDao;
     this.followService = followService;
     this.userFeedService = userFeedService;
+    this.userService = userService;
   }
   
   @RequestMapping(value = "/u/profile/{username}", method = RequestMethod.GET)
@@ -47,11 +51,15 @@ public class UserController {
         return "redirect:/dashboard";
       }
       model.addAttribute("follows", followService.doesUsernameFollow(authorizedUsername, user));
+      model.addAttribute("likes", userService.doesLike(authorizedUsername, username));
+      model.addAttribute("loggedUsername", authorizedUsername);
     }
     model.addAttribute("username", username);
     model.addAttribute("loggedIn", loggedIn);
     model.addAttribute("avatarPath", user.getAvatarPath());
     model.addAttribute("createdAt", user.getCreatedAt());
+    model.addAttribute("numberOfLikes", user.getLikes().size());
+    model.addAttribute("numberOfFollowers", followService.getNumberOfFollowers(user.getId()));
     return "user";
   }
   
@@ -69,5 +77,27 @@ public class UserController {
 		}
 		return new FeedRequest(FeedDirection.NEXT, next);
 	}
+  
+  @RequestMapping(value = "/u/like", method = RequestMethod.POST)
+  @ResponseBody
+  public int like(Authentication authentication, @RequestParam String username) throws Exception {
+  	if(authentication == null) {
+  		throw new NotLoggedInException();
+  	}
+  	String loggedUsername = authentication.getName();
+  	int likes = userService.like(loggedUsername, username);
+  	return likes;
+  }
+  
+  @RequestMapping(value = "/u/unlike", method = RequestMethod.POST)
+  @ResponseBody
+  public int unlike(Authentication authentication, @RequestParam String username) throws Exception {
+  	if(authentication == null) {
+  		throw new NotLoggedInException();
+  	}
+  	String loggedUsername = authentication.getName();
+  	int likes = userService.unlike(loggedUsername, username);
+  	return likes;
+  }
   
 }

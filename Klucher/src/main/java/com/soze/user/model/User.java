@@ -4,10 +4,13 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -20,6 +23,8 @@ import javax.validation.constraints.Size;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class User implements UserDetails, Serializable {
@@ -51,6 +56,10 @@ public class User implements UserDetails, Serializable {
 	@NotNull
 	@Min(0)
 	private Integer notifications = 0;
+	
+	@ElementCollection
+	@JsonIgnore
+	private Set<Long> likes = new HashSet<>();
 
 	@SuppressWarnings("unused")
 	private User() {
@@ -125,6 +134,14 @@ public class User implements UserDetails, Serializable {
 
 	public void setCreatedAt(Timestamp createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public Set<Long> getLikes() {
+		return likes;
+	}
+
+	public void setLikes(Set<Long> likes) {
+		this.likes = likes;
 	}
 
 	@Override

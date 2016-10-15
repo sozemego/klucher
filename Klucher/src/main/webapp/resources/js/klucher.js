@@ -171,6 +171,7 @@ function dashboardOnLoad() {
 	pollFeed();
 	pollNotifications();
 	displayTimeCreated();
+	displayUserSocialStats();
 }
 
 function attachCharacterCountListener() {
@@ -354,10 +355,10 @@ function addKluchToFeed(kluchElement, append) {
 
 	const loggedIn = isLoggedIn();
 	if(loggedIn) {
-			const username = getUsername();
+			const username = getLoggedUsername();
 			if(username === user.username) {
 				const deleteButton = $(document.createElement("div"));
-				deleteButton.addClass("kluch-footer-icon-container");
+				deleteButton.addClass("kluch-footer-icon-container kluch-footer-icon-delete kluch-footer-icon-delete-inactive");
 				const deleteImg = $(document.createElement("img"));
 				deleteImg.addClass("kluch-footer-icon");
 				deleteImg.attr("src", "../../resources/images/delete_2.png");
@@ -385,6 +386,11 @@ function addKluchToFeed(kluchElement, append) {
 
 				deleteButton.append(deleteImg);
 				kluchFooter.append(deleteButton);
+				kluchContainer.hover(function() {
+					$(this).find(".kluch-footer-icon-delete").removeClass("kluch-footer-icon-delete-inactive");
+				}, function() {
+					$(this).find(".kluch-footer-icon-delete").addClass("kluch-footer-icon-delete-inactive");
+				});
 		}
 	}
 
@@ -488,7 +494,15 @@ function getLinkStyle(link) {
 }
 
 function getUsername() {
-	return $("#data").attr("data-username");
+	const username = $("#data").attr("data-username");
+	if(username === null || username === undefined || username === "") {
+		return getLoggedUsername();
+	}
+	return username;
+}
+
+function getLoggedUsername() {
+	return $("#data").attr("data-logged-username");
 }
 
 function attachLikeListener(button, liked, id) {
@@ -735,6 +749,7 @@ function userOnLoad() {
 	setUpLoginForm();
 	configureSubheaderButtons();
 	displayTimeCreated();
+	displayUserSocialStats();
 }
 
 function setUpUserButtons() {
@@ -748,6 +763,7 @@ function setUpUserButtons() {
 
 function setUpUserButtonsLoggedIn() {
 	setUpFollowButtonLoggedIn();
+	attachUserLikeButtonListener();
 }
 
 function setUpUserButtonsLoggedOut() {
@@ -784,6 +800,38 @@ function setUpUnfollowButton() {
 	$("#user-button-follow").unbind("click");
 	$("#user-button-follow").click(function() {
 		unfollowUserAjax();
+	});
+}
+
+function attachUserLikeButtonListener() {
+	const likeButton = $("#user-button-like");
+	const likeButtonText = likeButton.find("#user-button-like-text");
+	const likes = doesLikeUser();
+	const likeButtonImg = likeButton.find("#user-button-like-image");
+	likeButtonImg.attr("src", likes ? "../../resources/images/like_2_active.png" : "../../resources/images/like_2.png");
+	likeButtonText.text(likes ? "unlike" : "like");
+	const username = getUsername();
+	likeButton.off();
+	likeButton.click(function() {
+		ajaxLikeUnlikeUser(username, likes);
+	});
+}
+
+function ajaxLikeUnlikeUser(username, likes) {
+	const path = likes ? "unlike" : "like";
+	$.ajax({
+		type: "POST",
+		url: "/u/" + path,
+		data: {
+			"username" : username
+		},
+		error: function(xhr, status, error) {
+			displayAlert(xhr.responseJSON.message);
+		},
+		success: function(data, status, xhr) {
+			setLikesUser(!likes);
+			attachUserLikeButtonListener();
+		}
 	});
 }
 
@@ -833,6 +881,22 @@ function isLoggedIn() {
 		return true;
 	}
 	return $("#data").attr("data-logged-in") === "true";
+}
+
+function doesLikeUser() {
+	return $("#data").attr("data-likes") === "true";
+}
+
+function setLikesUser(likes) {
+	$("#data").attr("data-likes", likes);
+}
+
+function getUserNumberOfLikes() {
+	return parseInt($("#data").attr("data-likes-number"));
+}
+
+function getUserNumberOfFollowers() {
+	return parseInt($("#data").attr("data-followers-number"));
 }
 
 // data-follows should store whether or not you follow the current user
@@ -895,6 +959,24 @@ function unfollowUserAjax() {
 function setFollow(bool) {
 	$("#data").attr("data-follows", bool);
 }
+
+function displayUserVarious() {
+	displayUserSocialStats();
+}
+
+function displayUserSocialStats() {
+	const userLikes = getUserNumberOfLikes();
+	const userFollowers = getUserNumberOfFollowers();
+	let text = "";
+	if(userLikes > 0) {
+		text += "liked by: " + userLikes;
+	}
+	if(userFollowers > 0) {
+		text += " followers: " + userFollowers;
+	}
+	$(".user-info-text-social-stats").text(text);
+}
+
 
 function hashtagOnLoad() {
 	attachInifiteScrollingListenerHashtag();
