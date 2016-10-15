@@ -31,6 +31,7 @@ public class DashboardController {
     model.addAttribute("createdAt", user.getCreatedAt());
     model.addAttribute("numberOfLikes", user.getLikes().size());
     model.addAttribute("numberOfFollowers", followService.getNumberOfFollowers(user.getId()));
+    model.addAttribute("username", username);
     return "dashboard";
   }
 
