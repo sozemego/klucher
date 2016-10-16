@@ -311,8 +311,8 @@ public class KluchFeedService {
 		Long next = null;
 		List<Kluch> kluchs = page.getContent();
 		if (kluchs.size() > 0) {
-			previous = kluchs.get(0).getTimestamp().getTime();
-			next = kluchs.get(kluchs.size() - 1).getTimestamp().getTime();
+			previous = kluchs.stream().mapToLong(k -> k.getId()).max().getAsLong();
+			next = kluchs.stream().mapToLong(k -> k.getId()).min().getAsLong();
 		}
 		if(page.isLast()) {
 			next = null;

@@ -265,12 +265,15 @@ function getKluch(username, timestamp, text) {
 }
 
 function getFeed(direction, id, append) {
-	if(isGettingFeed() || isFeedFinished()) {
+	if(isGettingFeed()) {
 		return;
 	}
 	let next = null;
 	let previous = null;
 	if(direction === "before") {
+		if(isFeedFinished()) {
+			return;
+		}
 		next = id;
 	} else if (direction === "after") {
 		previous = id;
