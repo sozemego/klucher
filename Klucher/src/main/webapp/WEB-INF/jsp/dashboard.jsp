@@ -20,7 +20,7 @@
 <body>
 <input type = "hidden" id = "data" data-username = "${username}"
  data-avatar-path = "${avatarPath}" data-created-date="${createdAt}" data-logged-username="${loggedUsername}"
- data-likes-number="${numberOfLikes}" data-followers-number="${numberOfFollowers}">
+ data-likes-number="${numberOfLikes}" data-followers-number="${numberOfFollowers}" data-kluchs-number="${kluchs}">
 <c:import url="header_with_buttons.jsp"></c:import>
 <div class="page">
 	<div class="dashboard">
@@ -31,6 +31,7 @@
 				</div>
 				<div class="user-info-text">
 					<p class="user-info-text-name">${username}</p>
+					<p class="user-info-text-social-stats"></p>
 					<p class="user-date-created" id="user-date-created"></p>
 				</div>
 			</div>

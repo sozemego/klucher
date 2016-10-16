@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import org.junit.Before;
@@ -76,7 +77,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(0L),
         eq(exists)))
     .thenReturn(new PageImpl<>(Arrays.asList()));
-    boolean exists = feedService.existsFeedAfter("test", new FeedRequest(FeedDirection.PREVIOUS, null), false);
+    boolean exists = feedService.existsFeedAfter("test", new FeedRequest(FeedDirection.PREVIOUS, null, Optional.empty()), false);
     assertThat(exists, equalTo(false));
   }
 
@@ -88,7 +89,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(0L),
         eq(exists)))
     .thenReturn(new PageImpl<>(Arrays.asList(new Kluch(0, null, null))));
-    boolean exists = feedService.existsFeedAfter("test", new FeedRequest(FeedDirection.PREVIOUS, null), false);
+    boolean exists = feedService.existsFeedAfter("test", new FeedRequest(FeedDirection.PREVIOUS, null, Optional.empty()), false);
     assertThat(exists, equalTo(true));
   }
 
@@ -100,7 +101,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(0L),
         eq(exists)))
     .thenReturn(new PageImpl<>(Arrays.asList()));
-    boolean exists = feedService.existsFeedAfter("test", new FeedRequest(FeedDirection.PREVIOUS, null), false);
+    boolean exists = feedService.existsFeedAfter("test", new FeedRequest(FeedDirection.PREVIOUS, null, Optional.empty()), false);
     assertThat(exists, equalTo(false));
   }
   
@@ -113,13 +114,14 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(Long.MAX_VALUE),
         eq(next)))
     .thenReturn(new PageImpl<>(randomKluchs));
-    Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.NEXT, null), false);
+    Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()), false);
     assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), notNullValue());
     assertThat(feed.getTotalElements(), equalTo(1L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(1));
+    feed.getElements().forEach(e -> assertThat(e.isLiked(), equalTo(false)));
   }
   
   @Test
@@ -131,13 +133,14 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(Long.MAX_VALUE),
         eq(next)))
     .thenReturn(new PageImpl<>(randomKluchs));
-    Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.NEXT, null), false);
+    Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()), false);
     assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), notNullValue());
     assertThat(feed.getTotalElements(), equalTo(30L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(30));
+    feed.getElements().forEach(e -> assertThat(e.isLiked(), equalTo(false)));
   }
   
   @Test
@@ -149,13 +152,14 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(0L),
         eq(previous)))
     .thenReturn(new PageImpl<>(randomKluchs));
-    Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.PREVIOUS, null), false);
+    Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.PREVIOUS, null, Optional.empty()), false);
     assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), notNullValue());
     assertThat(feed.getTotalElements(), equalTo(1L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(1));
+    feed.getElements().forEach(e -> assertThat(e.isLiked(), equalTo(false)));
   }
   
   @Test
@@ -167,13 +171,14 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(0L),
         eq(previous)))
     .thenReturn(new PageImpl<>(randomKluchs));
-    Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.PREVIOUS, null), false);
+    Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.PREVIOUS, null, Optional.empty()), false);
     assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), notNullValue());
     assertThat(feed.getTotalElements(), equalTo(30L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(30));
+    feed.getElements().forEach(e -> assertThat(e.isLiked(), equalTo(false)));
   }
   
   @Test
@@ -184,13 +189,14 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(0L),
         eq(next)))
     .thenReturn(new PageImpl<>(Arrays.asList()));
-    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(null, hashtagText, new FeedRequest(FeedDirection.PREVIOUS, null));
+    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.PREVIOUS, null, Optional.empty()));
     assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), nullValue());
     assertThat(feed.getTotalElements(), equalTo(0L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(0));
+    feed.getElements().forEach(e -> assertThat(e.isLiked(), equalTo(false)));
   }
   
   @Test
@@ -201,13 +207,14 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(Long.MAX_VALUE),
         eq(next)))
     .thenReturn(new PageImpl<>(Arrays.asList()));
-    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(null, hashtagText, new FeedRequest(FeedDirection.NEXT, null));
+    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
     assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), nullValue());
     assertThat(feed.getTotalElements(), equalTo(0L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(0));
+    feed.getElements().forEach(e -> assertThat(e.isLiked(), equalTo(false)));
   }
   
   @Test
@@ -219,13 +226,14 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(Long.MAX_VALUE),
         eq(next)))
     .thenReturn(new PageImpl<>(randomKluchs));
-    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(null, hashtagText, new FeedRequest(FeedDirection.NEXT, null));
+    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
     assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), notNullValue());
     assertThat(feed.getTotalElements(), equalTo(1L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(1));
+    feed.getElements().forEach(e -> assertThat(e.isLiked(), equalTo(false)));
   }
   
   @Test
@@ -237,28 +245,29 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(Long.MAX_VALUE),
         eq(next)))
     .thenReturn(new PageImpl<>(randomKluchs));
-    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(null, hashtagText, new FeedRequest(FeedDirection.NEXT, null));
+    Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
     assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), notNullValue());
     assertThat(feed.getTotalElements(), equalTo(30L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(30));
+    feed.getElements().forEach(e -> assertThat(e.isLiked(), equalTo(false)));
   }
   
   @Test(expected = NullOrEmptyException.class)
   public void testGetMentionsNullUsername() throws Exception {
-  	feedService.getMentions(null, new FeedRequest(FeedDirection.NEXT, null));
+  	feedService.getMentions(null, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
   }
   
   @Test(expected = NullOrEmptyException.class)
   public void testGetMentionsEmptyUsername() throws Exception {
-  	feedService.getMentions("", new FeedRequest(FeedDirection.NEXT, null));
+  	feedService.getMentions("", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
   }
   
   @Test(expected = UserDoesNotExistException.class)
   public void testGetMentionsUserDoesNotExist() throws Exception {
-  	feedService.getMentions("user", new FeedRequest(FeedDirection.NEXT, null));
+  	feedService.getMentions("user", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
   }
   
   @Test
@@ -269,13 +278,14 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
   			eq(Long.MAX_VALUE),
   			eq(next)))
   	.thenReturn(new PageImpl<>(Arrays.asList()));
-  	Feed<KluchFeedElement> feed = feedService.getMentions("user", new FeedRequest(FeedDirection.NEXT, null));
+  	Feed<KluchFeedElement> feed = feedService.getMentions("user", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
   	assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), nullValue());
     assertThat(feed.getTotalElements(), equalTo(0L));
     Collection<KluchFeedElement> kluchs = feed.getElements();
     assertThat(kluchs.size(), equalTo(0));
+    feed.getElements().forEach(e -> assertThat(e.isLiked(), equalTo(false)));
   }
   
   @Test
@@ -287,12 +297,13 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
   			eq(Long.MAX_VALUE),
   			eq(next)))
   	.thenReturn(new PageImpl<>(kluchs));
-  	Feed<KluchFeedElement> feed = feedService.getMentions("user", new FeedRequest(FeedDirection.NEXT, null));
+  	Feed<KluchFeedElement> feed = feedService.getMentions("user", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
   	assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), notNullValue());
     assertThat(feed.getTotalElements(), equalTo(15L));
     assertThat(feed.getElements().size(), equalTo(15));
+    feed.getElements().forEach(e -> assertThat(e.isLiked(), equalTo(false)));
   }
   
   @Test
@@ -304,12 +315,13 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
   			eq(Long.MAX_VALUE),
   			eq(next)))
   	.thenReturn(new PageImpl<>(kluchs));
-  	Feed<KluchFeedElement> feed = feedService.getMentions("user", new FeedRequest(FeedDirection.NEXT, null));
+  	Feed<KluchFeedElement> feed = feedService.getMentions("user", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
   	assertThat(feed.getElements(), notNullValue());
     assertThat(feed.getNext(), nullValue());
     assertThat(feed.getPrevious(), notNullValue());
     assertThat(feed.getTotalElements(), equalTo(30L));
     assertThat(feed.getElements().size(), equalTo(30));
+    feed.getElements().forEach(e -> assertThat(e.isLiked(), equalTo(false)));
   }
   
   private List<Kluch> getRandomKluchs(int number) {

@@ -17,5 +17,7 @@ public interface KluchRepository extends JpaRepository<Kluch, Long> {
 	public Page<Kluch> findByHashtagsInAndIdLessThan(String hashtag, long lessThanId, Pageable pageRequest);
 
 	public void deleteByAuthorId(Long authorId);
+	
+	public Long countByAuthorId(Long authorId);
 
 }

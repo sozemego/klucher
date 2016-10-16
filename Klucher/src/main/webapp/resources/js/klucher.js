@@ -899,6 +899,10 @@ function getUserNumberOfFollowers() {
 	return parseInt($("#data").attr("data-followers-number"));
 }
 
+function getUserNumberOfKluchs() {
+	return parseInt($("#data").attr("data-kluchs-number"));
+}
+
 // data-follows should store whether or not you follow the current user
 function doesFollow() {
 	return $("#data").attr("data-follows") === "true";
@@ -967,12 +971,16 @@ function displayUserVarious() {
 function displayUserSocialStats() {
 	const userLikes = getUserNumberOfLikes();
 	const userFollowers = getUserNumberOfFollowers();
+	const userKluchs = getUserNumberOfKluchs();
 	let text = "";
 	if(userLikes > 0) {
 		text += "liked by: " + userLikes;
 	}
 	if(userFollowers > 0) {
 		text += " followers: " + userFollowers;
+	}
+	if(userKluchs > 0) {
+		text += " kluchs: " + userKluchs;
 	}
 	$(".user-info-text-social-stats").text(text);
 }

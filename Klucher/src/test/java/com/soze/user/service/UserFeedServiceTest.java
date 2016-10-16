@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,12 +53,12 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 
 	@Test(expected = NullOrEmptyException.class)
 	public void testGetFollowerFeedUsernameEmpty() throws Exception {
-		userFeedService.getFollowerFeed("", new FeedRequest(null, null));
+		userFeedService.getFollowerFeed("", new FeedRequest(null, null, Optional.empty()));
 	}
 
 	@Test(expected = UserDoesNotExistException.class)
 	public void testGetFollowerFeedUserDoesNotExist() throws Exception {
-		userFeedService.getFollowerFeed("username", new FeedRequest(null, null));
+		userFeedService.getFollowerFeed("username", new FeedRequest(null, null, Optional.empty()));
 	}
 
 	@Test(expected = NullOrEmptyException.class)
@@ -72,7 +73,7 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 		long userId = 54L;
 		when(followDao.findAllByFolloweeId(userId)).thenReturn(new ArrayList<>());
 		when(userDao.findAll(new ArrayList<>())).thenReturn(new ArrayList<>());
-		Feed<UserFollowerView> feed = userFeedService.getFollowerFeed(userId, new FeedRequest(FeedDirection.NEXT, null));
+		Feed<UserFollowerView> feed = userFeedService.getFollowerFeed(userId, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
 		assertThat(feed, notNullValue());
 		assertThat(feed.getElements(), notNullValue());
 		assertThat(feed.getElements().size(), equalTo(0));
@@ -87,7 +88,7 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 		long userId = user.getId();
 		when(followDao.findAllByFolloweeId(userId)).thenReturn(new ArrayList<>());
 		when(userDao.findAll(new ArrayList<>())).thenReturn(new ArrayList<>());
-		Feed<UserFollowerView> feed = userFeedService.getFollowerFeed(userId, new FeedRequest(FeedDirection.NEXT, null));
+		Feed<UserFollowerView> feed = userFeedService.getFollowerFeed(userId, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
 		assertThat(feed, notNullValue());
 		assertThat(feed.getElements(), notNullValue());
 		assertThat(feed.getElements().size(), equalTo(0));
@@ -104,7 +105,7 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 		List<Long> randomUsersIds =  mockRandomUsers(numberOfFollows);
 		List<Follow> follows = getFollowersFor(user, randomUsersIds);
 		when(followDao.findAllByFolloweeId(userId)).thenReturn(follows);
-		Feed<UserFollowerView> feed = userFeedService.getFollowerFeed(userId, new FeedRequest(FeedDirection.NEXT, null));
+		Feed<UserFollowerView> feed = userFeedService.getFollowerFeed(userId, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
 		assertThat(feed, notNullValue());
 		assertThat(feed.getElements(), notNullValue());
 		assertThat(feed.getElements().size(), equalTo(5));

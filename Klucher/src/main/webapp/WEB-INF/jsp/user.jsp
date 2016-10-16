@@ -21,7 +21,7 @@
 <body>
 <input type="hidden" id="data" data-username="${username}" data-logged-username="${loggedUsername}" data-logged-in="${loggedIn}" 	data-follows = "${follows}"
 	data-created-date="${createdAt}" data-likes="${likes}"
-	data-likes-number="${numberOfLikes}" data-followers-number="${numberOfFollowers}">
+	data-likes-number="${numberOfLikes}" data-followers-number="${numberOfFollowers}" data-kluchs-number="${kluchs}">
 <c:import url="header_with_buttons.jsp"></c:import>
 <div class="page">
 	<div class="dashboard">
@@ -38,12 +38,6 @@
 						<img id = "user-button-like-image" class="user-button-image" src = "../../resources/images/like_2.png"></img>
 					</div>
 					<span id = "user-button-like-text" class="user-button-text">like</span>
-				</div>
-				<div class="user-button" id="user-button-poke">
-					<div class="user-button-image-container">
-						<img id = "user-button-poke-image" class="user-button-image" src = "../../resources/images/follow_1.png"></img>				
-					</div>
-					<span id = "user-button-poke-text" class="user-button-text">poke</span>
 				</div>
 			</div>
 			<div class="user-info-container">

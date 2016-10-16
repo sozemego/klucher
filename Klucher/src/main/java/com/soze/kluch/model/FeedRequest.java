@@ -1,15 +1,19 @@
 package com.soze.kluch.model;
 
+import java.util.Optional;
+
 import com.soze.common.feed.FeedDirection;
 
 public class FeedRequest {
 
 	private final FeedDirection feedDirection;
 	private final Long id;
+	private final Optional<String> source;
 
-	public FeedRequest(FeedDirection feedDirection, Long id) {
+	public FeedRequest(FeedDirection feedDirection, Long id, Optional<String> source) {
 		this.feedDirection = feedDirection;
 		this.id = id;
+		this.source = source;
 	}
 
 	public FeedDirection getFeedDirection() {
@@ -21,6 +25,10 @@ public class FeedRequest {
 			return feedDirection.getDefaultId();
 		}
 		return id;
+	}
+	
+	public Optional<String> getSource() {
+		return source;
 	}
 
 	@Override

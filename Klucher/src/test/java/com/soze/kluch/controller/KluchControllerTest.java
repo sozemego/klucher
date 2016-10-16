@@ -7,6 +7,8 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -114,7 +116,7 @@ public class KluchControllerTest extends TestWithMockUsers {
 				.contentType(MediaType.APPLICATION_JSON))
 		.andDo(print())
 		.andExpect(status().isOk());
-		verify(kluchFeedService).constructFeed(username, new FeedRequest(FeedDirection.NEXT, null), true);
+		verify(kluchFeedService).constructFeed(username, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()), true);
 	}
   
   @Test
@@ -125,7 +127,7 @@ public class KluchControllerTest extends TestWithMockUsers {
 				.contentType(MediaType.APPLICATION_JSON))
 		.andDo(print())
 		.andExpect(status().isOk());
-		verify(kluchFeedService).constructFeed(username, new FeedRequest(FeedDirection.NEXT, null), true);
+		verify(kluchFeedService).constructFeed(username, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()), true);
 	}
   
   @Test
@@ -138,7 +140,7 @@ public class KluchControllerTest extends TestWithMockUsers {
 				.param("previous", "5"))
 		.andDo(print())
 		.andExpect(status().isOk());
-		verify(kluchFeedService).constructFeed(username, new FeedRequest(FeedDirection.PREVIOUS, 5l), true);
+		verify(kluchFeedService).constructFeed(username, new FeedRequest(FeedDirection.PREVIOUS, 5l, Optional.empty()), true);
 	}
   
   @Test
@@ -151,7 +153,7 @@ public class KluchControllerTest extends TestWithMockUsers {
         .param("next", "5"))
     .andDo(print())
     .andExpect(status().isOk());
-    verify(kluchFeedService).constructFeed(username, new FeedRequest(FeedDirection.NEXT, 5L), false);
+    verify(kluchFeedService).constructFeed(username, new FeedRequest(FeedDirection.NEXT, 5L, Optional.empty()), false);
   }
   
   @Test
@@ -172,7 +174,7 @@ public class KluchControllerTest extends TestWithMockUsers {
         .param("next", "0"))
     .andDo(print())
     .andExpect(status().is(200));
-    verify(kluchFeedService).getMentions("test", new FeedRequest(FeedDirection.NEXT, 0L));
+    verify(kluchFeedService).getMentions("test", new FeedRequest(FeedDirection.NEXT, 0L, Optional.empty()));
   }
   
   @Test
@@ -184,7 +186,7 @@ public class KluchControllerTest extends TestWithMockUsers {
         .param("next", "0"))
       .andDo(print())
       .andExpect(status().isOk());
-    verify(kluchFeedService).constructHashtagFeed(null, hashtag, new FeedRequest(FeedDirection.NEXT, 0L));
+    verify(kluchFeedService).constructHashtagFeed(hashtag, new FeedRequest(FeedDirection.NEXT, 0L, Optional.empty()));
   }
 
 }

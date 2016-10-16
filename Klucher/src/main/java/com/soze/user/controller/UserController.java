@@ -1,5 +1,7 @@
 package com.soze.user.controller;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -60,6 +62,7 @@ public class UserController {
     model.addAttribute("createdAt", user.getCreatedAt());
     model.addAttribute("numberOfLikes", user.getLikes().size());
     model.addAttribute("numberOfFollowers", followService.getNumberOfFollowers(user.getId()));
+    model.addAttribute("kluchs", userService.getNumberOfKluchs(username));
     return "user";
   }
   
@@ -67,15 +70,16 @@ public class UserController {
   @ResponseBody
   public Feed<UserFollowerView> getFollowers(@PathVariable String username,
   		@RequestParam(required = false) Long next) throws Exception {
-  	FeedRequest feedRequest = createFeedRequest(null, next);
+  	FeedRequest feedRequest = createFeedRequest(null, next, username);
   	return userFeedService.getFollowerFeed(username, feedRequest);
   }
   
-  private FeedRequest createFeedRequest(Long previous, Long next) {
+  private FeedRequest createFeedRequest(Long previous, Long next, String sourceUsername) {
+  	Optional<String> source = sourceUsername == null ? Optional.empty() : Optional.of(sourceUsername);
 		if (previous != null) {
-			return new FeedRequest(FeedDirection.PREVIOUS, previous);
+			return new FeedRequest(FeedDirection.PREVIOUS, previous, source);
 		}
-		return new FeedRequest(FeedDirection.NEXT, next);
+		return new FeedRequest(FeedDirection.NEXT, next, source);
 	}
   
   @RequestMapping(value = "/u/like", method = RequestMethod.POST)

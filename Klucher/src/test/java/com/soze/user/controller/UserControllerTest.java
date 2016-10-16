@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -117,7 +119,7 @@ public class UserControllerTest extends TestWithMockUsers {
 				.param("next", "" + Long.MAX_VALUE))
 		.andDo(print())
 		.andExpect(status().isOk());
-		verify(userFeedService).getFollowerFeed(username, new FeedRequest(FeedDirection.NEXT, Long.MAX_VALUE));
+		verify(userFeedService).getFollowerFeed(username, new FeedRequest(FeedDirection.NEXT, Long.MAX_VALUE, Optional.empty()));
 	}
 	
 	@Test

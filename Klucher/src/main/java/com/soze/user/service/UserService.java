@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.soze.common.exceptions.CannotDoItToYourselfException;
 import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
+import com.soze.kluch.dao.KluchDao;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 
@@ -15,10 +16,12 @@ import com.soze.user.model.User;
 public class UserService {
 
 	private final UserDao userDao;
+	private final KluchDao kluchDao;
 	
 	@Autowired
-	public UserService(UserDao userDao) {
+	public UserService(UserDao userDao, KluchDao kluchDao) {
 		this.userDao = userDao;
+		this.kluchDao = kluchDao;
 	}
 	
 	/**
@@ -186,6 +189,18 @@ public class UserService {
 			return false;
 		}
 		return target.getLikes().contains(source.getId());
+	}
+	
+	/**
+	 * Returns a number of kluchs whose author is user with <code>username</code>.
+	 * @param username
+	 * @return
+	 * @throws NullOrEmptyException
+	 * @throws UserDoesNotExistException
+	 */
+	public long getNumberOfKluchs(String username) throws NullOrEmptyException, UserDoesNotExistException {
+		User user = getUser(username);
+		return kluchDao.countByAuthorId(user.getId());
 	}
 	
 	private User getUser(String username) throws UserDoesNotExistException {

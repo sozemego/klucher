@@ -1,5 +1,7 @@
 package com.soze.kluch.controller;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +70,7 @@ public class KluchController {
 		String authenticatedUsername = authentication == null ? null : authentication.getName();
 		boolean onlyForUser = isOnlyForUser(authentication, username, authenticatedUsername);
 
-		FeedRequest feedRequest = createFeedRequest(previous, next);
+		FeedRequest feedRequest = createFeedRequest(previous, next, authenticatedUsername);
 
 		log.info("User [{}] requested to construct a feed for user [{}], with feed request [{}].",
 				authenticatedUsername, username, feedRequest);
@@ -85,7 +87,7 @@ public class KluchController {
 		String authenticatedUsername = authentication == null ? null : authentication.getName();
 		boolean onlyForUser = isOnlyForUser(authentication, username, authenticatedUsername);
 		
-		FeedRequest feedRequest = createFeedRequest(previous, next);
+		FeedRequest feedRequest = createFeedRequest(previous, next, authenticatedUsername);
 		boolean existsAfter = kluchFeedService.existsFeedAfter(username, feedRequest, onlyForUser);
 		
 		log.info("User [{}] polled feed for user [{}], with feedRequest [{}] and feed constructor returned [{}].",
@@ -102,7 +104,7 @@ public class KluchController {
 			throw new NotLoggedInException();
 		}
 		String username = authentication.getName();
-		FeedRequest feedRequest = createFeedRequest(null, next);
+		FeedRequest feedRequest = createFeedRequest(null, next, username);
 		Feed<KluchFeedElement> feed = kluchFeedService.getMentions(username, feedRequest);
 		log.info("User [{}] requested their mentions feed with feed request [{}]. Feed returned : [{}]", username, feedRequest, feed);
 		return feed;
@@ -113,8 +115,8 @@ public class KluchController {
 	public Feed<KluchFeedElement> getHashtagPage(Authentication authentication, @PathVariable String hashtag,
 			@RequestParam(required = false) Long next) {
 		String username = authentication == null ? null : authentication.getName();
-		FeedRequest feedRequest = createFeedRequest(null, next);
-		Feed<KluchFeedElement> feed = kluchFeedService.constructHashtagFeed(username, hashtag.toLowerCase(), feedRequest);
+		FeedRequest feedRequest = createFeedRequest(null, next, username);
+		Feed<KluchFeedElement> feed = kluchFeedService.constructHashtagFeed(hashtag.toLowerCase(), feedRequest);
 		log.info("Someone requested feed of hashtags for hashtag [{}] with feed request [{}]. Feed returned [{}].", hashtag, feedRequest,
 				feed);
 		return feed;
@@ -157,11 +159,12 @@ public class KluchController {
 		return onlyForUser;
 	}
 
-	private FeedRequest createFeedRequest(Long previous, Long next) {
+	private FeedRequest createFeedRequest(Long previous, Long next, String sourceUsername) {
+  	Optional<String> source = sourceUsername == null ? Optional.empty() : Optional.of(sourceUsername);
 		if (previous != null) {
-			return new FeedRequest(FeedDirection.PREVIOUS, previous);
+			return new FeedRequest(FeedDirection.PREVIOUS, previous, source);
 		}
-		return new FeedRequest(FeedDirection.NEXT, next);
+		return new FeedRequest(FeedDirection.NEXT, next, source);
 	}
 
 }

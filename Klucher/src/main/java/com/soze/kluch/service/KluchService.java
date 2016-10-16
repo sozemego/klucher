@@ -26,7 +26,7 @@ import com.soze.user.model.User;
  * A service responsible for posting new Kluchs. It validates them, assembles
  * them and in the future will extract hashtag information and send it off to
  * another service (work in progress). It stores previous Kluch(s) created by an
- * user (to prevent spam). Includes rate-limiting functionality.
+ * user (to prevent spam).
  * 
  * @author sozek
  *

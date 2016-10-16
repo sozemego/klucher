@@ -3,6 +3,8 @@ package com.soze.kluch.dao;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ public class KluchDatabase implements KluchDao {
 	}
 
 	@Override
+	@CacheEvict(cacheNames = "kluchCount", key = "#kluch.authorId")
 	public Kluch save(Kluch kluch) {
 		return kluchRepository.save(kluch);
 	}
@@ -88,6 +91,12 @@ public class KluchDatabase implements KluchDao {
 	@Override
 	public void deleteByAuthorId(Long authorId) {
 		kluchRepository.deleteByAuthorId(authorId);
+	}
+	
+	@Override
+	@Cacheable(cacheNames = "kluchCount")
+	public Long countByAuthorId(Long authorId) {
+		return kluchRepository.countByAuthorId(authorId);
 	}
 
 }

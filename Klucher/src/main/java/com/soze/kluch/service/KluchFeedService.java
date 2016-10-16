@@ -3,6 +3,7 @@ package com.soze.kluch.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -67,7 +68,8 @@ public class KluchFeedService {
 	 * @param username
 	 *          name of the user for which we want to construct the feed
 	 * @param feedRequest
-	 * 					encapsulates feed direction (previous/next) and id used in feed creation
+	 * 					encapsulates feed direction (previous/next) and id used in feed creation.
+	 * 					Also contains username of the feed requester (or null if feed was requeted anonymously)
 	 * @param onlyForUser
 	 *          flag which specifies whether Kluchs in the feed should only be for
 	 *          a given user (true) or for their followers too (false)
@@ -79,10 +81,10 @@ public class KluchFeedService {
 	 */
 	public Feed<KluchFeedElement> constructFeed(String username, FeedRequest feedRequest, boolean onlyForUser) throws UserDoesNotExistException, NullOrEmptyException {
 		if (feedRequest.getFeedDirection() == FeedDirection.PREVIOUS) {
-			return constructFeedPrevious(username, feedRequest.getId(), onlyForUser);
+			return constructFeedPrevious(username, feedRequest.getId(), onlyForUser, feedRequest.getSource());
 		}
 		if (feedRequest.getFeedDirection() == FeedDirection.NEXT) {
-			return constructFeedNext(username, feedRequest.getId(), onlyForUser);
+			return constructFeedNext(username, feedRequest.getId(), onlyForUser, feedRequest.getSource());
 		}
 		return new Feed<>(new ArrayList<>(0), null, null, 0);
 	}
@@ -115,12 +117,12 @@ public class KluchFeedService {
 	 * @throws NullOrEmptyException
 	 *           if <code>username</code> is null or empty
 	 */
-	private Feed<KluchFeedElement> constructFeedPrevious(String username, long id, boolean onlyForUser)
+	private Feed<KluchFeedElement> constructFeedPrevious(String username, long id, boolean onlyForUser, Optional<String> sourceUsername)
 			throws UserDoesNotExistException, NullOrEmptyException {
 		User user = getUser(username);
 		List<Long> authorIds = getIdsOfAuthors(user.getId(), onlyForUser);
 		Page<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdGreaterThan(authorIds, id, previous);
-		Feed<KluchFeedElement> feed = constructFeed(user.getId(), kluchs);
+		Feed<KluchFeedElement> feed = constructFeed(getUserId(sourceUsername), kluchs);
 		return feed;
 	}
 
@@ -151,12 +153,12 @@ public class KluchFeedService {
 	 * @throws NullOrEmptyException
 	 *           if <code>username</code> is null or empty
 	 */
-	private Feed<KluchFeedElement> constructFeedNext(String username, long id, boolean onlyForUser)
+	private Feed<KluchFeedElement> constructFeedNext(String username, long id, boolean onlyForUser, Optional<String> sourceUsername)
 			throws UserDoesNotExistException, NullOrEmptyException {
 		User user = getUser(username);
 		List<Long> authorIds = getIdsOfAuthors(user.getId(), onlyForUser);
 		Page<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdLessThan(authorIds, id, next);
-		Feed<KluchFeedElement> feed = constructFeed(user.getId(), kluchs);
+		Feed<KluchFeedElement> feed = constructFeed(getUserId(sourceUsername), kluchs);
 		return feed;
 	}
 	
@@ -230,14 +232,14 @@ public class KluchFeedService {
 	 * @throws NullOrEmptyException
 	 *           if <code>hashtagText</code> is null or empty
 	 */
-	public Feed<KluchFeedElement> constructHashtagFeed(String username, String hashtagText, FeedRequest feedRequest)
+	public Feed<KluchFeedElement> constructHashtagFeed(String hashtagText, FeedRequest feedRequest)
 			throws UserDoesNotExistException, NullOrEmptyException {
 		boolean hasPoundCharacter = hashtagText.startsWith("#");
 		if (hasPoundCharacter) {
 			hashtagText = hashtagText.substring(1);
 		} 
 		Page<Kluch> kluchs = kluchDao.findByHashtagsInAndIdLessThan(hashtagText, feedRequest.getId(), next);
-		Feed<KluchFeedElement> feed = constructFeed(getUserId(username), kluchs);
+		Feed<KluchFeedElement> feed = constructFeed(getUserId(feedRequest.getSource()), kluchs);
 		return feed;
 	}
 	
@@ -246,8 +248,8 @@ public class KluchFeedService {
 	 * @param username
 	 * @return userId if user exists, null otherwise
 	 */
-	private Long getUserId(String username) {
-		User user = userDao.findOne(username);
+	private Long getUserId(Optional<String> username) {
+		User user = userDao.findOne(username.orElse(null));
 		if(user == null) {
 			return null;
 		}
@@ -280,7 +282,7 @@ public class KluchFeedService {
 	 * Returns a list of authors this user would see kluchs of (so this user's
 	 * kluchs and their followers' kluchs).
 	 * 
-	 * @param user
+	 * @param userId
 	 * @param onlyForUser
 	 *          whether the list of authors should include only the user or also
 	 *          users they follow
