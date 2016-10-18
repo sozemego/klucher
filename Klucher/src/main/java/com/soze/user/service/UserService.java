@@ -1,6 +1,6 @@
 package com.soze.user.service;
 
-import java.util.Set;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -90,9 +90,10 @@ public class UserService {
 	 * @return number of likes of target
 	 */
 	private int like(User source, User target) {
-		Set<Long> likes = target.getLikes();
+		List<Long> likes = target.getLikes();
 		int numberOfLikes = likes.size();
-		if(likes.add(source.getId())) {
+		if(!likes.contains(source.getId())) {
+			likes.add(source.getId());
 			userDao.save(target);
 			numberOfLikes++;
 		}	
@@ -165,7 +166,7 @@ public class UserService {
 	 * @return number of likes of target
 	 */
 	private int unlike(User source, User target) {
-		Set<Long> likes = target.getLikes();
+		List<Long> likes = target.getLikes();
 		int numberOfLikes = likes.size();
 		if(likes.remove(source.getId())) {
 			userDao.save(target);

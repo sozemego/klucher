@@ -31,6 +31,7 @@ import com.soze.kluch.model.FeedRequest;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 import com.soze.user.model.UserFollowerView;
+import com.soze.user.model.UserLikeView;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -106,6 +107,41 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 		List<Follow> follows = getFollowersFor(user, randomUsersIds);
 		when(followDao.findAllByFolloweeId(userId)).thenReturn(follows);
 		Feed<UserFollowerView> feed = userFeedService.getFollowerFeed(userId, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
+		assertThat(feed, notNullValue());
+		assertThat(feed.getElements(), notNullValue());
+		assertThat(feed.getElements().size(), equalTo(5));
+		assertThat(feed.getNext(), nullValue());
+		assertThat(feed.getPrevious(), nullValue());
+		assertThat(feed.getTotalElements(), equalTo(5L));
+	}
+	
+	@Test(expected = NullOrEmptyException.class)
+	public void testGetLikeFeedNullUsername() throws Exception {
+		userFeedService.getLikeFeed(null, null);
+	}
+	
+	@Test(expected = NullOrEmptyException.class)
+	public void testGetLikeFeedEmptyUsername() throws Exception {
+		userFeedService.getLikeFeed("", null);
+	}
+	
+	@Test(expected = NullOrEmptyException.class)
+	public void testGetLikeFeedNullRequest() throws Exception {
+		mockUser("user");
+		userFeedService.getLikeFeed("user", null);
+	}
+	
+	@Test(expected = UserDoesNotExistException.class)
+	public void testGetLikeFeedUserDoesNotExistException() throws Exception {
+		userFeedService.getLikeFeed("user", new FeedRequest(FeedDirection.NEXT, null, null));
+	}
+	
+	@Test
+	public void testGetLikeFeedUserValid() throws Exception {
+		User user = mockUser("user");
+		List<Long> randomUsers = mockRandomUsers(5);
+		user.getLikes().addAll(randomUsers);
+		Feed<UserLikeView> feed = userFeedService.getLikeFeed("user", new FeedRequest(FeedDirection.NEXT, null, null));
 		assertThat(feed, notNullValue());
 		assertThat(feed.getElements(), notNullValue());
 		assertThat(feed.getElements().size(), equalTo(5));

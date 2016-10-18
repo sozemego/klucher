@@ -21,6 +21,7 @@ import com.soze.kluch.model.FeedRequest;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 import com.soze.user.model.UserFollowerView;
+import com.soze.user.model.UserLikeView;
 import com.soze.user.service.UserFeedService;
 import com.soze.user.service.UserService;
 
@@ -72,6 +73,14 @@ public class UserController {
   		@RequestParam(required = false) Long next) throws Exception {
   	FeedRequest feedRequest = createFeedRequest(null, next, username);
   	return userFeedService.getFollowerFeed(username, feedRequest);
+  }
+  
+  @RequestMapping(value = "/u/likes/{username}", method = RequestMethod.GET)
+  @ResponseBody
+  public Feed<UserLikeView> getLikes(@PathVariable String username,
+  		@RequestParam(required = false) Long next) throws Exception {
+  	FeedRequest feedRequest = createFeedRequest(null, next, username);
+  	return userFeedService.getLikeFeed(username, feedRequest);
   }
   
   private FeedRequest createFeedRequest(Long previous, Long next, String sourceUsername) {

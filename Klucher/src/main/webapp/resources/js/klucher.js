@@ -1092,6 +1092,7 @@ function removeAnimateAlertUp() {
 function notificationsOnLoad() {
 	pollNotifications();
 	getNewFollowers();
+	getNewLikes();
 	getKluchsWithMentions(Number.MAX_SAFE_INTEGER);
 	attachInifiteScrollingListenerMentions();
 	markNotificationsAsRead();
@@ -1160,6 +1161,27 @@ function handleNewFollowers(feed) {
 	displayNewFollowers(feed.elements, feed.totalElements);
 }
 
+function handleNewLikes(feed) {
+	displayNewLikes(feed.elements, feed.totalElements);
+}
+
+function getNewLikes(id) {
+	const username = getUsername();
+	$.ajax({
+		type: "GET",
+		url: "/u/likes/" + username,
+		data: {
+			"id": id
+		},
+		error: function(xhr, status, error) {
+			displayAlert(xhr.responseJSON.message);
+		},
+		success: function(data, status, xhr) {
+			handleNewLikes(data);
+		}
+	});
+}
+
 function getKluchsWithMentions(id) {
 	if(isGettingFeed() || isFeedFinished()) {
 		return;
@@ -1210,6 +1232,43 @@ function sendMarkNotificationsAsRead() {
 	});	
 }
 
+function displayNewLikes(likes, total) {
+	if(likes.length === 0) {
+		return;
+	}
+	const users = [];
+	for(let i = 0; i < likes.length; i++) {
+		//TODO fix this, i dont have to get a style for all of them?
+		users.push(getUserLinkStyle(likes[i].username));
+	}
+	
+	// constructs a message to display with all likes
+	// who liked you recently.
+	let message = "";
+	const namesToDisplay = 3;
+	if(users.length === 1) {
+		message += users[0];
+	}
+	if(users.length === 2) {
+		message += users[0] + " and " + users[1];
+	}
+	if(users.length > 2) {
+		const remainingLikes = total - namesToDisplay;
+		if(remainingLikes === 0) {
+			message += users[0] + ", " + users[1] + " and " + users[2];
+		}
+		
+		if(remainingLikes > 0) {
+			message += users[0] + ", " + users[1] + ", " + users[2];
+			message += " and " + createRemainingLikesElement(remainingLikes) + " more";
+		}
+	}
+	message += " liked you.";
+	createEventListenersForRemainingLikesList();
+	populateRemainingLikes(likes.slice(namesToDisplay), total, namesToDisplay);
+	$("#likes-new-text").html(message);
+}
+
 function displayNewFollowers(followers, total) {
 	if(followers.length === 0) {
 		return;
@@ -1251,6 +1310,10 @@ function createRemainingFollowersElement(remainingFollowers) {
 	return "<span id = 'followers-new-remaining-text' class = 'followers-new-remaining-text'>" + remainingFollowers + "</span>";
 }
 
+function createRemainingLikesElement(likes) {
+	return "<span id = 'likes-new-remaining-text' class = 'likes-new-remaining-text'>" + likes + "</span>";
+}
+
 function createEventListenersForRemainingFollowersList() {
 	$("body").on("mouseenter", "#followers-new-remaining-text", function(event) {
 		showRemainingFollowersList(true);
@@ -1266,6 +1329,25 @@ function createEventListenersForRemainingFollowersList() {
 		const distanceToFadeOut = 25;
 		if(distance > distanceToFadeOut) {
 			showRemainingFollowersList(false);
+		}
+	});
+}
+
+function createEventListenersForRemainingLikesList() {
+	$("body").on("mouseenter", "#likes-new-remaining-text", function(event) {
+		showRemainingLikesList(true);
+	});
+
+	$("body").on("click", "#likes-new-remaining-text", function(event) {
+		$("#likes-new-free").fadeToggle('fast');
+	});
+
+	$("body").on("mousemove", function(event) {
+		const boundingRect = $("#likes-new-free")[0].getBoundingClientRect();
+		const distance = pointRectDist(event.pageX, event.pageY, boundingRect.left, boundingRect.top, boundingRect.width, boundingRect.height);
+		const distanceToFadeOut = 25;
+		if(distance > distanceToFadeOut) {
+			showRemainingLikesList(false);
 		}
 	});
 }
@@ -1290,6 +1372,22 @@ function showRemainingFollowersList(bool) {
 		followersList.fadeIn();
 	} else {
 		followersList.fadeOut();
+	}
+}
+
+function showRemainingLikesList(bool) {
+
+	const likesList = $("#likes-new-free");
+
+	if(bool) {
+		const position = $("#likes-new-remaining-text").position();
+		likesList.css({
+			"top": position.top + 18,
+			"left": position.left + 10
+		});
+		likesList.fadeIn();
+	} else {
+		likesList.fadeOut();
 	}
 }
 
@@ -1336,6 +1434,53 @@ function populateRemainingFollowers(remainingFollowers, total, listedAlready) {
 		element.append(text);
 
 		remainingFollowersList.append(element);
+	}
+
+}
+
+function populateRemainingLikes(remainingLikes, total, listedAlready) {
+
+	const remainingLikesList = $("#likes-new-free");
+	remainingLikesList.empty();
+	const maxTableLength = 10;
+	for(var i = 0; i < remainingLikes.length; i++) {
+
+		if(i === maxTableLength) {
+
+			const element = $(document.createElement("a"));
+			element.addClass("likes-new-free-element likes-new-free-element-remaining-text");
+			element.attr("href", "/#");
+
+			const remainingText = $(document.createElement("span"));
+			remainingText.text("and " + (total - listedAlready - maxTableLength) + " more...");
+			
+			element.append(remainingText);
+			remainingLikesList.append(element);
+			break;
+
+		}
+
+		const like = remainingLikes[i];
+
+		const element = $(document.createElement("a"));
+		element.addClass("likes-new-free-element");
+		element.attr("href", "/u/profile/" + like.username);
+
+		const avatarContainer = $(document.createElement("div"));
+		avatarContainer.addClass("likes-new-free-element-image-container");
+
+		const avatar = $(document.createElement("img"));
+		avatar.addClass("likes-new-free-element-image");
+		avatar.attr("src", "../../resources/images/" + like.avatarPath);
+		avatarContainer.append(avatar);
+		element.append(avatarContainer);
+
+		const text = $(document.createElement("span"));
+		text.addClass("likes-new-free-element-text");
+		text.text(like.username);
+		element.append(text);
+
+		remainingLikesList.append(element);
 	}
 
 }

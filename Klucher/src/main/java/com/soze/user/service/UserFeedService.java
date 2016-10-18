@@ -16,6 +16,7 @@ import com.soze.kluch.model.FeedRequest;
 import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 import com.soze.user.model.UserFollowerView;
+import com.soze.user.model.UserLikeView;
 
 @Service
 public class UserFeedService {
@@ -30,10 +31,30 @@ public class UserFeedService {
 		this.followDao = followDao;
 	}
 	
+	/**
+	 * Constructs a feed of UserFollowerView objects. These objects represent
+	 * information needed to display users following another user (username, avatarPath).
+	 * 
+	 * @param username
+	 * @param feedRequest
+	 * @return
+	 * @throws UserDoesNotExistException
+	 * @throws NullOrEmptyException
+	 */
 	public Feed<UserFollowerView> getFollowerFeed(String username, FeedRequest feedRequest) throws UserDoesNotExistException, NullOrEmptyException {
 		return getFollowerFeed(getUser(username), feedRequest);
 	}
 	
+	/**
+	 * Constructs a feed of UserFollowerView objects. These objects represent
+	 * information needed to display users following another user (username, avatarPath).
+	 * 
+	 * @param username
+	 * @param feedRequest
+	 * @return
+	 * @throws UserDoesNotExistException
+	 * @throws NullOrEmptyException
+	 */
 	public Feed<UserFollowerView> getFollowerFeed(User user, FeedRequest feedRequest) throws NullOrEmptyException {
 		if(user == null) {
 			throw new NullOrEmptyException("User");
@@ -41,12 +62,66 @@ public class UserFeedService {
 		return getFollowerFeed(user.getId(), feedRequest);
 	}
 	
+	/**
+	 * Constructs a feed of UserFollowerView objects. These objects represent
+	 * information needed to display users following another user (username, avatarPath).
+	 * 
+	 * @param username
+	 * @param feedRequest
+	 * @return
+	 * @throws UserDoesNotExistException
+	 * @throws NullOrEmptyException
+	 */
 	public Feed<UserFollowerView> getFollowerFeed(long userId, FeedRequest feedRequest) throws NullOrEmptyException {
 		if(feedRequest == null) {
 			throw new NullOrEmptyException("FeedRequest");
 		}
 		List<Follow> follows = followDao.findAllByFolloweeId(userId);
 		return constructFollowerFeed(follows, feedRequest);
+	}
+	
+	/**
+	 * Creates a feed of UserLikeView objects which contain
+	 * information about users that liked another user. 
+	 * @param username
+	 * @param feedRequest
+	 * @return
+	 * @throws NullOrEmptyException
+	 * @throws UserDoesNotExistException
+	 */
+	public Feed<UserLikeView> getLikeFeed(String username, FeedRequest feedRequest) throws NullOrEmptyException, UserDoesNotExistException {
+		User user = getUser(username);
+		if(feedRequest == null) {
+			throw new NullOrEmptyException("FeedRequest");
+		}
+		List<Long> userIds = filterLikes(user.getLikes(), feedRequest);
+		List<User> users = getUsers(userIds);
+		return constructLikeFeed(users, feedRequest, user.getLikes().size());
+	}
+	
+	private List<Long> filterLikes(List<Long> userIds, FeedRequest feedRequest) {
+		int indexOf = userIds.indexOf(feedRequest.getId());
+		if(indexOf > -1) {
+			return userIds.subList(indexOf, Math.min(indexOf + ELEMENTS_PER_REQUEST, userIds.size()));
+		}
+		if (indexOf == -1 && !userIds.isEmpty()) {
+			return userIds.subList(0, Math.min(ELEMENTS_PER_REQUEST, userIds.size()));
+		}
+		return new ArrayList<>();
+	}
+	
+	private Feed<UserLikeView> constructLikeFeed(List<User> users, FeedRequest feedRequest, int totalElements) {
+		List<UserLikeView> userLikeViews = new ArrayList<>();
+		for(User user: users) {
+			userLikeViews.add(new UserLikeView(user.getUsername(), user.getAvatarPath()));
+		}
+		Long next = null;
+		if(users.size() < ELEMENTS_PER_REQUEST || users.size() == totalElements) {
+			next = null;
+		} else {
+			next = users.get(users.size() - 1).getId();
+		}
+		return new Feed<>(userLikeViews, null, next, totalElements);
 	}
 	
 	private Feed<UserFollowerView> constructFollowerFeed(List<Follow> follows, FeedRequest feedRequest) {
@@ -97,6 +172,10 @@ public class UserFeedService {
 			throw new UserDoesNotExistException(username);
 		}
 		return user;
+	}
+	
+	private List<User> getUsers(List<Long> userIds) {
+		return userDao.findAll(userIds);
 	}
 	
 }

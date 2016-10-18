@@ -32,6 +32,11 @@
 
 				</span>
 			</div>
+			<div class="likes-new-container" id="likes-new-container">
+				<span class="likes-new-text" id="likes-new-text">
+
+				</span>
+			</div>
 			<div class="kluch-feed" id="kluch-feed" data-next = "9007199254740991"
 			 data-previous = "0" data-getting-feed="false" data-feed-finished="false">
 				
@@ -48,6 +53,10 @@
 <div class="followers-new-free" id="followers-new-free">
 	
 </div>
+<div class="likes-new-free" id="likes-new-free">
+	
+</div>
+
 <c:import url="footer.jsp"></c:import>
 <script>
 $(notificationsOnLoad());

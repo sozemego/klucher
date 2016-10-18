@@ -4,9 +4,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -59,7 +57,7 @@ public class User implements UserDetails, Serializable {
 	
 	@ElementCollection
 	@JsonIgnore
-	private Set<Long> likes = new HashSet<>();
+	private List<Long> likes = new ArrayList<>();
 
 	@SuppressWarnings("unused")
 	private User() {
@@ -136,11 +134,11 @@ public class User implements UserDetails, Serializable {
 		this.createdAt = createdAt;
 	}
 
-	public Set<Long> getLikes() {
+	public List<Long> getLikes() {
 		return likes;
 	}
 
-	public void setLikes(Set<Long> likes) {
+	public void setLikes(List<Long> likes) {
 		this.likes = likes;
 	}
 

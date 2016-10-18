@@ -891,8 +891,70 @@ a.followers-new-free-element {
 
 /**
 
-	#HOVER
-
-	https://github.com/IanLunn/Hover/blob/master/css/hover.css
+	#LIKES
 
 */
+
+.likes-new-container {
+	width: 100%;
+	height: 2em;
+	margin: 15px 0 10px 0;
+}
+
+.likes-new-text {
+
+}
+
+.likes-new-remaining-text {
+	color: #b71664;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.likes-new-free {
+	position: absolute;
+	display: none;
+	width: 200px;
+	background-color: #add8e6;
+	border: 1px solid gray;
+}
+
+.likes-new-free-element {
+	display: table;
+	height: 32px;
+	width: 100%;
+	color: black;
+}
+
+a.likes-new-free-element {
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.likes-new-free-element-image-container {
+	position: relative;
+	display: table-cell;
+	width: 32px;
+	height: 32px;
+}
+
+.likes-new-free-element-image {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: auto;
+	width: 24px;
+	height: 24px;
+}
+
+.likes-new-free-element-text {
+	vertical-align: middle;
+	display: table-cell;
+}
+
+.likes-new-free-element-remaining-text {
+	text-align: right;
+	width: 100%;
+}
