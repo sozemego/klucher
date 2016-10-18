@@ -56,17 +56,16 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
 			new Sort(new Order(Direction.ASC, "timestamp")));
   private final PageRequest exists = new PageRequest(0, 1);
   
+  @MockBean
+  private KluchDao kluchDao;
+  
   @Autowired
   @InjectMocks
   private KluchFeedService feedService;
-
-  @MockBean
-  private KluchDao kluchDao;
-
+  
   @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    MockitoAnnotations.initMocks(this);
+  public void setUp() {
+  	MockitoAnnotations.initMocks(this);
   }
 
   @Test
@@ -88,7 +87,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
         eq(Arrays.asList(user.getId())),
         eq(0L),
         eq(exists)))
-    .thenReturn(new PageImpl<>(Arrays.asList(new Kluch(0, null, null))));
+    .thenReturn(new PageImpl<>(Arrays.asList(new Kluch(1L, null, null))));
     boolean exists = feedService.existsFeedAfter("test", new FeedRequest(FeedDirection.PREVIOUS, null, Optional.empty()), false);
     assertThat(exists, equalTo(true));
   }
@@ -334,7 +333,6 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
     	Kluch kluch = new Kluch(user.getId(), null, new Timestamp(0L + i));
       kluchs.add(kluch);
     }
-    mockUsers(accumulatedUsernames);
     return kluchs;
   }
   

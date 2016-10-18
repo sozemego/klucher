@@ -2,7 +2,6 @@ package com.soze.notification.service;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -15,20 +14,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.TestWithMockUsers;
 import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
-import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 
 @RunWith(SpringRunner.class)
+@Transactional
 @SpringBootTest
 @ActiveProfiles("test")
 public class NotificationServiceWithCacheTest extends TestWithMockUsers {
-
-	@Autowired
-	private UserDao userDao;
 
 	@Autowired
 	private NotificationService notificationService;
@@ -93,7 +90,6 @@ public class NotificationServiceWithCacheTest extends TestWithMockUsers {
 		User user = mockUser("user", "password");
 		user.setNotifications(64);
 		notificationService.read("user");
-		verify(userDao).save(user);
 		int notifications = notificationService.poll("user");
 		assertThat(notifications, equalTo(0));
 	}

@@ -2,9 +2,6 @@ package com.soze.user.service;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,24 +14,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.TestWithMockUsers;
 import com.soze.common.exceptions.CannotDoItToYourselfException;
 import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
-import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 
 @RunWith(SpringRunner.class)
+@Transactional
 @SpringBootTest
 @ActiveProfiles("test")
 public class UserServiceTest extends TestWithMockUsers {
 
 	@Autowired
 	private UserService service;
-	
-	@Autowired
-	private UserDao userDao;
 	
 	@Before
 	public void setUp() {
@@ -65,10 +60,9 @@ public class UserServiceTest extends TestWithMockUsers {
 	@Test
 	public void testValidLike() throws Exception {
 		mockUser("user");
-		User likedUser = mockUser("likedUser");
+		mockUser("likedUser");
 		int likes = service.like("user", "likedUser");
 		assertThat(likes, equalTo(1));
-		verify(userDao).save(likedUser);
 	}
 	
 	@Test
@@ -80,7 +74,6 @@ public class UserServiceTest extends TestWithMockUsers {
 			likes = service.like(user.getUsername(), "likedUser");
 		}
 		assertThat(likes, equalTo(8));
-		verify(userDao, times(8)).save(any(User.class));
 	}
 	
 	@Test
@@ -93,7 +86,6 @@ public class UserServiceTest extends TestWithMockUsers {
 			likes = service.like(user.getUsername(), "likedUser");
 		}
 		assertThat(likes, equalTo(8));
-		verify(userDao, times(8)).save(any(User.class));
 	}
 	
 	@Test(expected = NullOrEmptyException.class)
@@ -120,13 +112,11 @@ public class UserServiceTest extends TestWithMockUsers {
 	@Test
 	public void testValidUnlike() throws Exception {
 		mockUser("user");
-		User likedUser = mockUser("likedUser");
+		mockUser("likedUser");
 		int likes = service.like("user", "likedUser");
 		assertThat(likes, equalTo(1));
-		verify(userDao, times(1)).save(likedUser);
 		likes = service.unlike("user", "likedUser");
 		assertThat(likes, equalTo(0));
-		verify(userDao, times(2)).save(likedUser);
 	}
 	
 	@Test
@@ -138,12 +128,10 @@ public class UserServiceTest extends TestWithMockUsers {
 			likes = service.like(user.getUsername(), "likedUser");
 		}
 		assertThat(likes, equalTo(8));
-		verify(userDao, times(8)).save(any(User.class));
 		for(User user: likingUsers) {
 			likes = service.unlike(user.getUsername(), "likedUser");
 		}
 		assertThat(likes, equalTo(0));
-		verify(userDao, times(16)).save(any(User.class));
 	}
 	
 	@Test
@@ -155,13 +143,11 @@ public class UserServiceTest extends TestWithMockUsers {
 			likes = service.like(user.getUsername(), "likedUser");
 		}
 		assertThat(likes, equalTo(8));
-		verify(userDao, times(8)).save(any(User.class));
 		for(User user: likingUsers) {
 			service.unlike(user.getUsername(), "likedUser");
 			likes = service.unlike(user.getUsername(), "likedUser");
 		}
 		assertThat(likes, equalTo(0));
-		verify(userDao, times(16)).save(any(User.class));
 	}
 	
 	@Test(expected = NullOrEmptyException.class)

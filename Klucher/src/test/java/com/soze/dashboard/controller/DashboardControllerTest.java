@@ -37,7 +37,6 @@ public class DashboardControllerTest extends TestWithMockUsers {
   
   @Before
   public void setUp() throws Exception {
-    super.setUp();
     mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
         .apply(springSecurity()).build();
   }

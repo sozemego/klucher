@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.TestWithMockUsers;
 import com.soze.common.exceptions.CannotDoItToYourselfException;
@@ -20,6 +21,7 @@ import com.soze.follow.model.Follow;
 import com.soze.user.model.User;
 
 @RunWith(SpringRunner.class)
+@Transactional
 @SpringBootTest
 @ActiveProfiles("test")
 public class FollowServiceTest extends TestWithMockUsers {

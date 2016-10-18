@@ -1,26 +1,17 @@
 package com.soze;
 
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.junit.Before;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -39,20 +30,11 @@ public class TestWithMockUsers {
 
 	private final Random random = new Random();
 	
-	private final AtomicLong ids = new AtomicLong(1);
-	
-	private final Map<String, Long> savedUserIds = new HashMap<>();
-	
-  @MockBean
+	@Autowired
   private UserDao userDao;
   
   @Autowired
   private RegisterConverter registerConverter;
-  
-  @Before
-  public void setUp() throws Exception {
-    MockitoAnnotations.initMocks(this);
-  }
   
   protected User mockUser(String username) {
   	return mockUser(username, "password");
@@ -68,8 +50,7 @@ public class TestWithMockUsers {
   
   protected User mockUser(String username, String password, boolean login) {
     User user = getBaseUser(username, password);
-    when(userDao.findOne(username)).thenReturn(user);
-    when(userDao.findOne(user.getId())).thenReturn(user);
+    user = userDao.save(user);
     if(login) {
       SecurityContextHolder.getContext().setAuthentication(
           new UsernamePasswordAuthenticationToken(username,
@@ -79,57 +60,19 @@ public class TestWithMockUsers {
   }
   
   protected List<User> mockUsers(List<String> usernames) {
-  	return mockUsers(usernames, false);
-  }
-  
-	protected List<User> mockUsers(List<String> usernames, boolean alreadyExist) {
-  	if(alreadyExist) {
-  		mockExistingUsers(usernames);
-  	}
-  	return mockNewUsers(usernames);
-  }
-	
-	protected List<User> mockNewUsers(List<String> usernames) {
-		List<User> users = new ArrayList<>();
-  	List<Long> ids = new ArrayList<>();
+  	List<User> users = new ArrayList<>();
   	for(String username: usernames) {
-  		User user = mockUser(username, "password", false);
-  		users.add(user);
-  		ids.add(user.getId());
+  		users.add(mockUser(username, false));
   	}
-		//when(userDao.findAll(usernames)).thenReturn(users);
-  	when(userDao.findByUsernameIn(argThat(sameAsSet(usernames)))).thenReturn(users);
-		when(userDao.findAll(argThat(sameAsSet(ids)))).thenReturn(users);
   	return users;
-	}
-	
-	protected List<User> mockExistingUsers(List<String> usernames) {
-		List<User> users = new ArrayList<>();
-		List<Long> userIds = new ArrayList<>();
-		for(String username: usernames) {
-			User user = userDao.findOne(username);
-			users.add(user);
-			userIds.add(user.getId());
-		}
-		when(userDao.findByUsernameIn(argThat(sameAsSet(usernames)))).thenReturn(users);
-		when(userDao.findAll(argThat(sameAsSet(userIds)))).thenReturn(users);
-		return users;
-	}
+  }
 
   private User getBaseUser(String username, String password) {
-  	Long id = null;
-  	if(savedUserIds.containsKey(username)) {
-  		id = savedUserIds.get(username);
-  	} else {
-  		id = ids.getAndIncrement();
-  		savedUserIds.put(username, id);
-  	}
     RegisterForm form = new RegisterForm();
     form.setUsername(username);
     form.setPassword(password);
-    User testUser = registerConverter.convertRegisterForm(form);
-    testUser.setId(id);
-    return testUser;
+    User user = registerConverter.convertRegisterForm(form);
+    return user;
   }
   
   protected User mockRandomUser() {

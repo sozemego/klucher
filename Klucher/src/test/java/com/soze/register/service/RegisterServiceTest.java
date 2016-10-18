@@ -1,15 +1,14 @@
 package com.soze.register.service;
 
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +17,6 @@ import com.soze.common.exceptions.InvalidLengthException;
 import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserAlreadyExistsException;
 import com.soze.register.model.RegisterForm;
-import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 
 @RunWith(SpringRunner.class)
@@ -29,9 +27,6 @@ public class RegisterServiceTest {
   
   @Autowired
   private RegisterService registerService;
-  
-  @MockBean
-  private UserDao userDao;
   
   @Test(expected = NullOrEmptyException.class)
   public void testEmptyFields() {
@@ -78,12 +73,11 @@ public class RegisterServiceTest {
     RegisterForm form = new RegisterForm();
     form.setUsername("user");
     form.setPassword("password");
-    User user = getUser(form);
-    when(userDao.save(user)).thenReturn(user);
+    getUser(form);
     User registeredUser = registerService.register(form);
     assertThat(registeredUser, notNullValue());
     assertThat(registeredUser.getUsername(), equalTo("user"));
-    assertThat(registeredUser.getPassword(), equalTo("password"));
+    assertThat(registeredUser.getPassword(), not(equalTo("password")));
   }
   
   @Test(expected = UserAlreadyExistsException.class)
@@ -92,7 +86,6 @@ public class RegisterServiceTest {
     form.setUsername("user");
     form.setPassword(generateString(6));
     registerService.register(form);
-    when(userDao.exists("user")).thenReturn(true);
     registerService.register(form);
   }
   

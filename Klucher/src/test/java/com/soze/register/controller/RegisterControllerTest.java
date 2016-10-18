@@ -29,7 +29,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.soze.TestWithRealUsers;
+import com.soze.TestWithMockUsers;
 import com.soze.common.exceptions.UserAlreadyExistsException;
 import com.soze.login.service.LoginService;
 import com.soze.register.model.RegisterForm;
@@ -39,7 +39,7 @@ import com.soze.register.service.RegisterService;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-public class RegisterControllerTest extends TestWithRealUsers {
+public class RegisterControllerTest extends TestWithMockUsers {
 
   @Autowired
   private WebApplicationContext webApplicationContext;

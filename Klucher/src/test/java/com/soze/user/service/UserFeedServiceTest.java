@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.TestWithMockUsers;
 import com.soze.common.exceptions.NullOrEmptyException;
@@ -28,21 +29,18 @@ import com.soze.common.feed.FeedDirection;
 import com.soze.follow.dao.FollowDao;
 import com.soze.follow.model.Follow;
 import com.soze.kluch.model.FeedRequest;
-import com.soze.user.dao.UserDao;
 import com.soze.user.model.User;
 import com.soze.user.model.UserFollowerView;
 import com.soze.user.model.UserLikeView;
 
 @RunWith(SpringRunner.class)
+@Transactional
 @SpringBootTest
 @ActiveProfiles("test")
 public class UserFeedServiceTest extends TestWithMockUsers {
 
 	@Autowired
 	private UserFeedService userFeedService;
-
-	@Autowired
-	private UserDao userDao;
 
 	@MockBean
 	private FollowDao followDao;
@@ -73,7 +71,6 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 	public void testGetFollowerFeedByIdUserDoesNotExist() throws Exception {
 		long userId = 54L;
 		when(followDao.findAllByFolloweeId(userId)).thenReturn(new ArrayList<>());
-		when(userDao.findAll(new ArrayList<>())).thenReturn(new ArrayList<>());
 		Feed<UserFollowerView> feed = userFeedService.getFollowerFeed(userId, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
 		assertThat(feed, notNullValue());
 		assertThat(feed.getElements(), notNullValue());
@@ -88,7 +85,6 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 		User user = mockUser("username");
 		long userId = user.getId();
 		when(followDao.findAllByFolloweeId(userId)).thenReturn(new ArrayList<>());
-		when(userDao.findAll(new ArrayList<>())).thenReturn(new ArrayList<>());
 		Feed<UserFollowerView> feed = userFeedService.getFollowerFeed(userId, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
 		assertThat(feed, notNullValue());
 		assertThat(feed.getElements(), notNullValue());
@@ -152,13 +148,10 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 	
 	private List<Long> mockRandomUsers(int number) {
 		List<Long> users = new ArrayList<>();
-		List<String> usernames = new ArrayList<>();
 		for(int i = 0; i < number; i++) {
 			User mock = mockRandomUser();
 			users.add(mock.getId());
-			usernames.add(mock.getUsername());
 		}
-		mockUsers(usernames, true);
 		return users;
 	}
 	
