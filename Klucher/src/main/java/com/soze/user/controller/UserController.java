@@ -59,7 +59,7 @@ public class UserController {
     }
     model.addAttribute("username", username);
     model.addAttribute("loggedIn", loggedIn);
-    model.addAttribute("avatarPath", user.getAvatarPath());
+    model.addAttribute("avatarPath", user.getUserSettings().getAvatarPath());
     model.addAttribute("createdAt", user.getCreatedAt());
     model.addAttribute("numberOfLikes", user.getLikes().size());
     model.addAttribute("numberOfFollowers", followService.getNumberOfFollowers(user.getId()));

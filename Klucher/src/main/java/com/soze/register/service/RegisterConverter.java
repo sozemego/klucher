@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.soze.register.model.RegisterForm;
 import com.soze.user.model.User;
 import com.soze.user.model.UserRoles;
+import com.soze.usersettings.model.UserSettings;
 import com.soze.utils.FileUtils;
 
 /**
@@ -70,7 +71,8 @@ public class RegisterConverter {
     		hashedPassword,
     		userRoles,
     		new Timestamp(Instant.now().toEpochMilli()));
-    user.setAvatarPath(getRandomAvatarPath());
+    UserSettings userSettings = new UserSettings(getRandomAvatarPath(), null);
+    user.setUserSettings(userSettings);
     return user;
   }
   

@@ -30,7 +30,7 @@ public class DashboardController {
     String username = authentication.getName();
     User user = userDao.findOne(username);
     model.addAttribute("loggedUsername", user.getUsername());
-    model.addAttribute("avatarPath", user.getAvatarPath());
+    model.addAttribute("avatarPath", user.getUserSettings().getAvatarPath());
     model.addAttribute("createdAt", user.getCreatedAt());
     model.addAttribute("numberOfLikes", user.getLikes().size());
     model.addAttribute("numberOfFollowers", followService.getNumberOfFollowers(user.getId()));

@@ -1498,3 +1498,7 @@ function convertTimestampToMonthYear(timestamp) {
 	const year = date.getFullYear();
 	return month + "." + year;
 }
+
+function settingsOnLoad() {
+	pollNotifications();
+}

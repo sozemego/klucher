@@ -2,19 +2,14 @@ package com.soze.user.model;
 
 import java.io.Serializable;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 
-@Entity
+@Embeddable
 public class UserRoles implements Serializable {
 
 	private static final long serialVersionUID = -5506739313096234155L;
 	
-	@Id
-	@GeneratedValue
-	private Long id;
 	@NotNull
 	private boolean user;
 	@NotNull
@@ -27,14 +22,6 @@ public class UserRoles implements Serializable {
 	public UserRoles(boolean user, boolean admin) {
 		this.user = user;
 		this.admin = admin;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Long getId() {
-		return id;
 	}
 
 	public boolean isUser() {

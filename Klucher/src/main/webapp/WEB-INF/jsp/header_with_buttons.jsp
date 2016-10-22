@@ -20,7 +20,7 @@
 		</div>
 		<div class="header-buttons-right">
 			<span class="header-button"  id="header-button-settings">
-				<a href="/" class="header-button-link">
+				<a href="/settings" class="header-button-link">
 					<div class="header-button-content">
 						<img class="header-button-image" src="../../resources/images/settings.png"></img>
 						<span class="header-button-text">settings</span>

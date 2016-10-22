@@ -6,14 +6,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -23,6 +22,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.soze.usersettings.model.UserSettings;
 
 @Entity
 public class User implements UserDetails, Serializable {
@@ -41,11 +41,9 @@ public class User implements UserDetails, Serializable {
 	@NotNull
 	private String hashedPassword;
 
-	@OneToOne(cascade = { CascadeType.ALL })
+	@Embedded
 	@NotNull
 	private UserRoles userRoles;
-
-	private String avatarPath;
 	
 	@NotNull
 	@Column(name = "createdAt")
@@ -58,6 +56,10 @@ public class User implements UserDetails, Serializable {
 	@ElementCollection
 	@JsonIgnore
 	private List<Long> likes = new ArrayList<>();
+	
+	@NotNull
+	@Embedded
+	private UserSettings userSettings;
 
 	@SuppressWarnings("unused")
 	private User() {
@@ -99,14 +101,6 @@ public class User implements UserDetails, Serializable {
 		this.username = username;
 	}
 
-	public String getAvatarPath() {
-		return avatarPath;
-	}
-
-	public void setAvatarPath(String avatarPath) {
-		this.avatarPath = avatarPath;
-	}
-
 	public Integer getNotifications() {
 		return notifications;
 	}
@@ -140,6 +134,14 @@ public class User implements UserDetails, Serializable {
 
 	public void setLikes(List<Long> likes) {
 		this.likes = likes;
+	}
+
+	public UserSettings getUserSettings() {
+		return userSettings;
+	}
+
+	public void setUserSettings(UserSettings userSettings) {
+		this.userSettings = userSettings;
 	}
 
 	@Override

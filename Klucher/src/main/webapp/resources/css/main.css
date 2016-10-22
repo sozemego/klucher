@@ -958,3 +958,51 @@ a.likes-new-free-element {
 	text-align: right;
 	width: 100%;
 }
+
+/**
+
+	#SETTINGS
+
+*/
+
+.settings-container {
+	padding-top: 15px;
+	width: 75%;
+	margin: auto;
+	text-align: center;
+}
+
+.settings-header {
+	font-size: 1.25em;
+	padding-bottom: 15px;
+}
+
+p.settings-header {
+	margin: 0;
+}
+
+.settings-item {
+	padding-top: 5px;
+	padding-bottom: 5px;
+	margin: auto;
+	width: 50%;
+	display: flex;
+	justify-content: space-between;
+}
+
+.settings-text {
+	text-align: left;
+}
+
+.settings-input-number {
+	size: 25px;
+}
+
+.settings-item-profile-description {
+	height: 6em;
+}
+
+.settings-item-profile-description-element {
+	width: 240px;
+	resize: none;
+}

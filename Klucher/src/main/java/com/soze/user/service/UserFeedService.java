@@ -113,7 +113,7 @@ public class UserFeedService {
 	private Feed<UserLikeView> constructLikeFeed(List<User> users, FeedRequest feedRequest, int totalElements) {
 		List<UserLikeView> userLikeViews = new ArrayList<>();
 		for(User user: users) {
-			userLikeViews.add(new UserLikeView(user.getUsername(), user.getAvatarPath()));
+			userLikeViews.add(new UserLikeView(user.getUsername(), user.getUserSettings().getAvatarPath()));
 		}
 		Long next = null;
 		if(users.size() < ELEMENTS_PER_REQUEST || users.size() == totalElements) {
@@ -149,7 +149,7 @@ public class UserFeedService {
 	private List<UserFollowerView> constructFollowerFeed(List<User> users) {
 		List<UserFollowerView> userFollowerViews = new ArrayList<>();
 		users.forEach(user -> {
-			UserFollowerView view = new UserFollowerView(user.getUsername(), user.getAvatarPath());
+			UserFollowerView view = new UserFollowerView(user.getUsername(), user.getUserSettings().getAvatarPath());
 			userFollowerViews.add(view);
 		});
 		

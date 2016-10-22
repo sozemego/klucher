@@ -373,7 +373,7 @@ public class KluchFeedService {
 	}
 
 	private KluchUserView getKluchUserView(User user) {
-		return new KluchUserView(user.getUsername(), user.getAvatarPath());
+		return new KluchUserView(user.getUsername(), user.getUserSettings().getAvatarPath());
 	}
 	
 }
