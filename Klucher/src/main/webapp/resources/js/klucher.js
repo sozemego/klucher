@@ -172,6 +172,7 @@ function dashboardOnLoad() {
 	pollNotifications();
 	displayTimeCreated();
 	displayUserSocialStats();
+	processProfileDescription();
 }
 
 function attachCharacterCountListener() {
@@ -753,6 +754,7 @@ function userOnLoad() {
 	configureSubheaderButtons();
 	displayTimeCreated();
 	displayUserSocialStats();
+	processProfileDescription();
 }
 
 function setUpUserButtons() {
@@ -986,6 +988,13 @@ function displayUserSocialStats() {
 		text += " kluchs: " + userKluchs;
 	}
 	$(".user-info-text-social-stats").text(text);
+}
+
+function processProfileDescription() {
+	const profileDescriptionElement = $("#user-info-profile-description");
+	const profileDescriptionText = profileDescriptionElement.text();
+	const processedDescriptionText = processKluchText(profileDescriptionText);
+	profileDescriptionElement.html(processedDescriptionText);
 }
 
 
@@ -1501,4 +1510,91 @@ function convertTimestampToMonthYear(timestamp) {
 
 function settingsOnLoad() {
 	pollNotifications();
+	attachSaveSettingsListener();
+	configureDeleteAccountButton();
+}
+
+function attachSaveSettingsListener() {
+	const saveSettingsButton = $("#settings-save-button");
+	saveSettingsButton.click(function() {
+		const valid = validateSettings();
+		if(valid) {
+			saveSettings();
+		}
+	});
+}
+
+function validateSettings() {
+	const kluchsPerRequestInputElement = $("#settings-input-kluchs-per-request");
+	const kluchsPerRequestValue = parseInt(kluchsPerRequestInputElement.val());
+	if(isNaN(kluchsPerRequestValue) || kluchsPerRequestValue < 10 || kluchsPerRequestValue > 120) {
+		$("#settings-kluchs-per-request-text").addClass("settings-error");
+		return false;
+	}
+
+	const profileDescriptionElement = $("#settings-input-profile-description");
+	const profileDescriptionValue = profileDescriptionElement.val();
+	if(profileDescriptionValue.length > 140) {
+		$("#settings-profile-description-text").adClass("settings-error");
+		return false;
+	}
+
+	return true;
+}
+
+function saveSettings() {
+	const userSettings = gatherSettings();
+	const stringifiedSettings = JSON.stringify(userSettings);
+	$.ajax({
+		type: "POST",
+		data: stringifiedSettings,
+		dataType: "json",
+		headers: {
+      "Content-Type": "application/json"
+		},
+		url: "/settings",
+		error: function(xhr, status, error) {
+			displayAlert(xhr.responseJSON.message);
+		},
+		success: function(data, status, xhr) {
+			
+		}
+	});
+}
+
+function gatherSettings() {
+	const profileDescription = $("#settings-input-profile-description").val();
+	const kluchsPerRequest = parseInt($("#settings-input-kluchs-per-request").val());
+	return {
+		"avatarPath": "",
+		"kluchsPerRequest": kluchsPerRequest,
+		"profileDescription": profileDescription
+	};
+}
+
+function configureDeleteAccountButton() {
+	const deleteButtonElement = $("#settings-delete-button");
+	deleteButtonElement.click(function() {
+		const deleteButtonConfirmElement = $("#settings-delete-button-yes");
+		deleteButtonConfirmElement.fadeToggle();
+	});
+	const deleteButtonConfirmElement = $("#settings-delete-button-yes");
+	deleteButtonConfirmElement.click(function() {
+		$(this).fadeOut(2500, function() {
+			deleteAccount();
+		});
+	});
+}
+
+function deleteAccount() {
+	$.ajax({
+		url: "/settings/delete",
+		type: "DELETE",
+		error: function(xhr, status, error) {
+			displayAlert(xhr.responseJSON.message);
+		},
+		success: function(data, status, xhr) {
+			window.location = "/";
+		}
+	});
 }

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
@@ -33,11 +34,7 @@ import com.soze.user.model.User;
 @Service
 public class KluchFeedService {
 	
-	private final static int ELEMENTS_PER_REQUEST = 30;
-	private final PageRequest next = new PageRequest(0, ELEMENTS_PER_REQUEST,
-			new Sort(new Order(Direction.DESC, "timestamp")));
-	private final PageRequest previous = new PageRequest(0, ELEMENTS_PER_REQUEST,
-			new Sort(new Order(Direction.ASC, "timestamp")));
+	private static final int DEFAULT_ELEMENTS_PER_REQUEST = 30;
 	private final PageRequest exists = new PageRequest(0, 1);
 	private final KluchDao kluchDao;
 	private final UserDao userDao;
@@ -121,8 +118,9 @@ public class KluchFeedService {
 			throws UserDoesNotExistException, NullOrEmptyException {
 		User user = getUser(username);
 		List<Long> authorIds = getIdsOfAuthors(user.getId(), onlyForUser);
-		Page<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdGreaterThan(authorIds, id, previous);
-		Feed<KluchFeedElement> feed = constructFeed(getUserId(sourceUsername), kluchs);
+		Optional<User> sourceUser = getUserSafe(sourceUsername);
+		Page<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdGreaterThan(authorIds, id, getPreviousPageable(sourceUser));
+		Feed<KluchFeedElement> feed = constructFeed(getUserId(sourceUser), kluchs);
 		return feed;
 	}
 
@@ -157,8 +155,9 @@ public class KluchFeedService {
 			throws UserDoesNotExistException, NullOrEmptyException {
 		User user = getUser(username);
 		List<Long> authorIds = getIdsOfAuthors(user.getId(), onlyForUser);
-		Page<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdLessThan(authorIds, id, next);
-		Feed<KluchFeedElement> feed = constructFeed(getUserId(sourceUsername), kluchs);
+		Optional<User> sourceUser = getUserSafe(sourceUsername);
+		Page<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdLessThan(authorIds, id, getNextPageable(sourceUser));
+		Feed<KluchFeedElement> feed = constructFeed(getUserId(sourceUser), kluchs);
 		return feed;
 	}
 	
@@ -205,7 +204,8 @@ public class KluchFeedService {
 	public Feed<KluchFeedElement> getMentions(String username, FeedRequest feedRequest)
 			throws NullOrEmptyException, UserDoesNotExistException {
 		User user = getUser(username);
-		Page<Kluch> kluchs = kluchDao.findByMentionsInAndIdLessThan(username, feedRequest.getId(), next);
+		Optional<User> sourceUser = getUserSafe(feedRequest.getSource());
+		Page<Kluch> kluchs = kluchDao.findByMentionsInAndIdLessThan(username, feedRequest.getId(), getNextPageable(sourceUser));
 		Feed<KluchFeedElement> feed = constructFeed(user.getId(), kluchs);
 		return feed;
 	}
@@ -237,23 +237,11 @@ public class KluchFeedService {
 		boolean hasPoundCharacter = hashtagText.startsWith("#");
 		if (hasPoundCharacter) {
 			hashtagText = hashtagText.substring(1);
-		} 
-		Page<Kluch> kluchs = kluchDao.findByHashtagsInAndIdLessThan(hashtagText, feedRequest.getId(), next);
-		Feed<KluchFeedElement> feed = constructFeed(getUserId(feedRequest.getSource()), kluchs);
-		return feed;
-	}
-	
-	/**
-	 * Finds a user with given name and if it exists, returns its userId.
-	 * @param username
-	 * @return userId if user exists, null otherwise
-	 */
-	private Long getUserId(Optional<String> username) {
-		User user = userDao.findOne(username.orElse(null));
-		if(user == null) {
-			return null;
 		}
-		return user.getId();
+		Optional<User> sourceUser = getUserSafe(feedRequest.getSource());
+		Page<Kluch> kluchs = kluchDao.findByHashtagsInAndIdLessThan(hashtagText, feedRequest.getId(), getNextPageable(sourceUser));
+		Feed<KluchFeedElement> feed = constructFeed(getUserId(sourceUser), kluchs);
+		return feed;
 	}
 	
 	/**
@@ -371,9 +359,39 @@ public class KluchFeedService {
 		}
 		throw new UserDoesNotExistException("" + kluch.getAuthorId());
 	}
+	
+	/**
+	 * Tries to find user but does not throw exceptions if the user does not exist.
+	 * @param username
+	 * @return
+	 */
+	private Optional<User> getUserSafe(Optional<String> username) {
+		User user = userDao.findOne(username.orElse(null));
+		return user == null ? Optional.empty() : Optional.of(user);
+	}
 
 	private KluchUserView getKluchUserView(User user) {
 		return new KluchUserView(user.getUsername(), user.getUserSettings().getAvatarPath());
+	}
+	
+	private Pageable getPreviousPageable(Optional<User> user) {
+		return getPreviousPageable(user.isPresent() ? user.get().getUserSettings().getKluchsPerRequest() : DEFAULT_ELEMENTS_PER_REQUEST);
+	}
+
+	private Pageable getNextPageable(Optional<User> user) {
+		return getNextPageable(user.isPresent() ? user.get().getUserSettings().getKluchsPerRequest() : DEFAULT_ELEMENTS_PER_REQUEST);
+	}
+	
+	private Pageable getPreviousPageable(int numberOfElements) {
+		return new PageRequest(0, numberOfElements, new Sort(new Order(Direction.ASC, "id")));
+	}
+
+	private Pageable getNextPageable(int numberOfElements) {
+		return new PageRequest(0, numberOfElements, new Sort(new Order(Direction.DESC, "id")));
+	}
+	
+	private Long getUserId(Optional<User> user) {
+		return user.isPresent() ? user.get().getId() : null;
 	}
 	
 }

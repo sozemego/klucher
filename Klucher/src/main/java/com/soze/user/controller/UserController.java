@@ -64,6 +64,7 @@ public class UserController {
     model.addAttribute("numberOfLikes", user.getLikes().size());
     model.addAttribute("numberOfFollowers", followService.getNumberOfFollowers(user.getId()));
     model.addAttribute("kluchs", userService.getNumberOfKluchs(username));
+    model.addAttribute("profileDescription", user.getUserSettings().getProfileDescription());
     return "user";
   }
   

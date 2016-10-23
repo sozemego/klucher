@@ -25,13 +25,20 @@
 	<div class = "settings-container">
 		<p class = "settings-header">Settings</p>
 		<div class = "settings-item">
-			<span class = "settings-text">Kluchs per request (between 10 and 120):</span>
-			<input type="number" class="settings-input-number" max="120" min="10" id = "settings-input-kluchs-per-request">
+			<span class = "settings-text" id="settings-kluchs-per-request-text">Kluchs per request (between 10 and 120):</span>
+			<input type="number" class="settings-input-number" max="120" min="10" id = "settings-input-kluchs-per-request" value ="${userSettings.kluchsPerRequest}">
 		</div>
 		<div class = "settings-item settings-item-profile-description">
-			<span class = "settings-text">Profile description (maximum 140 characters):</span>
-			<textarea maxlength="140" class="settings-item-profile-description-element"></textarea>
+			<span class = "settings-text" id="settings-profile-description-text">Profile description (maximum 140 characters):</span>
+			<textarea maxlength="140" class="settings-item-profile-description-element" id="settings-input-profile-description">${userSettings.profileDescription}</textarea>
 		</div>
+		<div class = "settings-save-button-container">
+			<span class="settings-save-button" id="settings-save-button">save</span>
+		</div>
+		<div class="settings-delete-button" id="settings-delete-button">
+			delete account!
+		</div>
+		<div class="settings-delete-button settings-delete-button-inactive" id="settings-delete-button-yes">click to confirm</div>
 	</div>
 </div>
 <c:import url="footer.jsp"></c:import>

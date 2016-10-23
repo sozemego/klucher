@@ -43,6 +43,9 @@ public class KlucherAuthenticationProvider implements AuthenticationProvider {
     if (!sameHash) {
       throw new BadCredentialsException(username);
     }
+    if(user.isDeleted()) {
+    	throw new BadCredentialsException(username);
+    }
     List<GrantedAuthority> grantedAuths = new ArrayList<>();
     for (GrantedAuthority ga : user.getAuthorities()) {
       grantedAuths.add(ga);

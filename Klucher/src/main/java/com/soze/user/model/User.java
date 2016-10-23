@@ -60,6 +60,8 @@ public class User implements UserDetails, Serializable {
 	@NotNull
 	@Embedded
 	private UserSettings userSettings;
+	
+	private boolean deleted;
 
 	@SuppressWarnings("unused")
 	private User() {
@@ -184,6 +186,14 @@ public class User implements UserDetails, Serializable {
 	@Override
 	public boolean isEnabled() {
 		return true;
+	}
+	
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+	
+	public boolean isDeleted() {
+		return deleted;
 	}
 
 	@Override

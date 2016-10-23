@@ -50,6 +50,9 @@ public class TestWithMockUsers {
   
   protected User mockUser(String username, String password, boolean login) {
     User user = getBaseUser(username, password);
+    if(userDao.exists(username)) {
+    	return userDao.findOne(username);
+    }
     user = userDao.save(user);
     if(login) {
       SecurityContextHolder.getContext().setAuthentication(

@@ -32,6 +32,7 @@ public class RegisterConverter {
 
 	private static final Logger log = LoggerFactory.getLogger(RegisterConverter.class);
 	private static final String AVATARS_PATH = "config/avatars.txt";
+	private static final int DEFAULT_KLUCHS_PER_REQUEST = 30;
 	private final List<String> avatarPaths = new ArrayList<>();
 	private final Random random = new Random();
   private final PasswordEncoder passwordEncoder;
@@ -71,7 +72,7 @@ public class RegisterConverter {
     		hashedPassword,
     		userRoles,
     		new Timestamp(Instant.now().toEpochMilli()));
-    UserSettings userSettings = new UserSettings(getRandomAvatarPath(), null);
+    UserSettings userSettings = new UserSettings(getRandomAvatarPath(), DEFAULT_KLUCHS_PER_REQUEST, "");
     user.setUserSettings(userSettings);
     return user;
   }

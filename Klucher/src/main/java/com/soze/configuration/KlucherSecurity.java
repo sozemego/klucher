@@ -42,6 +42,7 @@ public class KlucherSecurity extends WebSecurityConfigurerAdapter {
     .csrf().disable()
     .authorizeRequests()
       .antMatchers("/dashboard/**").authenticated()
+      .antMatchers("/settings/**").authenticated()
       .antMatchers("/configprops/**").hasRole("ADMIN")
       .antMatchers("/logfile/**").hasRole("ADMIN")
       .antMatchers("/health").hasRole("ADMIN")

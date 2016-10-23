@@ -59,7 +59,7 @@ public class DashboardControllerTest extends TestWithMockUsers {
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(view().name("dashboard"))
-        .andExpect(model().attributeExists("loggedUsername", "avatarPath", "createdAt", "numberOfLikes", "numberOfFollowers"));
+        .andExpect(model().attributeExists("loggedUsername", "avatarPath", "createdAt", "numberOfLikes", "numberOfFollowers", "profileDescription"));
   }
 
 }

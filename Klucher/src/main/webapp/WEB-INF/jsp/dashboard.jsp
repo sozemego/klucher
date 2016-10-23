@@ -32,6 +32,7 @@
 				<div class="user-info-text">
 					<p class="user-info-text-name">${username}</p>
 					<p class="user-info-text-social-stats"></p>
+					<p class="user-info-profile-description" id="user-info-profile-description">${profileDescription}</p>
 					<p class="user-date-created" id="user-date-created"></p>
 				</div>
 			</div>

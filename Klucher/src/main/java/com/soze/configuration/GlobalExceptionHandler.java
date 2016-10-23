@@ -28,6 +28,7 @@ import com.soze.common.exceptions.ContainsWhiteSpaceException;
 import com.soze.common.exceptions.InvalidLengthException;
 import com.soze.common.exceptions.InvalidOwnerException;
 import com.soze.common.exceptions.InvalidTimestampException;
+import com.soze.common.exceptions.InvalidUserSettingException;
 import com.soze.common.exceptions.KluchDoesNotExistException;
 import com.soze.common.exceptions.KluchPreviouslyPostedException;
 import com.soze.common.exceptions.NotLoggedInException;
@@ -128,6 +129,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<Object> handleKluchDoesNotExistException(KluchDoesNotExistException e) {
 		String message = "Kluch does not exist";
 		return getResponse(message, HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler(InvalidUserSettingException.class)
+	public ResponseEntity<Object> handleInvalidUserSettingException(InvalidUserSettingException ex) {
+		String message = ex.getInvalidSetting() + " setting was invalid.";
+		return getResponse(message, HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)

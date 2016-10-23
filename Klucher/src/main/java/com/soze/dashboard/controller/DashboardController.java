@@ -36,6 +36,7 @@ public class DashboardController {
     model.addAttribute("numberOfFollowers", followService.getNumberOfFollowers(user.getId()));
     model.addAttribute("username", username);
     model.addAttribute("kluchs", userService.getNumberOfKluchs(username));
+    model.addAttribute("profileDescription", user.getUserSettings().getProfileDescription());
     return "dashboard";
   }
 

@@ -89,7 +89,8 @@ public class UserControllerTest extends TestWithMockUsers {
 			.andExpect(model().attribute("likes", equalTo(false)))
 			.andExpect(model().attribute("loggedUsername", equalTo(username)))
 			.andExpect(model().attribute("numberOfLikes", equalTo(0)))
-			.andExpect(model().attribute("numberOfFollowers", equalTo(0L)));
+			.andExpect(model().attribute("numberOfFollowers", equalTo(0L)))
+			.andExpect(model().attributeExists("profileDescription"));
 	}
 	
 	@Test
@@ -107,7 +108,8 @@ public class UserControllerTest extends TestWithMockUsers {
 			.andExpect(model().attribute("likes", equalTo(null)))
 			.andExpect(model().attribute("loggedUsername", equalTo(null)))
 			.andExpect(model().attribute("numberOfLikes", equalTo(0)))
-			.andExpect(model().attribute("numberOfFollowers", equalTo(0L)));
+			.andExpect(model().attribute("numberOfFollowers", equalTo(0L)))
+			.andExpect(model().attributeExists("profileDescription"));
 	}
 	
 	@Test

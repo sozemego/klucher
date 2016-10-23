@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -111,7 +112,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
     when(kluchDao.findByAuthorIdInAndIdLessThan(
         eq(Arrays.asList(user.getId())),
         eq(Long.MAX_VALUE),
-        eq(next)))
+        any()))
     .thenReturn(new PageImpl<>(randomKluchs));
     Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()), false);
     assertThat(feed.getElements(), notNullValue());
@@ -130,7 +131,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
     when(kluchDao.findByAuthorIdInAndIdLessThan(
         eq(Arrays.asList(user.getId())),
         eq(Long.MAX_VALUE),
-        eq(next)))
+        any()))
     .thenReturn(new PageImpl<>(randomKluchs));
     Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()), false);
     assertThat(feed.getElements(), notNullValue());
@@ -149,7 +150,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
     when(kluchDao.findByAuthorIdInAndIdGreaterThan(
         eq(Arrays.asList(user.getId())),
         eq(0L),
-        eq(previous)))
+        any()))
     .thenReturn(new PageImpl<>(randomKluchs));
     Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.PREVIOUS, null, Optional.empty()), false);
     assertThat(feed.getElements(), notNullValue());
@@ -168,7 +169,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
     when(kluchDao.findByAuthorIdInAndIdGreaterThan(
         eq(Arrays.asList(user.getId())),
         eq(0L),
-        eq(previous)))
+        any()))
     .thenReturn(new PageImpl<>(randomKluchs));
     Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.PREVIOUS, null, Optional.empty()), false);
     assertThat(feed.getElements(), notNullValue());
@@ -186,7 +187,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
     when(kluchDao.findByHashtagsInAndIdLessThan(
         eq(hashtagText),
         eq(0L),
-        eq(next)))
+        any()))
     .thenReturn(new PageImpl<>(Arrays.asList()));
     Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.PREVIOUS, null, Optional.empty()));
     assertThat(feed.getElements(), notNullValue());
@@ -204,7 +205,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
     when(kluchDao.findByHashtagsInAndIdLessThan(
         eq(hashtagText),
         eq(Long.MAX_VALUE),
-        eq(next)))
+        any()))
     .thenReturn(new PageImpl<>(Arrays.asList()));
     Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
     assertThat(feed.getElements(), notNullValue());
@@ -223,7 +224,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
     when(kluchDao.findByHashtagsInAndIdLessThan(
         eq(hashtagText),
         eq(Long.MAX_VALUE),
-        eq(next)))
+        any()))
     .thenReturn(new PageImpl<>(randomKluchs));
     Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
     assertThat(feed.getElements(), notNullValue());
@@ -242,7 +243,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
     when(kluchDao.findByHashtagsInAndIdLessThan(
         eq(hashtagText),
         eq(Long.MAX_VALUE),
-        eq(next)))
+        any()))
     .thenReturn(new PageImpl<>(randomKluchs));
     Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
     assertThat(feed.getElements(), notNullValue());
@@ -275,7 +276,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
   	when(kluchDao.findByMentionsInAndIdLessThan(
   			eq("user"),
   			eq(Long.MAX_VALUE),
-  			eq(next)))
+  			any()))
   	.thenReturn(new PageImpl<>(Arrays.asList()));
   	Feed<KluchFeedElement> feed = feedService.getMentions("user", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
   	assertThat(feed.getElements(), notNullValue());
@@ -294,7 +295,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
   	when(kluchDao.findByMentionsInAndIdLessThan(
   			eq("user"),
   			eq(Long.MAX_VALUE),
-  			eq(next)))
+  			any()))
   	.thenReturn(new PageImpl<>(kluchs));
   	Feed<KluchFeedElement> feed = feedService.getMentions("user", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
   	assertThat(feed.getElements(), notNullValue());
@@ -312,7 +313,7 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
   	when(kluchDao.findByMentionsInAndIdLessThan(
   			eq("user"),
   			eq(Long.MAX_VALUE),
-  			eq(next)))
+  			any()))
   	.thenReturn(new PageImpl<>(kluchs));
   	Feed<KluchFeedElement> feed = feedService.getMentions("user", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
   	assertThat(feed.getElements(), notNullValue());

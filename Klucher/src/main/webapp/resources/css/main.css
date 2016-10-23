@@ -332,7 +332,13 @@ body {
 
 .dashboard-section-user {
 	text-align: right;
-	padding-right: 50px;
+	padding-right: 100px;
+}
+
+.dashboard-section-right {
+	vertical-align: top;
+	padding-top: 3em;
+	padding-left: 2em;
 }
 
 .dashboard-section-feed {
@@ -397,7 +403,6 @@ body {
 }
 
 .user-buttons-container {
-	display: inline-block;
 	height: 100%;
 	vertical-align: top;
 	width: 100px;
@@ -429,6 +434,8 @@ body {
 	height: 100%;
 	display: table-cell;
 	position: relative;
+	width: 24px;
+	height: 24px;
 }
 
 .user-button-image {
@@ -469,6 +476,12 @@ body {
 .user-info-text-social-stats {
 	font-size: 0.95em;
 	color: gray;
+}
+
+.user-info-profile-description {
+	width: 250px;
+	overflow: hidden;
+	word-wrap: break-word;
 }
 
 .user-date-created {
@@ -1005,4 +1018,59 @@ p.settings-header {
 .settings-item-profile-description-element {
 	width: 240px;
 	resize: none;
+}
+
+.settings-save-button-container {
+	width: 50%;
+	text-align: right;
+	margin: auto;
+}
+
+.settings-save-button {
+	border: 1px dotted gray;
+	border-radius: 1px;
+	background-color: #add8e6;
+	cursor: pointer;
+	-webkit-transition-duration: 0.3s;
+	transition-duration: 0.3s;
+	-webkit-transition-property: background-color;
+	transition-property: background-color;
+}
+
+.settings-save-button:hover {
+	background-color: #1c8baf;
+}
+
+.settings-save-button:active {
+	background-color: #b71664;
+}
+
+.settings-error {
+	color: red;
+}
+
+.settings-delete-button {
+	margin: auto;
+	font-size: 1.5em;
+	border: 2px dotted red;
+	border-radius: 2px;
+	background-color: #add8e6;
+	cursor: pointer;
+	width: 150px;
+	-webkit-transition-duration: 0.3s;
+	transition-duration: 0.3s;
+	-webkit-transition-property: background-color;
+	transition-property: background-color;
+}
+
+.settings-delete-button:hover {
+	background-color: #b71664;
+}
+
+.settings-delete-button:active {
+	background-color: #b71664;
+}
+
+.settings-delete-button-inactive {
+	display: none;
 }
