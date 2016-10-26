@@ -137,7 +137,7 @@ public class KluchService {
 		if (kluch == null) {
 			throw new KluchDoesNotExistException();
 		}
-		if (user.getId() != kluch.getAuthorId()) {
+		if (user.getId() != kluch.getAuthor().getId()) {
 			throw new InvalidOwnerException("Kluch");
 		}
 		kluchDao.delete(kluch);
@@ -165,7 +165,6 @@ public class KluchService {
 		}
 		kluch.getLikes().add(user.getId());
 		kluch = kluchDao.save(kluch);
-		notificationService.addNotification(kluch.getAuthorId());
 		return kluch.getLikes().size();
 	}
 	
@@ -190,7 +189,6 @@ public class KluchService {
 		}
 		kluch.getLikes().remove(user.getId());
 		kluch = kluchDao.save(kluch);
-		notificationService.removeNotification(kluch.getAuthorId());
 		return kluch.getLikes().size();
 	}
 

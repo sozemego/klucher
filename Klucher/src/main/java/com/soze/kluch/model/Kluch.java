@@ -10,10 +10,16 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.soze.user.model.User;
 
 @Entity
 @Table(name = "kluchs")
@@ -22,8 +28,12 @@ public class Kluch {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
+
+	@OneToOne
+	@JoinColumn(name="author_id")
 	@NotNull
-	private long authorId;
+	private User author;
+	
 	@NotNull
 	private String text;
 	@NotNull
@@ -39,6 +49,7 @@ public class Kluch {
 	
 	@JsonIgnore
 	@ElementCollection
+	@LazyCollection(LazyCollectionOption.EXTRA)
 	private Set<Long> likes = new HashSet<>();
 
 	@SuppressWarnings("unused")
@@ -46,8 +57,8 @@ public class Kluch {
 
 	}
 	
-	public Kluch(long authorId, String text, Timestamp timestamp) {
-		this.authorId = authorId;
+	public Kluch(User author, String text, Timestamp timestamp) {
+		this.author = author;
 		this.text = text;
 		this.timestamp = timestamp;
 	}
@@ -60,12 +71,12 @@ public class Kluch {
 		this.id = id;
 	}
 
-	public long getAuthorId() {
-		return authorId;
+	public void setAuthor(User author) {
+		this.author = author;
 	}
-
-	public void setAuthorId(long authorId) {
-		this.authorId = authorId;
+	
+	public User getAuthor() {
+		return author;
 	}
 
 	public String getText() {

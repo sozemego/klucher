@@ -4,7 +4,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,6 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +40,7 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 	@Autowired
 	private UserFeedService userFeedService;
 
-	@MockBean
+	@Autowired
 	private FollowDao followDao;
 
 	@Before
@@ -70,7 +68,6 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 	@Test
 	public void testGetFollowerFeedByIdUserDoesNotExist() throws Exception {
 		long userId = 54L;
-		when(followDao.findAllByFolloweeId(userId)).thenReturn(new ArrayList<>());
 		Feed<UserFollowerView> feed = userFeedService.getFollowerFeed(userId, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
 		assertThat(feed, notNullValue());
 		assertThat(feed.getElements(), notNullValue());
@@ -84,7 +81,6 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 	public void testGetFollowerFeedByIdUserExistsNoFollowers() throws Exception {
 		User user = mockUser("username");
 		long userId = user.getId();
-		when(followDao.findAllByFolloweeId(userId)).thenReturn(new ArrayList<>());
 		Feed<UserFollowerView> feed = userFeedService.getFollowerFeed(userId, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
 		assertThat(feed, notNullValue());
 		assertThat(feed.getElements(), notNullValue());
@@ -99,9 +95,7 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 		User user = mockUser("username");
 		long userId = user.getId();
 		int numberOfFollows = 5;
-		List<Long> randomUsersIds =  mockRandomUsers(numberOfFollows);
-		List<Follow> follows = getFollowersFor(user, randomUsersIds);
-		when(followDao.findAllByFolloweeId(userId)).thenReturn(follows);
+		followUser(user, mockRandomUsers(numberOfFollows));
 		Feed<UserFollowerView> feed = userFeedService.getFollowerFeed(userId, new FeedRequest(FeedDirection.NEXT, null, Optional.empty()));
 		assertThat(feed, notNullValue());
 		assertThat(feed.getElements(), notNullValue());
@@ -155,15 +149,11 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 		return users;
 	}
 	
-	private List<Follow> getFollowersFor(User user, List<Long> randomUserIds) {
-		List<Follow> follows = new ArrayList<>();
-		int i = 0;
+	private void followUser(User user, List<Long> randomUserIds) {
 		for(Long id: randomUserIds) {
 			Follow follow = new Follow(id, user.getId());
-			follow.setId(i++);
-			follows.add(follow);
+			followDao.save(follow);
 		}
-		return follows;
 	}
 	
 	

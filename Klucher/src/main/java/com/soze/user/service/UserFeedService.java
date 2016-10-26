@@ -95,8 +95,7 @@ public class UserFeedService {
 			throw new NullOrEmptyException("FeedRequest");
 		}
 		List<Long> userIds = filterLikes(user.getLikes(), feedRequest);
-		List<User> users = getUsers(userIds);
-		return constructLikeFeed(users, feedRequest, user.getLikes().size());
+		return constructLikeFeed(userIds, feedRequest, user.getLikes().size());
 	}
 	
 	private List<Long> filterLikes(List<Long> userIds, FeedRequest feedRequest) {
@@ -110,16 +109,13 @@ public class UserFeedService {
 		return new ArrayList<>();
 	}
 	
-	private Feed<UserLikeView> constructLikeFeed(List<User> users, FeedRequest feedRequest, int totalElements) {
-		List<UserLikeView> userLikeViews = new ArrayList<>();
-		for(User user: users) {
-			userLikeViews.add(new UserLikeView(user.getUsername(), user.getUserSettings().getAvatarPath()));
-		}
+	private Feed<UserLikeView> constructLikeFeed(List<Long> userIds, FeedRequest feedRequest, int totalElements) {
+		List<UserLikeView> userLikeViews = userDao.findLikeViews(userIds);
 		Long next = null;
-		if(users.size() < ELEMENTS_PER_REQUEST || users.size() == totalElements) {
+		if(userIds.size() < ELEMENTS_PER_REQUEST || userIds.size() == totalElements) {
 			next = null;
 		} else {
-			next = users.get(users.size() - 1).getId();
+			next = userIds.get(userIds.size() - 1);
 		}
 		return new Feed<>(userLikeViews, null, next, totalElements);
 	}
@@ -127,8 +123,7 @@ public class UserFeedService {
 	private Feed<UserFollowerView> constructFollowerFeed(List<Follow> follows, FeedRequest feedRequest) {
 		List<Follow> filteredFollows = filterFollows(follows, feedRequest);
 		List<Long> followerIds = getFollowerIds(filteredFollows, feedRequest);
-		List<User> followers = userDao.findAll(followerIds);
-		List<UserFollowerView> userFollowerViews = constructFollowerFeed(followers);
+		List<UserFollowerView> userFollowerViews = userDao.findFollowerViews(followerIds);
 		Long next = getNextIdFollowers(filteredFollows, follows.size());
 		return new Feed<>(userFollowerViews, null, next, follows.size());
 	}
@@ -144,16 +139,6 @@ public class UserFeedService {
 		return follows.stream()
 				.map(follow -> follow.getFollowerId())
 				.collect(Collectors.toList());
-	}
-	
-	private List<UserFollowerView> constructFollowerFeed(List<User> users) {
-		List<UserFollowerView> userFollowerViews = new ArrayList<>();
-		users.forEach(user -> {
-			UserFollowerView view = new UserFollowerView(user.getUsername(), user.getUserSettings().getAvatarPath());
-			userFollowerViews.add(view);
-		});
-		
-		return userFollowerViews;
 	}
 	
 	private Long getNextIdFollowers(List<Follow> filteredFollows, int total) {
@@ -172,10 +157,6 @@ public class UserFeedService {
 			throw new UserDoesNotExistException(username);
 		}
 		return user;
-	}
-	
-	private List<User> getUsers(List<Long> userIds) {
-		return userDao.findAll(userIds);
 	}
 	
 }

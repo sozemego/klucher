@@ -30,6 +30,7 @@ import com.soze.kluch.model.FeedRequest;
 import com.soze.kluch.model.Kluch;
 import com.soze.kluch.service.KluchFeedService;
 import com.soze.kluch.service.KluchService;
+import com.soze.user.model.User;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -79,8 +80,8 @@ public class KluchControllerTest extends TestWithMockUsers {
   @Test
   public void testValidKluch() throws Exception {
   	String kluchText = "text";
-    mockUser("username", "password", true); 
-    when(service.post("username", kluchText)).thenReturn(new Kluch(0, null, null));
+    User user = mockUser("username", "password", true); 
+    when(service.post("username", kluchText)).thenReturn(new Kluch(user, null, null));
     mvc.perform(MockMvcRequestBuilders.post("/kluch")
         .param("kluchText", kluchText)
         .accept(MediaType.APPLICATION_JSON)

@@ -319,25 +319,12 @@ public class KluchFeedService {
 	 *           if any of the Kluchs' authors don't exist
 	 */
 	private List<KluchFeedElement> convertKluchsToFeedElements(Long userId, List<Kluch> kluchs) throws UserDoesNotExistException {
-		Set<Long> authorIds = kluchs.stream().map(k -> k.getAuthorId()).collect(Collectors.toSet());
+		Set<Long> authorIds = kluchs.stream().map(k -> k.getAuthor().getId()).collect(Collectors.toSet());
 		List<User> users = userDao.findAll(authorIds);
 		List<KluchFeedElement> feedElements = new ArrayList<>(kluchs.size());
 		for (Kluch k : kluchs) {
 			feedElements.add(new KluchFeedElement(k, getKluchUserView(getUserForKluch(k, users)), doesUserLikeKluch(userId, k), k.getLikes().size()));
 		}
-		/**
-		Collections.sort(feedElements, (k1, k2) -> {
-			long k1Time = k1.getKluch().getTimestamp().getTime();
-			long k2Time = k2.getKluch().getTimestamp().getTime();
-			if (k1Time < k2Time) {
-				return 1;
-			}
-			if (k1Time > k2Time) {
-				return -1;
-			}
-			return 0;
-		});
-		*/
 		return feedElements;
 	}
 
@@ -353,11 +340,11 @@ public class KluchFeedService {
 	
 	private User getUserForKluch(Kluch kluch, List<User> users) throws UserDoesNotExistException {
 		for (User user : users) {
-			if (user.getId() == kluch.getAuthorId()) {
+			if (user.getId() == kluch.getAuthor().getId()) {
 				return user;
 			}
 		}
-		throw new UserDoesNotExistException("" + kluch.getAuthorId());
+		throw new UserDoesNotExistException("" + kluch.getAuthor().getUsername());
 	}
 	
 	/**

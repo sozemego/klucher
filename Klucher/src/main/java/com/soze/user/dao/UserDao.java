@@ -1,8 +1,12 @@
 package com.soze.user.dao;
 
+import java.util.Collection;
 import java.util.List;
 
+import com.soze.kluch.model.KluchUserView;
 import com.soze.user.model.User;
+import com.soze.user.model.UserFollowerView;
+import com.soze.user.model.UserLikeView;
 
 public interface UserDao {
 
@@ -33,5 +37,13 @@ public interface UserDao {
   public void delete(Iterable<User> users);
   
   public void deleteAll();
+  
+  public UserLikeView findLikeView(Long id);
+  
+  public List<UserLikeView> findLikeViews(Collection<Long> ids);
+  
+  public UserFollowerView findFollowerView(Long id);
+  
+  public List<UserFollowerView> findFollowerViews(Collection<Long> ids);
   
 }

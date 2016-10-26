@@ -3,18 +3,15 @@ package com.soze.kluch.service;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,17 +33,12 @@ import com.soze.user.model.User;
 @ActiveProfiles("test")
 public class KluchServiceTest extends TestWithMockUsers {
 
-	@MockBean
+	@Autowired
 	private KluchDao kluchDao;
-	
-	@MockBean
-	private KluchAssembler assembler;
 
 	@Autowired
 	@InjectMocks
 	private KluchService kluchService;
-	
-	private final AtomicLong ids = new AtomicLong(1);
 
 	@Test(expected = InvalidLengthException.class)
 	public void testTooLongKluch() throws Exception {
@@ -66,12 +58,9 @@ public class KluchServiceTest extends TestWithMockUsers {
 		String kluchText = generateString(140);
 		String author = "author";
 		User user = mockUser(author, false);
-		Kluch kluch = getKluch(user, kluchText);
-		when(assembler.assembleKluch(user, kluchText)).thenReturn(kluch);
-		when(kluchDao.save(kluch)).thenReturn(kluch);
 		Kluch firstKluch = kluchService.post(author, kluchText);
 		assertThat(firstKluch, notNullValue());
-		assertThat(firstKluch.getAuthorId(), equalTo(user.getId()));
+		assertThat(firstKluch.getAuthor().getId(), equalTo(user.getId()));
 		assertThat(firstKluch.getText(), equalTo(kluchText));
 	}
 
@@ -98,7 +87,6 @@ public class KluchServiceTest extends TestWithMockUsers {
 	@Test(expected = KluchPreviouslyPostedException.class)
 	public void testAlreadyPosted() throws Exception {
 		mockUser("author");
-		when(kluchDao.save(any(Kluch.class))).thenReturn(new Kluch(0L, null, null));
 		String kluchText = generateString(50);
 		kluchService.post("author", kluchText);
 		kluchService.post("author", kluchText);
@@ -108,21 +96,15 @@ public class KluchServiceTest extends TestWithMockUsers {
 	public void testPostDifferentContent() throws Exception {
 		String kluchText = generateString(50);
 		String author = "author";
-		User user = mockUser(author);
-		Kluch kluch = getKluch(user, kluchText);
-		when(assembler.assembleKluch(user, kluchText)).thenReturn(kluch);
-		when(kluchDao.save(kluch)).thenReturn(kluch);
+		User user = mockUser(author);		
 		Kluch firstKluch = kluchService.post(author, kluchText);
 		assertThat(firstKluch, notNullValue());
-		assertThat(firstKluch.getAuthorId(), equalTo(user.getId()));
+		assertThat(firstKluch.getAuthor().getId(), equalTo(user.getId()));
 		assertThat(firstKluch.getText(), equalTo(kluchText));
 		String secondKluchText = generateString(51);
-		kluch = getKluch(user, secondKluchText);
-		when(kluchDao.save(kluch)).thenReturn(kluch);
-		when(assembler.assembleKluch(user, secondKluchText)).thenReturn(kluch);
 		Kluch anotherKluch = kluchService.post(author, secondKluchText);
 		assertThat(anotherKluch, notNullValue());
-		assertThat(anotherKluch.getAuthorId(), equalTo(user.getId()));
+		assertThat(anotherKluch.getAuthor().getId(), equalTo(user.getId()));
 		assertThat(anotherKluch.getText(), equalTo(secondKluchText));
 	}
 
@@ -131,21 +113,15 @@ public class KluchServiceTest extends TestWithMockUsers {
 		String kluchText = generateString(50);
 		String author = "author";
 		User user = mockUser(author);
-		Kluch kluch = getKluch(user, kluchText);
-		when(assembler.assembleKluch(user, kluchText)).thenReturn(kluch);
-		when(kluchDao.save(kluch)).thenReturn(kluch);
 		Kluch firstKluch = kluchService.post(author, kluchText);
 		assertThat(firstKluch, notNullValue());
-		assertThat(firstKluch.getAuthorId(), equalTo(user.getId()));
+		assertThat(firstKluch.getAuthor().getId(), equalTo(user.getId()));
 		assertThat(firstKluch.getText(), equalTo(kluchText));
 		String anotherAuthor = "author2";
 		User anotherUser = mockUser(anotherAuthor);
-		kluch = getKluch(anotherUser, kluchText);
-		when(kluchDao.save(kluch)).thenReturn(kluch);
-		when(assembler.assembleKluch(anotherUser, kluchText)).thenReturn(kluch);
 		Kluch anotherKluch = kluchService.post(anotherAuthor, kluchText);
 		assertThat(anotherKluch, notNullValue());
-		assertThat(anotherKluch.getAuthorId(), equalTo(anotherUser.getId()));
+		assertThat(anotherKluch.getAuthor().getId(), equalTo(anotherUser.getId()));
 		assertThat(anotherKluch.getText(), equalTo(kluchText));
 	}
 
@@ -177,8 +153,8 @@ public class KluchServiceTest extends TestWithMockUsers {
 		mockUser(username);
 		String differentUsername = "danny";
 		User anotherUser = mockUser(differentUsername);
-		Kluch kluch = getKluch(anotherUser, "text");
-		when(kluchDao.findOne(kluch.getId())).thenReturn(kluch);
+		Kluch kluch = postKluch(anotherUser, "text");
+		
 		kluchService.deleteKluch(username, kluch.getId());
 	}
 
@@ -186,10 +162,8 @@ public class KluchServiceTest extends TestWithMockUsers {
 	public void deleteKluchEverythingValid() {
 		String username = "lolers";
 		User user = mockUser(username);
-		Kluch kluch = getKluch(user, "text");
-		when(kluchDao.findOne(kluch.getId())).thenReturn(kluch);
+		Kluch kluch = postKluch(user, generateString(50));
 		kluchService.deleteKluch(username, kluch.getId());
-		verify(kluchDao).delete(kluch);
 	}
 	
 	@Test(expected = NullOrEmptyException.class)
@@ -211,38 +185,32 @@ public class KluchServiceTest extends TestWithMockUsers {
 	@Test
 	public void testLikeKluchValid() {
 		mockUser("user");
-		User anotherUser = mockUser("liked");
-		Kluch kluch = getKluch(anotherUser, "text");
-		when(kluchDao.findOne(1L)).thenReturn(kluch);
-		when(kluchDao.save(kluch)).thenReturn(kluch);
-		int liked = kluchService.likeKluch("user", 1L);
-		assertThat(liked, equalTo(1));
+		User liked = mockUser("liked");
+		Kluch kluch = postKluch(liked, "text");
+		int likes = kluchService.likeKluch("user", kluch.getId());
+		assertThat(likes, equalTo(1));
 	}
 	
 	@Test
 	public void testLikeKluchValidTwice() {
-		mockUser("user");
+		User user = mockUser("user");
 		mockUser("secondUser");
-		User anotherUser = mockUser("liked");
-		Kluch kluch = getKluch(anotherUser, "text");
-		when(kluchDao.findOne(1L)).thenReturn(kluch);
-		when(kluchDao.save(kluch)).thenReturn(kluch);
-		int liked = kluchService.likeKluch("user", 1L);
+		mockUser("liked");
+		Kluch kluch = postKluch(user, generateString(50));
+		int liked = kluchService.likeKluch("user", kluch.getId());
 		assertThat(liked, equalTo(1));
-		liked = kluchService.likeKluch("secondUser", 1L);
+		liked = kluchService.likeKluch("secondUser", kluch.getId());
 		assertThat(liked, equalTo(2));
 	}
 	
 	@Test
 	public void testLikeKluchValidTwiceSameUser() {
-		mockUser("user");
-		User anotherUser = mockUser("liked");
-		Kluch kluch = getKluch(anotherUser, "text");
-		when(kluchDao.findOne(1L)).thenReturn(kluch);
-		when(kluchDao.save(kluch)).thenReturn(kluch);
-		int liked = kluchService.likeKluch("user", 1L);
+		User user = mockUser("user");
+		mockUser("liked");
+		Kluch kluch = postKluch(user, generateString(50));
+		int liked = kluchService.likeKluch("user", kluch.getId());
 		assertThat(liked, equalTo(1));
-		liked = kluchService.likeKluch("user", 1L);
+		liked = kluchService.likeKluch("user", kluch.getId());
 		assertThat(liked, equalTo(1));
 	}
 	
@@ -266,11 +234,10 @@ public class KluchServiceTest extends TestWithMockUsers {
 	public void testUnlikeKluchValid() {
 		User user = mockUser("user");
 		User anotherUser = mockUser("liked");
-		Kluch kluch = getKluch(anotherUser, "text");
+		Kluch kluch = postKluch(anotherUser, generateString(50));
 		kluch.getLikes().add(user.getId());
-		when(kluchDao.findOne(1L)).thenReturn(kluch);
-		when(kluchDao.save(kluch)).thenReturn(kluch);
-		int liked = kluchService.unlikeKluch("user", 1L);
+		
+		int liked = kluchService.unlikeKluch("user", kluch.getId());
 		assertThat(liked, equalTo(0));
 	}
 	
@@ -279,14 +246,13 @@ public class KluchServiceTest extends TestWithMockUsers {
 		User user = mockUser("user");
 		User secondUser = mockUser("secondUser");
 		User anotherUser = mockUser("liked");
-		Kluch kluch = getKluch(anotherUser, "text");
+		Kluch kluch = postKluch(anotherUser, generateString(50));
 		kluch.getLikes().add(user.getId());
 		kluch.getLikes().add(secondUser.getId());
-		when(kluchDao.findOne(1L)).thenReturn(kluch);
-		when(kluchDao.save(kluch)).thenReturn(kluch);
-		int liked = kluchService.unlikeKluch("user", 1L);
+		
+		int liked = kluchService.unlikeKluch("user", kluch.getId());
 		assertThat(liked, equalTo(1));
-		liked = kluchService.unlikeKluch("secondUser", 1L);
+		liked = kluchService.unlikeKluch("secondUser", kluch.getId());
 		assertThat(liked, equalTo(0));
 	}
 	
@@ -294,20 +260,17 @@ public class KluchServiceTest extends TestWithMockUsers {
 	public void testUnlikeKluchValidTwiceSameUser() {
 		User user = mockUser("user");
 		User anotherUser = mockUser("liked");
-		Kluch kluch = getKluch(anotherUser, "text");
+		Kluch kluch = postKluch(anotherUser, generateString(50));
 		kluch.getLikes().add(user.getId());
-		when(kluchDao.findOne(1L)).thenReturn(kluch);
-		when(kluchDao.save(kluch)).thenReturn(kluch);
-		int liked = kluchService.unlikeKluch("user", 1L);
+		
+		int liked = kluchService.unlikeKluch("user", kluch.getId());
 		assertThat(liked, equalTo(0));
-		liked = kluchService.unlikeKluch("user", 1L);
+		liked = kluchService.unlikeKluch("user", kluch.getId());
 		assertThat(liked, equalTo(0));
 	}
-
-	private Kluch getKluch(User user, String text) {
-		Kluch kluch = new Kluch(user.getId(), text, null);
-		kluch.setId(ids.getAndIncrement());
-		return kluch;
+	
+	private Kluch postKluch(User user, String text) {
+		return kluchService.post(user.getUsername(), text);
 	}
 
 	private String generateString(int length) {
@@ -315,8 +278,14 @@ public class KluchServiceTest extends TestWithMockUsers {
 			return "";
 		}
 		StringBuilder sb = new StringBuilder(length);
-		for (int i = 0; i < length; i++) {
-			sb.append("c");
+		while(sb.length() < length) {
+			UUID uuid = UUID.randomUUID();
+			String uuidString = uuid.toString();
+			if(sb.capacity() < uuidString.length()) {
+				sb.append(uuidString.substring(0, sb.capacity()));
+			} else {
+				sb.append(uuidString);
+			}
 		}
 		return sb.toString();
 	}

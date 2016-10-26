@@ -1,11 +1,15 @@
 package com.soze.usersettings.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Embeddable;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 
 @Embeddable
-public class UserSettings {
+public class UserSettings implements Serializable {
+	
+	private static final long serialVersionUID = 5237615414873156759L;
 
 	@NotNull
 	private String avatarPath;

@@ -2,10 +2,14 @@ package com.soze.kluch.dao;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -16,14 +20,16 @@ import com.soze.kluch.repository.KluchRepository;
 public class KluchDatabase implements KluchDao {
 
 	private final KluchRepository kluchRepository;
+	private final EntityManager em;
 
 	@Autowired
-	public KluchDatabase(KluchRepository kluchRepository) {
+	public KluchDatabase(KluchRepository kluchRepository, EntityManager em) {
 		this.kluchRepository = kluchRepository;
+		this.em = em;
 	}
 
 	@Override
-	@CacheEvict(cacheNames = "kluchCount", key = "#kluch.authorId")
+	@CacheEvict(cacheNames = "kluchCount", key = "#kluch.author.id")
 	public Kluch save(Kluch kluch) {
 		return kluchRepository.save(kluch);
 	}
@@ -70,12 +76,23 @@ public class KluchDatabase implements KluchDao {
 
 	@Override
 	public Page<Kluch> findByAuthorIdInAndIdGreaterThan(Iterable<Long> authorIds, long greaterThanId, Pageable pageRequest) {
-		return kluchRepository.findByAuthorIdInAndIdGreaterThan(authorIds, greaterThanId, pageRequest);
+		String queryString = "SELECT k FROM Kluch k WHERE k.author.id IN (:ids) AND k.id > :previous";
+		TypedQuery<Kluch> query = em.createQuery(queryString, Kluch.class);
+		query.setParameter("ids", authorIds);
+		query.setParameter("previous", greaterThanId);
+		query.setMaxResults(pageRequest.getPageSize());
+		return new PageImpl<>(query.getResultList());
 	}
 	
 	@Override
 	public Page<Kluch> findByAuthorIdInAndIdLessThan(Iterable<Long> authorIds, long lessThanId, Pageable pageRequest) {
-		return kluchRepository.findByAuthorIdInAndIdLessThan(authorIds, lessThanId, pageRequest);
+		String queryString = "SELECT k FROM Kluch k WHERE k.author.id IN (:ids) AND k.id < :next";
+		TypedQuery<Kluch> query = em.createQuery(queryString, Kluch.class);
+		query.setParameter("ids", authorIds);
+		query.setParameter("next", lessThanId);
+		query.setMaxResults(pageRequest.getPageSize());
+		List<Kluch> kluchs = query.getResultList();
+		return new PageImpl<>(kluchs);
 	}
 	
 	@Override
@@ -87,16 +104,14 @@ public class KluchDatabase implements KluchDao {
 	public Page<Kluch> findByHashtagsInAndIdLessThan(String hashtag, long lessThanId, Pageable pageRequest) {
 		return kluchRepository.findByHashtagsInAndIdLessThan(hashtag, lessThanId, pageRequest);
 	}
-
-	@Override
-	public void deleteByAuthorId(Long authorId) {
-		kluchRepository.deleteByAuthorId(authorId);
-	}
 	
 	@Override
 	@Cacheable(cacheNames = "kluchCount")
 	public Long countByAuthorId(Long authorId) {
-		return kluchRepository.countByAuthorId(authorId);
+		String queryString = "SELECT COUNT(*) FROM Kluch k WHERE k.id = ?1";
+		TypedQuery<Long> query = em.createQuery(queryString, Long.class);
+		query.setParameter(1, authorId);
+		return query.getSingleResult();
 	}
 
 }

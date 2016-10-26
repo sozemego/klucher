@@ -1,7 +1,7 @@
 package com.soze.user.model;
 
 /**
- * Object that is meant to be sent as a part of a list of followers. It contains
+ * Object that is meant to be sent as a part of a list of likes. It contains
  * data relevant to displaying a list of users that like another user.
  *
  * @author kamil jurek

@@ -34,8 +34,6 @@ public interface KluchDao {
 	public Page<Kluch> findByMentionsInAndIdLessThan(String mention, long lessThanId, Pageable pageRequest);
 	
 	public Page<Kluch> findByHashtagsInAndIdLessThan(String hashtag, long lessThanId, Pageable pageRequest);
-
-	public void deleteByAuthorId(Long authorId);
 	
 	public Long countByAuthorId(Long authorId);
 

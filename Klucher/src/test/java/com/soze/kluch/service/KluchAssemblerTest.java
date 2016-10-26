@@ -21,7 +21,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(0));
@@ -34,7 +34,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(1));
 		assertThat(kluch.getHashtags().contains("hashtag"), equalTo(true));
@@ -48,7 +48,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(1));
 		assertThat(kluch.getHashtags().contains("hashtagsuperhashtag"), equalTo(true));
@@ -62,7 +62,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(1));
 		assertThat(kluch.getHashtags().contains("hashtag_superhashtag"), equalTo(true));
@@ -76,7 +76,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(1));
 		assertThat(kluch.getHashtags().contains("12333441255533990"), equalTo(true));
@@ -90,7 +90,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getHashtags().contains("$%%@@#$&&^%%^&&%^&&%%^&"), equalTo(false));
@@ -104,7 +104,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(3));
 		assertThat(kluch.getHashtags().contains("one"), equalTo(true));
@@ -120,7 +120,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(1));
 		assertThat(kluch.getHashtags().contains("one"), equalTo(true));
@@ -136,7 +136,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(3));
 		assertThat(kluch.getHashtags().contains("bla"), equalTo(true));
@@ -152,7 +152,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(0));
@@ -165,7 +165,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(0));
@@ -178,7 +178,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(0));
@@ -191,7 +191,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(1));
 		assertThat(kluch.getHashtags().contains("bla"), equalTo(true));
@@ -205,7 +205,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(2));
 		assertThat(kluch.getHashtags().contains("bla"), equalTo(true));
@@ -220,7 +220,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(1));
@@ -234,7 +234,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(1));
@@ -248,7 +248,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(1));
@@ -262,7 +262,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(0));
@@ -276,7 +276,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(3));
@@ -292,7 +292,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(1));
@@ -308,7 +308,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(0));
@@ -321,7 +321,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(0));
@@ -334,7 +334,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(0));
@@ -347,7 +347,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(1));
@@ -361,7 +361,7 @@ public class KluchAssemblerTest {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn(1L);
 		Kluch kluch = assembler.assembleKluch(user, kluchText);
-		assertThat(kluch.getAuthorId(), equalTo(1L));
+		assertThat(kluch.getAuthor().getId(), equalTo(1L));
 		assertThat(kluch.getText(), equalTo(kluchText));
 		assertThat(kluch.getHashtags().size(), equalTo(0));
 		assertThat(kluch.getMentions().size(), equalTo(2));
