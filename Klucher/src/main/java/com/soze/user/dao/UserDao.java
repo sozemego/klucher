@@ -3,7 +3,6 @@ package com.soze.user.dao;
 import java.util.Collection;
 import java.util.List;
 
-import com.soze.kluch.model.KluchUserView;
 import com.soze.user.model.User;
 import com.soze.user.model.UserFollowerView;
 import com.soze.user.model.UserLikeView;

@@ -20,10 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +29,6 @@ import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
 import com.soze.common.feed.Feed;
 import com.soze.common.feed.FeedDirection;
-import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.FeedRequest;
 import com.soze.kluch.model.Kluch;
 import com.soze.kluch.model.KluchFeedElement;
@@ -44,16 +39,6 @@ import com.soze.user.model.User;
 @Transactional
 @ActiveProfiles("test")
 public class KluchFeedServiceTest extends TestWithMockUsers {
-  
-  private static final int ELEMENTS_PER_REQUEST = 30;
-  private final PageRequest next = new PageRequest(0, ELEMENTS_PER_REQUEST,
-			new Sort(new Order(Direction.DESC, "timestamp")));
-	private final PageRequest previous = new PageRequest(0, ELEMENTS_PER_REQUEST,
-			new Sort(new Order(Direction.ASC, "timestamp")));
-  private final PageRequest exists = new PageRequest(0, 1);
-  
-  @Autowired
-  private KluchDao kluchDao;
   
   @Autowired
   @InjectMocks

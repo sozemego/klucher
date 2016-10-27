@@ -3,7 +3,6 @@ package com.soze.kluch.service;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
 
 import java.util.UUID;
 
@@ -23,7 +22,6 @@ import com.soze.common.exceptions.KluchDoesNotExistException;
 import com.soze.common.exceptions.KluchPreviouslyPostedException;
 import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
-import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
 import com.soze.user.model.User;
 
@@ -32,9 +30,6 @@ import com.soze.user.model.User;
 @Transactional
 @ActiveProfiles("test")
 public class KluchServiceTest extends TestWithMockUsers {
-
-	@Autowired
-	private KluchDao kluchDao;
 
 	@Autowired
 	@InjectMocks

@@ -116,7 +116,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<Object> handleIllegal(IllegalArgumentException ex) {
 		log.info("IllegalArgumentException", ex);
-		return getResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+		return getResponse("Some error occured", HttpStatus.BAD_REQUEST);
 	}
 	
 	@ExceptionHandler(InvalidOwnerException.class)
