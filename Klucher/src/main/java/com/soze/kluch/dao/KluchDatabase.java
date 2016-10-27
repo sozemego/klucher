@@ -76,7 +76,7 @@ public class KluchDatabase implements KluchDao {
 
 	@Override
 	public Page<Kluch> findByAuthorIdInAndIdGreaterThan(Iterable<Long> authorIds, long greaterThanId, Pageable pageRequest) {
-		String queryString = "SELECT k FSROM Kluch k WHERE k.author.id IN (:ids) AND k.id > :previous";
+		String queryString = "SELECT k FROM Kluch k WHERE k.author.id IN (:ids) AND k.id > :previous";
 		TypedQuery<Kluch> query = em.createQuery(queryString, Kluch.class);
 		query.setParameter("ids", authorIds);
 		query.setParameter("previous", greaterThanId);
@@ -86,7 +86,7 @@ public class KluchDatabase implements KluchDao {
 	
 	@Override
 	public Page<Kluch> findByAuthorIdInAndIdLessThan(Iterable<Long> authorIds, long lessThanId, Pageable pageRequest) {
-		String queryString = "SELECT k FSROM Kluch k WHERE k.author.id IN (:ids) AND k.id < :next";
+		String queryString = "SELECT k FROM Kluch k WHERE k.author.id IN (:ids) AND k.id < :next";
 		TypedQuery<Kluch> query = em.createQuery(queryString, Kluch.class);
 		query.setParameter("ids", authorIds);
 		query.setParameter("next", lessThanId);
