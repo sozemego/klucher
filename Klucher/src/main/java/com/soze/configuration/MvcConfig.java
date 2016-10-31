@@ -1,6 +1,7 @@
 package com.soze.configuration;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -15,11 +16,14 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
   @Autowired
   private RateLimitInterceptor rateLimitInterceptor;
   
+  @Value("${cache.cacheperiod}")
+  private Integer cachePeriod;
+  
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
     registry
     	.addResourceHandler("/resources/**")
-    	.addResourceLocations("/resources/").setCachePeriod(0);
+    	.addResourceLocations("/resources/").setCachePeriod(cachePeriod);
   }
   
   @Override

@@ -1,6 +1,5 @@
 package com.soze.chat.service;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
 
 import com.soze.chat.model.ChatMessageBundle;
-import com.soze.chat.model.ChatRoom;
 import com.soze.chat.model.InboundSocketMessage;
 import com.soze.chat.model.InboundSocketMessage.InboundMessageType;
 import com.soze.chat.model.OutboundSocketMessage;
@@ -153,7 +151,7 @@ public class ChatService {
 		return roomContainer.getUserCounts();
 	}
 	
-	@Scheduled(initialDelayString = "${chat.updateusercountinterval}", fixedDelayString = "${chat.updateusercountinterval}")
+	@Scheduled(initialDelayString = "${chat.updateusercount.interval}", fixedDelayString = "${chat.updateusercount.interval}")
 	public void updateUserCounts() {
 		Map<String, Integer> userCounts = roomContainer.getUserCounts();
 		for(Map.Entry<String, Integer> entry: userCounts.entrySet()) {
