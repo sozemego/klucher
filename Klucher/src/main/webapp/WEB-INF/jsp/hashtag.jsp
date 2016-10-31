@@ -19,10 +19,12 @@
 <input type="hidden" id="data" data-username="${username}" data-logged-in="${loggedIn}" data-hashtag="${hashtag}">
 <c:import url="header_with_buttons.jsp"></c:import>
 <div class="page">
-	<div class="hashtag-name-title-container">
-		<span class="hashtag-name-title">
-			#${hashtag}
-		</span>
+	<div class="hashtag-name-title-divider">
+		<div class="hashtag-name-title-container">
+			<span class="hashtag-name-title">
+				#${hashtag}
+			</span>
+		</div>
 	</div>
 	<div class="dashboard">
 		<div class="dashboard-section dashboard-section-user">

@@ -1598,3 +1598,171 @@ function deleteAccount() {
 		}
 	});
 }
+
+var stompClient = null;
+
+function chatStart() {
+	const hashtag = getHashtag();
+	if(hashtag === null || hashtag === undefined || hashtag === "") {
+		hideChat();
+		return;
+	}
+	var socket = new SockJS("/chat-socket");
+	stompClient = Stomp.over(socket);
+	stompClient.connect({}, function(frame) {
+		console.log("Connected: " + frame);
+		stompClient.subscribe("/chat/back/" + getHashtag(), function(message) {
+			handleMessage(message);
+			console.log(message);
+		});
+		requestUserList();
+	});
+	attachKeyListeners();
+}
+
+function handleMessage(message) {
+	const parsedMessage = JSON.parse(message.body);
+
+	if(parsedMessage.type === "CHAT_MESSAGE") {
+		displayMessage(parsedMessage);
+	}
+
+	if(parsedMessage.type === "USER_COUNT") {
+		updateUserCount(parsedMessage.userCount);
+	}
+
+	if(parsedMessage.type === "ADD_USER") {
+		addUserToChatList(parsedMessage.username);
+	}
+
+	if(parsedMessage.type === "REMOVE_USER") {
+		removeUserFromChatList(parsedMessage.username);
+	}
+
+	if(parsedMessage.type === "USER_LIST") {
+		populateChatUserList(parsedMessage.users);
+	}
+}
+
+function displayMessage(parsedMessage) {
+
+	const time = getTimeOfMessage(parsedMessage.timestamp);
+	const username = parsedMessage.username;
+	const messageText = processKluchText(parsedMessage.message);
+
+	const chatMessageContainer = $(document.createElement("div"));
+	chatMessageContainer.addClass("chat-message-container");
+
+	const timestampElement = $(document.createElement("span"));
+	timestampElement.addClass("chat-message-timestamp");
+	timestampElement.text(time);
+
+	const usernameElement = $(document.createElement("span"));
+	usernameElement.addClass("chat-message-username");
+	usernameElement.text(username + ":");
+
+	const messageTextElement = $(document.createElement("span"));
+	messageTextElement.addClass("chat-message-text");
+	messageTextElement.html(messageText);
+
+	chatMessageContainer.append([timestampElement, usernameElement, messageTextElement]);
+
+	const chatMessagesContainer = $("#chat-messages");
+	chatMessagesContainer.append(chatMessageContainer);
+	chatMessagesContainer[0].scrollTop = chatMessagesContainer[0].scrollHeight;
+}
+
+function getHashtag() {
+	return $("#data").attr("data-hashtag");
+}
+
+function hideChat() {
+	$("#chat-container").addClass("chat-inactive");
+}
+
+function getTimeOfMessage(timestamp) {
+	const date = new Date(timestamp);
+	var mm = date.getMonth() + 1 + "";
+	var dd = "" + date.getDate();
+	var ddLength = dd.length;
+	const day = ("00" + dd).substring(dd.length);
+	const month = ("00" + mm).substring(mm.length);
+	const returnString = [day, month, date.getFullYear()].join(".");
+	return returnString;
+}
+
+function attachKeyListeners() {
+	const textbox = $("#chat-input-textbox");
+	textbox.keydown(function(event) {
+		if(event.which === 13) {
+			event.preventDefault();
+			validateAndSendMessage();
+			textbox.val('');
+			textbox.focus();
+		}
+	});
+
+	const sendButton = $("#chat-input-send-button");
+	sendButton.click(function() {
+		validateAndSendMessage();
+		textbox.val('');
+		textbox.focus();
+	});
+}
+
+function validateAndSendMessage() {
+	const messageValue = $("#chat-input-textbox").val();
+	if(messageValue === undefined || messageValue === null || messageValue === "") {
+		return;
+	}
+	sendMessage(messageValue.trim().substring(0, 140));
+}
+
+function sendMessage(text) {
+	stompClient.send("/chat/in/" + getHashtag(), {}, JSON.stringify({"type": "CHAT_MESSAGE", "content": text}));
+}
+
+function updateUserCount(userCount) {
+	const hashtagNameElement = $("#hashtag-name-title");
+	hashtagNameElement.text("#" + getHashtag() + " (" + userCount + " user(s))");
+}
+
+function requestUserList() {
+	stompClient.send("/chat/in/" + getHashtag(), {}, JSON.stringify({"type" : "USER_LIST_REQUEST", "content": ""}));
+}
+
+function addUserToChatList(username) {
+	const chatList = $("#chat-user-list");
+
+	removeUserFromChatList(username);
+	const userElement = $(document.createElement("div"));
+	userElement.addClass("chat-user-element");
+	userElement.text(username);
+	userElement.attr("data-username", username);
+
+	chatList.append(userElement);
+
+}
+
+function removeUserFromChatList(username) {
+	const chatList = $("#chat-user-list");
+	const userElements = chatList.children();
+	for(var i = 0; i < userElements.length; i++) {
+		const name = $(userElements[i]).attr("data-username");
+		if(name === username) {
+			userElements[i].remove();
+		}
+	}
+}
+
+function populateChatUserList(users) {
+	$("#chat-user-list").empty();
+	users.sort(function(a, b) {
+		if(a < b) return -1;
+		if(a > b) return 1;
+		return 0;
+	});
+	for(var i = 0; i < users.length; i++) {
+		addUserToChatList(users[i]);
+	}
+}

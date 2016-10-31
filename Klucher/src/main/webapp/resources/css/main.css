@@ -765,9 +765,13 @@ a.kluch-text-link-link {
 
 */
 
+.hashtag-name-title-divider {
+	padding-top: 2px;
+}
+
 .hashtag-name-title-container {
 	width: 100%;
-	height: 3em;
+	height: 2.5em;
 	text-align: center;
 	background-color: #add8e6;
 	border: 1px solid gray;
@@ -1073,4 +1077,83 @@ p.settings-header {
 
 .settings-delete-button-inactive {
 	display: none;
+}
+
+/**
+
+	#CHAT
+
+*/
+
+.chat-container {
+	width: 80%;
+	margin: auto;
+	overflow: hidden;
+}
+
+.chat-messages-wrapper {
+	float: left;
+	width: 80%;
+}
+
+.chat-messages {
+	height: 550px;
+	overflow: auto;
+	border: 2px solid gray;
+}
+
+.chat-message-container:nth-child(even) {
+	background-color: #add8e6;
+}
+
+.chat-message-timestamp {
+	width: 85px;
+	color: gray;
+	padding: 2px;
+}
+
+.chat-message-username {
+	
+}
+
+.chat-message-text {
+	padding-left: 5px;
+	width: 250px;
+}
+
+.chat-input-container {
+	width: 100%;
+	display: inline-flex;
+	align-items: center;
+}
+
+.chat-input-textbox {
+	resize: none;
+}
+
+.chat-send-button {
+	border: 2px dotted gray;
+	border-radius: 2px;
+	background-color: #add8e6;
+	display: inline-block;
+	font-size: 2em;
+}
+
+.chat-hidden {
+	display: none;
+}
+
+.chat-user-list-container {
+	width: 19%;
+	height: 550px;
+	overflow: hidden;
+	border: 1px dashed gray;
+}
+
+.chat-user-list {
+	overflow: auto;
+}
+
+.chat-user-element {
+	width: 100px;
 }
