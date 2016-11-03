@@ -41,7 +41,7 @@ public class ChatController {
 	
 	@RequestMapping(value = "/chat/{roomName}", method = RequestMethod.GET)
 	public String getChatHashtag(Authentication authentication, @PathVariable String roomName, Model model) {
-		if(chatService.doesChatRoomExist(roomName)) {
+		if(chatService.isChatRoomOpen(roomName)) {
 			model.addAttribute("hashtag", roomName);
 		}
 		return "chat";

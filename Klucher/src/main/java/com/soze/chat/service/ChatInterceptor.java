@@ -1,18 +1,20 @@
 package com.soze.chat.service;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptorAdapter;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ChatInterceptor extends ChannelInterceptorAdapter {
 	
-	private final ChatRoomContainer roomContainer;
-	
-	public ChatInterceptor(ChatRoomContainer roomContainer) {
-		this.roomContainer = roomContainer;
-	}
+	@Autowired
+	private ChatService service;
 	
 	@Override
   public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -21,7 +23,7 @@ public class ChatInterceptor extends ChannelInterceptorAdapter {
 
     if(command == StompCommand.SEND) {
     	String name = getRoomName(accessor);
-    	if(!roomContainer.doesChatRoomExist(name)) {
+    	if(!service.isChatRoomOpen(name)) {
     		return null;
     	}
     }
@@ -29,12 +31,12 @@ public class ChatInterceptor extends ChannelInterceptorAdapter {
     	String sessionID = getSessionId(accessor);
     	String roomName = getRoomName(accessor);
     	String username = getUsername(accessor);
-    	roomContainer.addUser(roomName, sessionID, username);
+    	service.addUser(roomName, sessionID, username);
     }
     if(command == StompCommand.DISCONNECT) {
     	String roomName = getRoomName(accessor);
     	String sessionId = getSessionId(accessor);
-    	roomContainer.removeUser(roomName, sessionId);
+    	service.removeUser(Optional.ofNullable(roomName), sessionId);
     }
     
     return message;

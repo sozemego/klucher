@@ -1,7 +1,12 @@
 package com.soze.chat.service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -9,29 +14,97 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
 
+import com.soze.chat.dao.ChatRoomDao;
 import com.soze.chat.model.ChatMessageBundle;
+import com.soze.chat.model.ChatRoom;
+import com.soze.chat.model.ChatRoomEntity;
 import com.soze.chat.model.InboundSocketMessage;
 import com.soze.chat.model.InboundSocketMessage.InboundMessageType;
+import com.soze.chat.model.NewUserMessage;
 import com.soze.chat.model.OutboundSocketMessage;
+import com.soze.chat.model.RemoveUserMessage;
 import com.soze.chat.model.UserListMessage;
-import com.soze.common.exceptions.ChatRoomAlreadyExistsException;
+import com.soze.common.exceptions.ChatRoomAlreadyOpenException;
 import com.soze.common.exceptions.ChatRoomDoesNotExistException;
 import com.soze.common.exceptions.NullOrEmptyException;
 
 @Service
 public class ChatService {
 
-	private final ChatRoomContainer roomContainer;
-	private final WebSocketMessageBrokerStats stats;
-	private final ChatMessageService messageService;
-	private final SimpMessagingTemplate simp;
-	
 	@Autowired
-	public ChatService(ChatRoomContainer roomContainer, WebSocketMessageBrokerStats stats, ChatMessageService messageService, SimpMessagingTemplate simp) {
-		this.roomContainer = roomContainer;
-		this.stats = stats;
-		this.messageService = messageService;
-		this.simp = simp;		
+	private WebSocketMessageBrokerStats stats;
+	@Autowired
+	private ChatMessageService messageService;
+	@Autowired
+	private SimpMessagingTemplate simp;
+	@Autowired
+	private ChatRoomDao chatRoomDao;
+	
+	private final Map<String, ChatRoom> chatRooms = new ConcurrentHashMap<>();
+	
+	/**
+	 * Attempts to create a room.
+	 * 
+	 * @param roomName
+	 * @throws ChatRoomAlreadyOpenException
+	 *           if room with this name is already open
+	 * @throws NullOrEmptyException
+	 *           if roomName is null or empty
+	 */
+	public void addChatRoom(String roomName) throws ChatRoomAlreadyOpenException, NullOrEmptyException {
+		validateInput(roomName);
+		if(!isChatRoomOpen(roomName)) {
+			openChatRoom(roomName);
+		} else {
+			throw new ChatRoomAlreadyOpenException(roomName);
+		}
+	}
+	
+	private void openChatRoom(String roomName) {
+		ChatRoomEntity entity = createPersistentChatRoom(roomName);
+		createInMemoryChatRoom(entity);
+	}
+	
+	private ChatRoomEntity createPersistentChatRoom(String roomName) {
+		ChatRoomEntity chatRoom = new ChatRoomEntity();
+		chatRoom.setName(roomName);
+		chatRoom.setCreatedAt(new Timestamp(Instant.now().toEpochMilli()));
+		return chatRoomDao.save(chatRoom);
+	}
+	
+	private void createInMemoryChatRoom(ChatRoomEntity entity) {
+		chatRooms.put(entity.getName(), new ChatRoom(entity.getName(), entity.getCreatedAt().toLocalDateTime()));
+	}
+	
+	public boolean isChatRoomOpen(String roomName) {
+		return chatRooms.containsKey(roomName);
+	}
+	
+	/**
+	 * Removes a chat room with given name.
+	 * 
+	 * @param roomName
+	 * @throws ChatRoomDoesNotExistException
+	 *           if chat room with name roomName does not exist
+	 * @throws NullOrEmptyException if roomName is null or empty
+	 */
+	public void removeChatRoom(String roomName) throws ChatRoomDoesNotExistException, NullOrEmptyException {
+		validateInput(roomName);
+		if(!isChatRoomOpen(roomName)) {
+			throw new ChatRoomDoesNotExistException(roomName);
+		}
+		closeChatRoom(roomName);
+	}
+	
+	private void closeChatRoom(String roomName) {
+		// something else could be done here - like send messages to all users that
+		// room closure is imminent.
+		ChatRoom room = chatRooms.remove(roomName);
+		ChatRoomEntity entity = chatRoomDao.findNewest(roomName);
+		entity.setClosedAt(new Timestamp(Instant.now().toEpochMilli()));
+		entity.setUniqueUsers(room.getAllUniqueUsers().size());
+		entity.setMaxConcurrentUsers(room.getMaxConcurrentUsers());
+		chatRoomDao.save(entity);
 	}
 	
 	/**
@@ -49,7 +122,14 @@ public class ChatService {
 	 */
 	public void addUser(String roomName, String sessionId, String username)
 			throws NullOrEmptyException, ChatRoomDoesNotExistException {
-		roomContainer.addUser(roomName, sessionId, username);
+		validateInput(roomName, sessionId, username);
+		if(!isChatRoomOpen(roomName)) {
+			throw new ChatRoomDoesNotExistException(roomName);		
+		}
+		boolean newUser = chatRooms.get(roomName).addUser(sessionId, username);
+		if (newUser) {
+			announceNewUser(roomName, username);
+		}
 	}
 	
 	/**
@@ -64,43 +144,25 @@ public class ChatService {
 	 * @throws NullOrEmptyException
 	 *           if sessionId is null or empty
 	 */
-	public void removeUser(String roomName, String sessionId) throws NullOrEmptyException {
-		roomContainer.removeUser(roomName, sessionId);
+	public void removeUser(Optional<String> roomName, String sessionId) throws NullOrEmptyException {
+		validateInput(sessionId);
+		String username = null;
+		if (!roomName.isPresent()) {
+			for (ChatRoom room : chatRooms.values()) {
+				username = room.removeUser(sessionId);
+				roomName = Optional.of(room.getName());
+				break;
+			}
+		} else if (isChatRoomOpen(roomName.get())) {
+			username = chatRooms.get(roomName.get()).removeUser(sessionId);
+		}
+		if (username != null) {
+			announceUserRemoval(roomName.get(), username);
+		}
 	}
 	
-	/**
-	 * Attempts to create a room.
-	 * 
-	 * @param roomName
-	 * @throws ChatRoomAlreadyExistsException
-	 *           if room with this name already exists
-	 * @throws NullOrEmptyException
-	 *           if roomName is null or empty
-	 */
-	public void addChatRoom(String roomName) throws ChatRoomAlreadyExistsException, NullOrEmptyException {
-		roomContainer.addChatRoom(roomName);
-	}
-	
-	/**
-	 * Removes a chat room with given name.
-	 * 
-	 * @param roomName
-	 * @throws ChatRoomDoesNotExistException
-	 *           if chat room with name roomName does not exist
-	 * @throws NullOrEmptyException if roomName is null or empty
-	 */
-	public void removeChatRoom(String roomName) throws ChatRoomDoesNotExistException, NullOrEmptyException {
-		roomContainer.removeChatRoom(roomName);
-	}
-	
-	/**
-	 * Returns true if a room with a given name exists.
-	 * @param roomName
-	 * @return
-	 * @throws NullOrEmptyException if roomName is null or empty
-	 */
-	public boolean doesChatRoomExist(String roomName) throws NullOrEmptyException {
-		return roomContainer.doesChatRoomExist(roomName);
+	private void announceUserRemoval(String roomName, String username) {
+		simp.convertAndSend("/chat/back/" + roomName, new RemoveUserMessage(username));
 	}
 	
 	/**
@@ -127,7 +189,12 @@ public class ChatService {
 	 *           if chat room with given name does not exist
 	 */
 	public Set<String> getUsers(String roomName) throws ChatRoomDoesNotExistException {
-		return roomContainer.getUsers(roomName);
+		validateInput(roomName);
+		if (isChatRoomOpen(roomName)) {
+			ChatRoom room = chatRooms.get(roomName);
+			return room.getUsers();
+		}
+		throw new ChatRoomDoesNotExistException(roomName);
 	}
 	
 	/**
@@ -140,7 +207,7 @@ public class ChatService {
 	 * @throws NullOrEmptyException if roomName is null or empty
 	 */
 	public int getNumberOfUsers(String roomName) throws ChatRoomDoesNotExistException, NullOrEmptyException {
-		return roomContainer.getNumberOfUsers(roomName);
+		return getUsers(roomName).size();
 	}
 	
 	/**
@@ -148,17 +215,25 @@ public class ChatService {
 	 * @return
 	 */
 	public Map<String, Integer> getUserCounts() {
-		return roomContainer.getUserCounts();
+		Map<String, Integer> map = new HashMap<>();
+		for(Map.Entry<String, ChatRoom> entry: chatRooms.entrySet()) {
+			String roomName = entry.getKey();
+			ChatRoom room = entry.getValue();
+			map.put(roomName, room.getUsers().size());
+		}
+		return map;
+	}
+	
+	private void announceNewUser(String roomName, String username) {
+		simp.convertAndSend("/chat/back/" + roomName, new NewUserMessage(username));
 	}
 	
 	@Scheduled(initialDelayString = "${chat.updateusercount.interval}", fixedDelayString = "${chat.updateusercount.interval}")
 	public void updateUserCounts() {
-		Map<String, Integer> userCounts = roomContainer.getUserCounts();
-		for(Map.Entry<String, Integer> entry: userCounts.entrySet()) {
-			String roomName = entry.getKey();
-			Integer userCount = entry.getValue();
-			simp.convertAndSend("/chat/back/" + roomName, new UserCount(userCount));
-		}
+		Map<String, Integer> userCounts = getUserCounts();
+		userCounts.forEach((name, count) -> {
+			simp.convertAndSend("/chat/back/" + name, new UserCount(count));
+		});
 	}
 	
 	public static class UserCount extends OutboundSocketMessage {
@@ -170,6 +245,14 @@ public class ChatService {
 			this.userCount = userCount;
 		}
 
+	}
+	
+	private void validateInput(String... strings) throws NullOrEmptyException {
+		for(String str: strings) {
+			if(str == null || str.isEmpty()) {
+				throw new NullOrEmptyException("Chat parameter");
+			}
+		}
 	}
 	
 }

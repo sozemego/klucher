@@ -24,6 +24,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.soze.common.errorresponse.ErrorResponse;
 import com.soze.common.exceptions.CannotDoItToYourselfException;
 import com.soze.common.exceptions.CannotLoginException;
+import com.soze.common.exceptions.ChatRoomDoesNotExistException;
 import com.soze.common.exceptions.ContainsWhiteSpaceException;
 import com.soze.common.exceptions.InvalidLengthException;
 import com.soze.common.exceptions.InvalidOwnerException;
@@ -135,6 +136,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<Object> handleInvalidUserSettingException(InvalidUserSettingException ex) {
 		String message = ex.getInvalidSetting() + " setting was invalid.";
 		return getResponse(message, HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler(ChatRoomDoesNotExistException.class)
+	public ResponseEntity<Object> handleChatRoomDoesNotExistException(ChatRoomDoesNotExistException ex) {
+		log.info("Someone tried to join room " + ex.getRoomName());
+		return getResponse("Cannot join room", HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)

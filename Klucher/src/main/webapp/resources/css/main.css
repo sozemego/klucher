@@ -170,7 +170,6 @@ body {
 }
 
 .front-side-introduction {
-	//border: 1px solid gray;
 	width: 471px;
 	float: right;
 }
@@ -655,7 +654,6 @@ a.kluch-header-author {
 .kluch-text {
 	white-space: pre-wrap;
 	word-wrap: break-word;
-	//max-width: 100%;
 	display: block;
 	max-width: inherit;
 	margin: 2px;
@@ -888,7 +886,6 @@ a.followers-new-free-element {
 */
 
 .about {
-	//text-align: center;
 	width: 100%;
 	margin-top: 200px;
 }

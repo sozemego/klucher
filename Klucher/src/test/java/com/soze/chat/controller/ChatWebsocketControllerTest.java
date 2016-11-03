@@ -1,7 +1,6 @@
 package com.soze.chat.controller;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import java.nio.charset.Charset;
@@ -38,7 +37,8 @@ import com.soze.chat.model.NewUserMessage;
 import com.soze.chat.model.OutboundSocketMessage;
 import com.soze.chat.model.RequestUserList;
 import com.soze.chat.model.UserListMessage;
-import com.soze.chat.service.ChatRoomContainer;
+import com.soze.chat.service.ChatService;
+import com.soze.common.exceptions.ChatRoomDoesNotExistException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -55,7 +55,7 @@ public class ChatWebsocketControllerTest {
 	private AbstractSubscribableChannel brokerChannel;
 	
 	@Autowired
-	private ChatRoomContainer roomContainer;
+	private ChatService service;
 	
 	private TestChannelInterceptor testBrokerInterceptor;
 	
@@ -67,6 +67,10 @@ public class ChatWebsocketControllerTest {
     this.testOutboundInterceptor = new TestChannelInterceptor();
 		this.brokerChannel.addInterceptor(testBrokerInterceptor);
 		this.clientOutboundChannel.addInterceptor(testOutboundInterceptor);
+		if(service.isChatRoomOpen("doge")) {
+			service.removeChatRoom("doge");
+		}
+		service.addChatRoom("doge");
   }
 	
 	@Test
@@ -81,7 +85,7 @@ public class ChatWebsocketControllerTest {
   	headers.setSessionAttributes(new HashMap<>());
   	Message<byte[]> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
   	
-  	int usersInRoomBefore = roomContainer.getNumberOfUsers(roomName);
+  	int usersInRoomBefore = service.getNumberOfUsers(roomName);
   	this.clientInboundChannel.send(message);
   	
   	Message<?> reply = testBrokerInterceptor.awaitMessage(5);
@@ -89,7 +93,7 @@ public class ChatWebsocketControllerTest {
   	OutboundSocketMessage response = new ObjectMapper().readValue(getStringFromMessage(reply), OutboundSocketMessage.class);
   	assertThat(response.getClass(), equalTo(NewUserMessage.class));
   	
-  	assertThat(roomContainer.getNumberOfUsers(roomName), equalTo(usersInRoomBefore + 1));
+  	assertThat(service.getNumberOfUsers(roomName), equalTo(usersInRoomBefore + 1));
   }
 	
 	@Test
@@ -105,13 +109,13 @@ public class ChatWebsocketControllerTest {
   	headers.setUser(new TestPrincipal(username));
   	headers.setSessionAttributes(new HashMap<>());
   	Message<byte[]> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
-  	int usersInRoomBefore = roomContainer.getNumberOfUsers(roomName);
+  	int usersInRoomBefore = service.getNumberOfUsers(roomName);
   	this.clientInboundChannel.send(message);
   	Message<?> reply = testBrokerInterceptor.awaitMessage(5);
   	
   	OutboundSocketMessage response = new ObjectMapper().readValue(getStringFromMessage(reply), OutboundSocketMessage.class);
   	assertThat(response.getClass(), equalTo(NewUserMessage.class));
-  	assertThat(roomContainer.getNumberOfUsers(roomName), equalTo(usersInRoomBefore + 1));
+  	assertThat(service.getNumberOfUsers(roomName), equalTo(usersInRoomBefore + 1));
 		
 		headers = StompHeaderAccessor.create(StompCommand.SEND);
   	headers.setSubscriptionId("0");
@@ -143,13 +147,13 @@ public class ChatWebsocketControllerTest {
   	headers.setUser(new TestPrincipal(username));
   	headers.setSessionAttributes(new HashMap<>());
   	Message<byte[]> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
-  	int usersInRoomBefore = roomContainer.getNumberOfUsers(roomName);
+  	int usersInRoomBefore = service.getNumberOfUsers(roomName);
   	this.clientInboundChannel.send(message);
   	Message<?> reply = testBrokerInterceptor.awaitMessage(5);
   	
   	OutboundSocketMessage response = new ObjectMapper().readValue(getStringFromMessage(reply), OutboundSocketMessage.class);
   	assertThat(response.getClass(), equalTo(NewUserMessage.class));
-  	assertThat(roomContainer.getNumberOfUsers(roomName), equalTo(usersInRoomBefore + 1));
+  	assertThat(service.getNumberOfUsers(roomName), equalTo(usersInRoomBefore + 1));
   	
   	headers = StompHeaderAccessor.create(StompCommand.SEND);
   	headers.setSubscriptionId("0");
@@ -181,10 +185,11 @@ public class ChatWebsocketControllerTest {
   	headers.setUser(new TestPrincipal(username));
   	headers.setSessionAttributes(new HashMap<>());
   	Message<byte[]> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
-  	this.clientInboundChannel.send(message);
-  	Message<?> reply = testBrokerInterceptor.awaitMessage(1);
-  	assertNull(reply);
-  	
+  	try {
+  		this.clientInboundChannel.send(message);
+  	} catch (Exception e) {
+			assertThat(e.getCause().getClass(), equalTo(ChatRoomDoesNotExistException.class));
+		}
 	}
 	
 	private String getStringFromMessage(Message<?> message) {

@@ -4,7 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.soze.common.exceptions.ChatRoomAlreadyExistsException;
+import com.soze.common.exceptions.ChatRoomAlreadyOpenException;
 import com.soze.common.exceptions.ChatRoomDoesNotExistException;
 
 @RunWith(SpringRunner.class)
@@ -27,7 +27,7 @@ public class ChatServiceTest {
 	@Autowired
 	private ChatService service;
 
-	@Test(expected = ChatRoomAlreadyExistsException.class)
+	@Test(expected = ChatRoomAlreadyOpenException.class)
 	public void testAddRoomAlreadyExists() throws Exception {
 		String roomName = "testName";
 		service.addChatRoom(roomName);
@@ -36,10 +36,10 @@ public class ChatServiceTest {
 
 	public void testAddRoomDoesNotExist() throws Exception {
 		String roomName = "testName1";
-		boolean exists = service.doesChatRoomExist(roomName);
+		boolean exists = service.isChatRoomOpen(roomName);
 		assertThat(exists, equalTo(false));
 		service.addChatRoom(roomName);
-		exists = service.doesChatRoomExist(roomName);
+		exists = service.isChatRoomOpen(roomName);
 		assertThat(exists, equalTo(true));
 	}
 
@@ -52,13 +52,13 @@ public class ChatServiceTest {
 	@Test
 	public void testRemoveRoomExists() throws Exception {
 		String roomName = "testName3";
-		boolean exists = service.doesChatRoomExist(roomName);
+		boolean exists = service.isChatRoomOpen(roomName);
 		assertThat(exists, equalTo(false));
 		service.addChatRoom(roomName);
-		exists = service.doesChatRoomExist(roomName);
+		exists = service.isChatRoomOpen(roomName);
 		assertThat(exists, equalTo(true));
 		service.removeChatRoom(roomName);
-		exists = service.doesChatRoomExist(roomName);
+		exists = service.isChatRoomOpen(roomName);
 		assertThat(exists, equalTo(false));
 	}
 
@@ -66,14 +66,14 @@ public class ChatServiceTest {
 	public void testDoesRoomExistExists() throws Exception {
 		String roomName = "testName4";
 		service.addChatRoom(roomName);
-		boolean exists = service.doesChatRoomExist(roomName);
+		boolean exists = service.isChatRoomOpen(roomName);
 		assertThat(exists, equalTo(true));
 	}
 
 	@Test
 	public void testDoesRoomExistDoesNotExist() throws Exception {
 		String roomName = "testName5";
-		boolean exists = service.doesChatRoomExist(roomName);
+		boolean exists = service.isChatRoomOpen(roomName);
 		assertThat(exists, equalTo(false));
 	}
 	
@@ -97,7 +97,7 @@ public class ChatServiceTest {
 		String username = "two";
 		String sessionId = "1";
 		service.addChatRoom(roomName);
-		boolean exists = service.doesChatRoomExist(roomName);
+		boolean exists = service.isChatRoomOpen(roomName);
 		assertThat(exists, equalTo(true));
 		service.addUser(roomName, sessionId, username);
 		Set<String> users = service.getUsers(roomName);
@@ -110,11 +110,11 @@ public class ChatServiceTest {
 		String username = "two";
 		String sessionId = "1";
 		service.addChatRoom(roomName);
-		boolean exists = service.doesChatRoomExist(roomName);
+		boolean exists = service.isChatRoomOpen(roomName);
 		assertThat(exists, equalTo(true));
 		service.addUser(roomName, sessionId, username);
 		assertThat(service.getUsers(roomName).contains(username), equalTo(true));
-		service.removeUser(roomName, sessionId);
+		service.removeUser(Optional.ofNullable(roomName), sessionId);
 		assertThat(service.getUsers(roomName).contains(username), equalTo(false));
 	}
 	

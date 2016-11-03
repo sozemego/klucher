@@ -9,14 +9,13 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 
 import com.soze.chat.service.ChatInterceptor;
-import com.soze.chat.service.ChatRoomContainer;
 
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
 	@Autowired
-	private ChatRoomContainer roomContainer;
+	private ChatInterceptor interceptor;
 	
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -31,7 +30,7 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 	
 	@Override
   public void configureClientInboundChannel(ChannelRegistration registration) {
-    registration.setInterceptors(new ChatInterceptor(roomContainer));
+    registration.setInterceptors(interceptor);
   }
 	
 }

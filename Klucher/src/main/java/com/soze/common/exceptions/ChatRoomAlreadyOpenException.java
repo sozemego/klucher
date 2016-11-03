@@ -1,11 +1,11 @@
 package com.soze.common.exceptions;
 
 @SuppressWarnings("serial")
-public class ChatRoomDoesNotExistException extends RuntimeException {
+public class ChatRoomAlreadyOpenException extends RuntimeException {
 
 	private final String roomName;
 
-	public ChatRoomDoesNotExistException(String roomName) {
+	public ChatRoomAlreadyOpenException(String roomName) {
 		this.roomName = roomName;
 	}
 

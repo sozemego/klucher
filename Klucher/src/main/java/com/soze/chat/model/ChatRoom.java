@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -17,21 +16,44 @@ public class ChatRoom {
 	private final String name;
 	private final LocalDateTime timeCreated;
 	private final Set<String> users = new HashSet<>();
+	/** A set which contains names of all users who ever joined, not just current users */
+	private final Set<String> allUsers = new HashSet<>();
 	private final Map<String, String> sessionIdToUser = new HashMap<>();
+	private int maxConcurrentUsers = 0;
 
 	public ChatRoom(String name) {
-		this.name = Objects.requireNonNull(name);
-		this.timeCreated = LocalDateTime.now();
+		this(name, LocalDateTime.now());
+	}
+	
+	public ChatRoom(String name, LocalDateTime timeCreated) {
+		this.name = name;
+		this.timeCreated = timeCreated;
 	}
 
 	public Set<String> getUsers() {
 		return users;
 	}
 
+	/**
+	 * Adds a user with username and given session to this chat room. Also maps
+	 * given sessionId to username. Returns true if added user was not already in this room.
+	 * @param sessionId
+	 * @param username
+	 * @return true if user was NOT present in this room
+	 */
 	public boolean addUser(String sessionId, String username) {
 		boolean userPreviouslyNotPresent = users.add(username);
+		allUsers.add(username);
 		sessionIdToUser.put(sessionId, username);
+		updateMaxConcurrentUsers();
 		return userPreviouslyNotPresent;
+	}
+	
+	private void updateMaxConcurrentUsers() {
+		int currentUsers = getUsers().size();
+		if(currentUsers > maxConcurrentUsers) {
+			maxConcurrentUsers = currentUsers;
+		}
 	}
 
 	public String removeUser(String sessionID) {
@@ -46,6 +68,18 @@ public class ChatRoom {
 
 	public LocalDateTime getTimeCreated() {
 		return timeCreated;
+	}
+
+	public int getMaxConcurrentUsers() {
+		return maxConcurrentUsers;
+	}
+
+	public void setMaxConcurrentUsers(int maxConcurrentUsers) {
+		this.maxConcurrentUsers = maxConcurrentUsers;
+	}
+
+	public Set<String> getAllUniqueUsers() {
+		return allUsers;
 	}
 
 	@Override
