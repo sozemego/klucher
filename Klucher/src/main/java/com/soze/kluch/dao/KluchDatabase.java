@@ -1,5 +1,7 @@
 package com.soze.kluch.dao;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -9,9 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.soze.kluch.model.Kluch;
 import com.soze.kluch.repository.KluchRepository;
@@ -75,43 +78,71 @@ public class KluchDatabase implements KluchDao {
 	}
 
 	@Override
-	public Page<Kluch> findByAuthorIdInAndIdGreaterThan(Iterable<Long> authorIds, long greaterThanId, Pageable pageRequest) {
-		String queryString = "SELECT k FROM Kluch k WHERE k.author.id IN (:ids) AND k.id > :previous";
+	public List<Kluch> findByAuthorIdInAndIdGreaterThan(Iterable<Long> authorIds, long greaterThanId, Pageable pageRequest) {
+		String queryString = "SELECT k FROM Kluch k JOIN FETCH k.likes WHERE k.author.id IN (:ids) AND k.id > :previous";
+		Direction dir = pageRequest.getSort().getOrderFor("id").getDirection();
+		if(dir == Direction.ASC) {
+			queryString += " ORDER BY k.id ASC";
+		}
+		if(dir == Direction.DESC) {
+			queryString += " ORDER BY k.id DESC";
+		}
 		TypedQuery<Kluch> query = em.createQuery(queryString, Kluch.class);
 		query.setParameter("ids", authorIds);
 		query.setParameter("previous", greaterThanId);
 		query.setMaxResults(pageRequest.getPageSize());
-		return new PageImpl<>(query.getResultList());
+		return query.getResultList();
 	}
 	
 	@Override
-	public Page<Kluch> findByAuthorIdInAndIdLessThan(Iterable<Long> authorIds, long lessThanId, Pageable pageRequest) {
-		String queryString = "SELECT k FROM Kluch k WHERE k.author.id IN (:ids) AND k.id < :next";
+	public List<Kluch> findByAuthorIdInAndIdLessThan(Iterable<Long> authorIds, long lessThanId, Pageable pageRequest) {
+		String queryString = "SELECT k FROM Kluch k JOIN FETCH k.likes WHERE k.author.id IN (:ids) AND k.id < :next";
+		Direction dir = pageRequest.getSort().getOrderFor("id").getDirection();
+		if(dir == Direction.ASC) {
+			queryString += " ORDER BY k.id ASC";
+		}
+		if(dir == Direction.DESC) {
+			queryString += " ORDER BY k.id DESC";
+		}
 		TypedQuery<Kluch> query = em.createQuery(queryString, Kluch.class);
 		query.setParameter("ids", authorIds);
 		query.setParameter("next", lessThanId);
 		query.setMaxResults(pageRequest.getPageSize());
-		List<Kluch> kluchs = query.getResultList();
-		return new PageImpl<>(kluchs);
+		return query.getResultList();
 	}
 	
 	@Override
-	public Page<Kluch> findByMentionsInAndIdLessThan(String mention, long lessThanId, Pageable pageRequest) {
+	public List<Kluch> findByMentionsInAndIdLessThan(String mention, long lessThanId, Pageable pageRequest) {
 		return kluchRepository.findByMentionsInAndIdLessThan(mention, lessThanId, pageRequest);
 	}
 	
 	@Override
-	public Page<Kluch> findByHashtagsInAndIdLessThan(String hashtag, long lessThanId, Pageable pageRequest) {
+	public List<Kluch> findByHashtagsInAndIdLessThan(String hashtag, long lessThanId, Pageable pageRequest) {
 		return kluchRepository.findByHashtagsInAndIdLessThan(hashtag, lessThanId, pageRequest);
 	}
 	
 	@Override
 	@Cacheable(cacheNames = "kluchCount")
 	public Long countByAuthorId(Long authorId) {
-		String queryString = "SELECT COUNT(*) FROM Kluch k WHERE k.id = ?1";
+		String queryString = "SELECT COUNT(*) FROM Kluch k WHERE k.author.id = ?1";
 		TypedQuery<Long> query = em.createQuery(queryString, Long.class);
 		query.setParameter(1, authorId);
 		return query.getSingleResult();
 	}
+
+	@Override
+	@Transactional
+	public List<Kluch> findAllAfterTimestamp(Timestamp timestamp) {
+		if(timestamp == null) {
+			return new ArrayList<>();
+		}
+		String queryString = "SELECT k FROM Kluch k JOIN FETCH k.hashtags WHERE k.timestamp > ?1";
+		TypedQuery<Kluch> query = em.createQuery(queryString, Kluch.class);
+		query.setParameter(1, timestamp);
+		List<Kluch> kluchs = query.getResultList();
+		return kluchs;
+	}
+	
+	
 
 }

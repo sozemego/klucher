@@ -32,6 +32,7 @@ public class Kluch {
 	@OneToOne
 	@JoinColumn(name="author_id")
 	@NotNull
+	@JsonIgnore
 	private User author;
 	
 	@NotNull

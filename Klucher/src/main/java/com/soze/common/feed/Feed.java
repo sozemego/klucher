@@ -16,13 +16,11 @@ public class Feed<T> {
 	private final Collection<T> elements;
 	private final Long previous;
 	private final Long next;
-	private final long totalElements;
 
-	public Feed(Collection<T> elements, Long previous, Long next, long totalElements) {
+	public Feed(Collection<T> elements, Long previous, Long next) {
 		this.elements = elements;
 		this.previous = previous;
 		this.next = next;
-		this.totalElements = totalElements;
 	}
 
 	public Collection<T> getElements() {
@@ -37,13 +35,9 @@ public class Feed<T> {
 		return next;
 	}
 
-	public long getTotalElements() {
-		return totalElements;
-	}
-
 	@Override
 	public String toString() {
-		return "Feed contains total [" + totalElements + "]. It currently holds [" + elements.size() + "] elements."
+		return "Feed currently holds [" + elements.size() + "] elements."
 				+ "next: [" + next + "]. Previous [" + previous + "].";
 	}
 

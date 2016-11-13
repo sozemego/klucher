@@ -74,7 +74,6 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 		assertThat(feed.getElements().size(), equalTo(0));
 		assertThat(feed.getNext(), nullValue());
 		assertThat(feed.getPrevious(), nullValue());
-		assertThat(feed.getTotalElements(), equalTo(0L));
 	}
 	
 	@Test
@@ -87,7 +86,6 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 		assertThat(feed.getElements().size(), equalTo(0));
 		assertThat(feed.getNext(), nullValue());
 		assertThat(feed.getPrevious(), nullValue());
-		assertThat(feed.getTotalElements(), equalTo(0L));
 	}
 	
 	@Test
@@ -102,7 +100,6 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 		assertThat(feed.getElements().size(), equalTo(5));
 		assertThat(feed.getNext(), nullValue());
 		assertThat(feed.getPrevious(), nullValue());
-		assertThat(feed.getTotalElements(), equalTo(5L));
 	}
 	
 	@Test(expected = NullOrEmptyException.class)
@@ -137,7 +134,6 @@ public class UserFeedServiceTest extends TestWithMockUsers {
 		assertThat(feed.getElements().size(), equalTo(5));
 		assertThat(feed.getNext(), nullValue());
 		assertThat(feed.getPrevious(), nullValue());
-		assertThat(feed.getTotalElements(), equalTo(5L));
 	}
 	
 	private List<Long> mockRandomUsers(int number) {

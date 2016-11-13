@@ -36,9 +36,6 @@
 			 data-previous = "0" data-getting-feed="false" data-feed-finished="false">
 				
 			</div>
-			<div class = "kluch-no-more">
-				no more kluchs :(
-			</div>
 		</div>
 		<div class = "dashboard-section">
 			

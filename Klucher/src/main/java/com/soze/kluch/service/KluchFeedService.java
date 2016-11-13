@@ -35,7 +35,7 @@ import com.soze.user.model.User;
 public class KluchFeedService {
 	
 	private static final int DEFAULT_ELEMENTS_PER_REQUEST = 30;
-	private final PageRequest exists = new PageRequest(0, 1);
+	private final PageRequest exists = new PageRequest(0, 1, new Sort(new Order(Direction.ASC, "id")));
 	private final KluchDao kluchDao;
 	private final UserDao userDao;
 	private final FollowDao followDao;
@@ -83,7 +83,7 @@ public class KluchFeedService {
 		if (feedRequest.getFeedDirection() == FeedDirection.NEXT) {
 			return constructFeedNext(username, feedRequest.getId(), onlyForUser, feedRequest.getSource());
 		}
-		return new Feed<>(new ArrayList<>(0), null, null, 0);
+		return new Feed<>(new ArrayList<>(0), null, null);
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class KluchFeedService {
 		User user = getUser(username);
 		List<Long> authorIds = getIdsOfAuthors(user.getId(), onlyForUser);
 		Optional<User> sourceUser = getUserSafe(sourceUsername);
-		Page<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdGreaterThan(authorIds, id, getPreviousPageable(sourceUser));
+		List<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdGreaterThan(authorIds, id, getPreviousPageable(sourceUser));
 		Feed<KluchFeedElement> feed = constructFeed(getUserId(sourceUser), kluchs);
 		return feed;
 	}
@@ -156,7 +156,7 @@ public class KluchFeedService {
 		User user = getUser(username);
 		List<Long> authorIds = getIdsOfAuthors(user.getId(), onlyForUser);
 		Optional<User> sourceUser = getUserSafe(sourceUsername);
-		Page<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdLessThan(authorIds, id, getNextPageable(sourceUser));
+		List<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdLessThan(authorIds, id, getNextPageable(sourceUser));
 		Feed<KluchFeedElement> feed = constructFeed(getUserId(sourceUser), kluchs);
 		return feed;
 	}
@@ -179,8 +179,8 @@ public class KluchFeedService {
 			throws UserDoesNotExistException, NullOrEmptyException {
 		User user = getUser(username);
 		List<Long> authorIds = getIdsOfAuthors(user.getId(), onlyForUser);
-		Page<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdGreaterThan(authorIds, feedRequest.getId(), exists);
-		return kluchs.hasContent();
+		List<Kluch> kluchs = kluchDao.findByAuthorIdInAndIdGreaterThan(authorIds, feedRequest.getId(), exists);
+		return !kluchs.isEmpty();
 	}
 	
 	/**
@@ -205,7 +205,7 @@ public class KluchFeedService {
 			throws NullOrEmptyException, UserDoesNotExistException {
 		User user = getUser(username);
 		Optional<User> sourceUser = getUserSafe(feedRequest.getSource());
-		Page<Kluch> kluchs = kluchDao.findByMentionsInAndIdLessThan(username, feedRequest.getId(), getNextPageable(sourceUser));
+		List<Kluch> kluchs = kluchDao.findByMentionsInAndIdLessThan(username, feedRequest.getId(), getNextPageable(sourceUser));
 		Feed<KluchFeedElement> feed = constructFeed(user.getId(), kluchs);
 		return feed;
 	}
@@ -239,7 +239,7 @@ public class KluchFeedService {
 			hashtagText = hashtagText.substring(1);
 		}
 		Optional<User> sourceUser = getUserSafe(feedRequest.getSource());
-		Page<Kluch> kluchs = kluchDao.findByHashtagsInAndIdLessThan(hashtagText, feedRequest.getId(), getNextPageable(sourceUser));
+		List<Kluch> kluchs = kluchDao.findByHashtagsInAndIdLessThan(hashtagText, feedRequest.getId(), getNextPageable(sourceUser));
 		Feed<KluchFeedElement> feed = constructFeed(getUserId(sourceUser), kluchs);
 		return feed;
 	}
@@ -293,19 +293,14 @@ public class KluchFeedService {
 	 * @param page
 	 * @return
 	 */
-	private Feed<KluchFeedElement> constructFeed(Long userId, Page<Kluch> page) {
-		long totalElements = (int) page.getTotalElements();
+	private Feed<KluchFeedElement> constructFeed(Long userId, List<Kluch> kluchs) {
 		Long previous = null;
 		Long next = null;
-		List<Kluch> kluchs = page.getContent();
 		if (kluchs.size() > 0) {
 			previous = kluchs.stream().mapToLong(k -> k.getId()).max().getAsLong();
 			next = kluchs.stream().mapToLong(k -> k.getId()).min().getAsLong();
 		}
-		if(page.isLast()) {
-			next = null;
-		}
-		return new Feed<>(convertKluchsToFeedElements(userId, kluchs), previous, next, totalElements);
+		return new Feed<>(convertKluchsToFeedElements(userId, kluchs), previous, next);
 	}
 	
 	/**

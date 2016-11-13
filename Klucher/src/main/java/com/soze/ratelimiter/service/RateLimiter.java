@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +31,10 @@ import com.soze.utils.FileUtils;
 @Service
 public class RateLimiter {
 
-  private static final String CONFIG_PATH = "config/limits.txt"; 
+	@Value("${spring.profiles.active}")
+	private String profile;
+  private static final String CONFIG_PATH = "config/limits_prod.txt";
+  private static final String DEV_CONFIG_PATH = "config/limits_dev.txt";
   private static final int DEFAULT_REQUEST_LIMIT = 60;
   //time in seconds after made requests expire and stop counting towards limit
   private final static int REQUEST_TIME_PERIOD_IN_SECONDS = 60;
@@ -131,8 +135,12 @@ public class RateLimiter {
   @PostConstruct
   public void init() {
     initDefaults();
+    String configPath = CONFIG_PATH;
+    if("dev".equalsIgnoreCase(profile)) {
+    	configPath = DEV_CONFIG_PATH;
+    }
     try {
-      List<String> limits = fileUtils.readLinesFromClasspathFile(CONFIG_PATH);
+      List<String> limits = fileUtils.readLinesFromClasspathFile(configPath);
       loadLimits(limits);
     } catch (IOException e) {
       // do nothing since we're going to use defaults if anything goes wrong

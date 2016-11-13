@@ -306,6 +306,10 @@ function addKluchUserFeed(feed, append) {
 	for(let i = 0; i < feedElements.length; i++) {
 		addKluchToFeed(feedElements[i], append);
 	}
+	// if there are no more elements to append, we are at the end (oldest part) of feed
+	if(feedElements.length === 0 && append) {
+		setFeedFinished(true);
+	}
 	setFeedIds(feed);
 }
 
@@ -600,9 +604,6 @@ function setFeedIds(feed) {
 
 function setNextId(next) {
 	$("#kluch-feed").attr("data-next", next);
-	if(next === null || next === undefined) {
-		setFeedFinished(true);
-	}
 }
 
 function setPreviousId(previous) {
@@ -622,7 +623,7 @@ function attachInfiniteScrollingListener() {
 }
 
 function setFeedFinished(bool) {
-	$("#kluch-feed").attr("data-feed-finished", true);
+	$("#kluch-feed").attr("data-feed-finished", bool);
 }
 
 function isFeedFinished() {
@@ -694,7 +695,6 @@ function displayNewKluchElement() {
 
 function clickNewKluchs() {
 	hideNewKluchElement();
-	setFeedFinished(false);
 	getFeed("after", parseInt($("#kluch-feed").attr("data-previous")), false);
 }
 
@@ -747,6 +747,7 @@ function getDaysPassed(hours) {
 function userOnLoad() {
 	getFeed("before", Number.MAX_SAFE_INTEGER, true);
 	attachInfiniteScrollingListener();
+	attachNewKluchElementListener();
 	pollFeed();
 	pollNotifications();
 	setUpUserButtons();

@@ -117,7 +117,7 @@ public class UserFeedService {
 		} else {
 			next = userIds.get(userIds.size() - 1);
 		}
-		return new Feed<>(userLikeViews, null, next, totalElements);
+		return new Feed<>(userLikeViews, null, next);
 	}
 	
 	private Feed<UserFollowerView> constructFollowerFeed(List<Follow> follows, FeedRequest feedRequest) {
@@ -125,7 +125,7 @@ public class UserFeedService {
 		List<Long> followerIds = getFollowerIds(filteredFollows, feedRequest);
 		List<UserFollowerView> userFollowerViews = userDao.findFollowerViews(followerIds);
 		Long next = getNextIdFollowers(filteredFollows, follows.size());
-		return new Feed<>(userFollowerViews, null, next, follows.size());
+		return new Feed<>(userFollowerViews, null, next);
 	}
 	
 	private List<Follow> filterFollows(List<Follow> follows, FeedRequest feedRequest) {

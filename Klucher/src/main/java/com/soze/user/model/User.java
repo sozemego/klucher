@@ -39,6 +39,7 @@ public class User implements UserDetails, Serializable {
 	private String username;
 
 	@NotNull
+	@JsonIgnore
 	private String hashedPassword;
 
 	@Embedded
