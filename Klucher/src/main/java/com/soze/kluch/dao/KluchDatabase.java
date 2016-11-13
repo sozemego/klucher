@@ -79,7 +79,7 @@ public class KluchDatabase implements KluchDao {
 
 	@Override
 	public List<Kluch> findByAuthorIdInAndIdGreaterThan(Iterable<Long> authorIds, long greaterThanId, Pageable pageRequest) {
-		String queryString = "SELECT k FROM Kluch k JOIN FETCH k.likes WHERE k.author.id IN (:ids) AND k.id > :previous";
+		String queryString = "SELECT k FROM Kluch k WHERE k.author.id IN (:ids) AND k.id > :previous";
 		Direction dir = pageRequest.getSort().getOrderFor("id").getDirection();
 		if(dir == Direction.ASC) {
 			queryString += " ORDER BY k.id ASC";
@@ -96,7 +96,7 @@ public class KluchDatabase implements KluchDao {
 	
 	@Override
 	public List<Kluch> findByAuthorIdInAndIdLessThan(Iterable<Long> authorIds, long lessThanId, Pageable pageRequest) {
-		String queryString = "SELECT k FROM Kluch k JOIN FETCH k.likes WHERE k.author.id IN (:ids) AND k.id < :next";
+		String queryString = "SELECT k FROM Kluch k WHERE k.author.id IN (:ids) AND k.id < :next";
 		Direction dir = pageRequest.getSort().getOrderFor("id").getDirection();
 		if(dir == Direction.ASC) {
 			queryString += " ORDER BY k.id ASC";
