@@ -79,10 +79,10 @@ public class RandomKluchGenerator {
     StringBuilder sb = new StringBuilder(kluchLength);
     while (sb.length() < kluchLength) {
       String word = generateRandomWord(hashtagChance);
-      if (sb.length() + word.length() > kluchLength) {
+      if (sb.length() + word.length() + 1 > kluchLength) {
         break;
       } else {
-        sb.append(word);
+        sb.append(word + " ");
       }
     }
     return sb.toString();
