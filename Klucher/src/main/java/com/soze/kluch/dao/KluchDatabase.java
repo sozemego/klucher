@@ -10,7 +10,6 @@ import javax.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -79,14 +78,8 @@ public class KluchDatabase implements KluchDao {
 
 	@Override
 	public List<Kluch> findByAuthorIdInAndIdGreaterThan(Iterable<Long> authorIds, long greaterThanId, Pageable pageRequest) {
-		String queryString = "SELECT k FROM Kluch k WHERE k.author.id IN (:ids) AND k.id > :previous";
-		Direction dir = pageRequest.getSort().getOrderFor("id").getDirection();
-		if(dir == Direction.ASC) {
-			queryString += " ORDER BY k.id ASC";
-		}
-		if(dir == Direction.DESC) {
-			queryString += " ORDER BY k.id DESC";
-		}
+		String queryString = "SELECT k FROM Kluch k LEFT JOIN FETCH k.likes WHERE k.author.id IN (:ids) AND k.id > :previous";
+		queryString += getOrderByString(pageRequest);
 		TypedQuery<Kluch> query = em.createQuery(queryString, Kluch.class);
 		query.setParameter("ids", authorIds);
 		query.setParameter("previous", greaterThanId);
@@ -96,19 +89,27 @@ public class KluchDatabase implements KluchDao {
 	
 	@Override
 	public List<Kluch> findByAuthorIdInAndIdLessThan(Iterable<Long> authorIds, long lessThanId, Pageable pageRequest) {
-		String queryString = "SELECT k FROM Kluch k WHERE k.author.id IN (:ids) AND k.id < :next";
-		Direction dir = pageRequest.getSort().getOrderFor("id").getDirection();
-		if(dir == Direction.ASC) {
-			queryString += " ORDER BY k.id ASC";
-		}
-		if(dir == Direction.DESC) {
-			queryString += " ORDER BY k.id DESC";
-		}
+		String queryString = "SELECT k FROM Kluch k LEFT JOIN FETCH k.likes WHERE k.author.id IN (:ids) AND k.id < :next";
+		queryString += getOrderByString(pageRequest);
 		TypedQuery<Kluch> query = em.createQuery(queryString, Kluch.class);
 		query.setParameter("ids", authorIds);
 		query.setParameter("next", lessThanId);
 		query.setMaxResults(pageRequest.getPageSize());
 		return query.getResultList();
+	}
+	
+	private String getOrderByString(Pageable pageRequest) {
+		if(pageRequest == null || pageRequest.getSort() == null || pageRequest.getSort().getOrderFor("id") == null) {
+			return "";
+		}
+		Direction dir = pageRequest.getSort().getOrderFor("id").getDirection();
+		if(dir == Direction.ASC) {
+			return " ORDER BY k.id ASC";
+		}
+		if(dir == Direction.DESC) {
+			return " ORDER BY k.id DESC";
+		}
+		return "";
 	}
 	
 	@Override
@@ -136,7 +137,7 @@ public class KluchDatabase implements KluchDao {
 		if(timestamp == null) {
 			return new ArrayList<>();
 		}
-		String queryString = "SELECT k FROM Kluch k JOIN FETCH k.hashtags WHERE k.timestamp > ?1";
+		String queryString = "SELECT k FROM Kluch k LEFT JOIN FETCH k.hashtags WHERE k.timestamp > ?1";
 		TypedQuery<Kluch> query = em.createQuery(queryString, Kluch.class);
 		query.setParameter(1, timestamp);
 		List<Kluch> kluchs = query.getResultList();

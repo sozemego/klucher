@@ -112,16 +112,18 @@ public class RateLimiter {
   
   private int purge(Interaction interaction, long currentTime) {
     LinkedList<Long> pastRequests = requests.get(interaction);
-    Iterator<Long> it = pastRequests.iterator();
-    long startPoint = currentTime - REQUEST_TIME_PERIOD_IN_SECONDS;
-    long endPoint = currentTime;
-    while(it.hasNext()) {
-      Long pastRequest = it.next();
-      if(pastRequest < startPoint || pastRequest > endPoint) {
-        it.remove();
-      }
-    }
-    return pastRequests.size();
+    synchronized (pastRequests) {
+	    Iterator<Long> it = pastRequests.iterator();
+	    long startPoint = currentTime - REQUEST_TIME_PERIOD_IN_SECONDS;
+	    long endPoint = currentTime;
+	    while(it.hasNext()) {
+	      Long pastRequest = it.next();
+	      if(pastRequest < startPoint || pastRequest > endPoint) {
+	        it.remove();
+	      }
+	    }
+	    return pastRequests.size();
+	   }
   }
   
   private int secondsUntilRequest(Interaction interaction, int limit, long currentTime) {
