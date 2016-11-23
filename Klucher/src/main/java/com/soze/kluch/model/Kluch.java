@@ -47,7 +47,7 @@ public class Kluch {
 	private Set<String> mentions = new HashSet<>();
 	
 	@JsonIgnore
-	@ElementCollection(fetch = FetchType.EAGER)
+	@ElementCollection
 	private Set<Long> likes = new HashSet<>();
 
 	@SuppressWarnings("unused")

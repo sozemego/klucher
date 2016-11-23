@@ -132,7 +132,6 @@ public class KluchDatabase implements KluchDao {
 	}
 
 	@Override
-	@Transactional
 	public List<Kluch> findAllAfterTimestamp(Timestamp timestamp) {
 		if(timestamp == null) {
 			return new ArrayList<>();

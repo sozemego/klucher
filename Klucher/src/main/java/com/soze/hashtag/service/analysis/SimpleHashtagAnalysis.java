@@ -67,7 +67,8 @@ public class SimpleHashtagAnalysis implements HashtagAnalysis {
 	private void assembleResult(Map<String, Integer> hashtagCounts){
 		Set<Entry<String, Integer>> entrySet = hashtagCounts.entrySet();
 		List<Entry<String, Integer>> entryList = new ArrayList<>(entrySet);
-		Collections.sort(entryList, (e1, e2) -> e1.getValue() - e2.getValue());
+		// sort in descending order
+		Collections.sort(entryList, (e1, e2) -> e2.getValue() - e1.getValue());
 		List<Entry<String, Integer>> topResults = entryList.stream()
 				.limit(maximumTrendingHashtags)
 				.collect(Collectors.toList());

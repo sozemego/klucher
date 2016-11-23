@@ -3,11 +3,16 @@ package com.soze.chat.service;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,9 +32,14 @@ import com.soze.chat.model.UserListMessage;
 import com.soze.common.exceptions.ChatRoomAlreadyOpenException;
 import com.soze.common.exceptions.ChatRoomDoesNotExistException;
 import com.soze.common.exceptions.NullOrEmptyException;
+import com.soze.hashtag.service.HashtagAnalysisService;
+import com.soze.hashtag.service.analysis.AnalysisResults;
+import com.soze.hashtag.service.analysis.HashtagCount;
 
 @Service
 public class ChatService {
+	
+	private static final Logger log = LoggerFactory.getLogger(ChatService.class);
 
 	@Autowired
 	private WebSocketMessageBrokerStats stats;
@@ -39,6 +49,9 @@ public class ChatService {
 	private SimpMessagingTemplate simp;
 	@Autowired
 	private ChatRoomDao chatRoomDao;
+	
+	@Autowired
+	private HashtagAnalysisService hashtagAnalysis;
 	
 	private final Map<String, ChatRoom> chatRooms = new ConcurrentHashMap<>();
 	
@@ -234,6 +247,32 @@ public class ChatService {
 		userCounts.forEach((name, count) -> {
 			simp.convertAndSend("/chat/back/" + name, new UserCount(count));
 		});
+	}
+	
+	@Scheduled(initialDelayString = "${hashtag.analysis.interval}", fixedDelayString = "${hashtag.analysis.interval}")
+	public void openRooms() {
+		AnalysisResults results = hashtagAnalysis.getResults();
+		if(results == null) {
+			return;
+		}
+		List<HashtagCount> counts = results.getHashtagCounts();
+		Set<String> hashtagNames = counts.stream()
+				.map(hc -> hc.getHashtag())
+				.collect(Collectors.toSet());
+		
+		Set<String> roomsToClose = new HashSet<>(chatRooms.keySet());
+		roomsToClose.removeAll(hashtagNames);
+		
+		Set<String> roomsToOpen = new HashSet<>(hashtagNames);
+		roomsToOpen.removeAll(chatRooms.keySet());
+		
+		for(String room: roomsToClose) {
+			closeChatRoom(room);
+		}
+		for(String room: roomsToOpen) {
+			openChatRoom(room);
+		}
+		log.info("Closing: {}. Opening: {}", roomsToClose, roomsToOpen);
 	}
 	
 	public static class UserCount extends OutboundSocketMessage {

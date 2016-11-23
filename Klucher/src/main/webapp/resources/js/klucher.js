@@ -1605,7 +1605,7 @@ var stompClient = null;
 function chatStart() {
 	const hashtag = getHashtag();
 	if(hashtag === null || hashtag === undefined || hashtag === "") {
-		hideChat();
+		displayMessage(getChatNotOpenMessage());
 		return;
 	}
 	var socket = new SockJS("/chat-socket");
@@ -1766,4 +1766,12 @@ function populateChatUserList(users) {
 	for(var i = 0; i < users.length; i++) {
 		addUserToChatList(users[i]);
 	}
+}
+
+function getChatNotOpenMessage() {
+	return {
+		"timestamp" : new Date().getTime(),
+		"username" : "System",
+		"message": "This room is not open."
+	};
 }

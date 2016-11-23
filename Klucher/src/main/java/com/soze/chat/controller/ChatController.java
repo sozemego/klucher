@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.soze.chat.model.ChatMessageBundle;
 import com.soze.chat.model.InboundSocketMessage;
@@ -51,5 +52,11 @@ public class ChatController {
 	public String getChat(Authentication authentication) {
 		return "chat";
 	}	
+	
+	@RequestMapping(value = "/chats/trending", method = RequestMethod.GET)
+	@ResponseBody
+	public Object getTrendingChats() {
+		return chatService.getUserCounts();
+	}
 	
 }
