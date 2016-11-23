@@ -2,12 +2,12 @@ package com.soze.ratelimiter.service;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
@@ -40,7 +40,7 @@ public class RateLimiter {
   private final static int REQUEST_TIME_PERIOD_IN_SECONDS = 60;
   private final Map<String, Limit> limits = new HashMap<>();
   private final Map<HttpMethod, Integer> defaultLimits = new HashMap<>();
-  private final Map<Interaction, LinkedList<Long>> requests = new ConcurrentHashMap<>();
+  private final Map<Interaction, List<Long>> requests = new HashMap<>();
   private final FileUtils fileUtils;
   
   @Autowired
@@ -85,13 +85,15 @@ public class RateLimiter {
    */
   private Interaction save(String username, String endpoint, HttpMethod method, long currentTime) {
     Interaction interaction = new Interaction(username, endpoint, method);
-    LinkedList<Long> pastRequests = requests.get(interaction);
-    if(pastRequests == null) {
-      pastRequests = new LinkedList<>();
-      requests.put(interaction, pastRequests);
+    synchronized(requests) {
+	    List<Long> pastRequests = requests.get(interaction);
+	    if(pastRequests == null) {
+	      pastRequests = Collections.synchronizedList(new LinkedList<>());
+	      requests.put(interaction, pastRequests);
+	    }
+    	pastRequests.add(currentTime);
+    	return interaction;
     }
-    pastRequests.add(currentTime);
-    return interaction;
   }
 
   private int getLimit(String endpoint, HttpMethod method) {
@@ -111,7 +113,8 @@ public class RateLimiter {
   }
   
   private int purge(Interaction interaction, long currentTime) {
-    LinkedList<Long> pastRequests = requests.get(interaction);
+  	//synchronized (requests) {
+    List<Long> pastRequests = requests.get(interaction);
     synchronized (pastRequests) {
 	    Iterator<Long> it = pastRequests.iterator();
 	    long startPoint = currentTime - REQUEST_TIME_PERIOD_IN_SECONDS;
@@ -127,7 +130,7 @@ public class RateLimiter {
   }
   
   private int secondsUntilRequest(Interaction interaction, int limit, long currentTime) {
-    LinkedList<Long> pastRequests = requests.get(interaction);
+    List<Long> pastRequests = requests.get(interaction);
     //the list's size() should be larger than limit at this point
     Long timestamp = pastRequests.get(pastRequests.size() - limit);
     long differenceBetweenCurrentAndLimitTimestamp = currentTime - timestamp;

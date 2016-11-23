@@ -1,3 +1,4 @@
 /register, post, 10
 /login, post, 5
 /kluch, post, 999999999
+/, get, 999999999
