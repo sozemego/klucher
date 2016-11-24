@@ -34,7 +34,7 @@ import com.soze.common.exceptions.ChatRoomDoesNotExistException;
 import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.hashtag.service.HashtagAnalysisService;
 import com.soze.hashtag.service.analysis.AnalysisResults;
-import com.soze.hashtag.service.analysis.HashtagCount;
+import com.soze.hashtag.service.analysis.HashtagScore;
 
 @Service
 public class ChatService {
@@ -241,21 +241,21 @@ public class ChatService {
 		simp.convertAndSend("/chat/back/" + roomName, new NewUserMessage(username));
 	}
 	
-	@Scheduled(initialDelayString = "${chat.updateusercount.interval}", fixedDelayString = "${chat.updateusercount.interval}")
+	@Scheduled(initialDelayString = "${chat.updateusercount.initialdelay}", fixedDelayString = "${chat.updateusercount.interval}")
 	public void updateUserCounts() {
 		Map<String, Integer> userCounts = getUserCounts();
 		userCounts.forEach((name, count) -> {
 			simp.convertAndSend("/chat/back/" + name, new UserCount(count));
 		});
 	}
-	
-	@Scheduled(initialDelayString = "${hashtag.analysis.interval}", fixedDelayString = "${hashtag.analysis.interval}")
+
+	@Scheduled(initialDelayString = "${chat.roomcleanup.initialdelay}", fixedDelayString = "${chat.roomcleanup.interval}")
 	public void openRooms() {
 		AnalysisResults results = hashtagAnalysis.getResults();
 		if(results == null) {
 			return;
 		}
-		List<HashtagCount> counts = results.getHashtagCounts();
+		List<HashtagScore> counts = results.getHashtagScores();
 		Set<String> hashtagNames = counts.stream()
 				.map(hc -> hc.getHashtag())
 				.collect(Collectors.toSet());

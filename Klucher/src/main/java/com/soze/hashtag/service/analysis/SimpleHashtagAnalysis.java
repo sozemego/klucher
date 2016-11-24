@@ -76,11 +76,11 @@ public class SimpleHashtagAnalysis implements HashtagAnalysis {
 	}
 	
 	private void convertEntriesToCounts(List<Entry<String, Integer>> entries) {
-		List<HashtagCount> hashtagCounts = new ArrayList<>();
+		List<HashtagScore> hashtagScores = new ArrayList<>();
 		for(Entry<String, Integer> entry: entries) {
-			hashtagCounts.add(new HashtagCount(entry.getKey(), entry.getValue()));
+			hashtagScores.add(new HashtagScore(entry.getKey(), entry.getValue()));
 		}
-		results = new AnalysisResults(hashtagCounts);
+		results = new AnalysisResults(hashtagScores);
 		log.info("Analysis finished, results are: {}", results);
 	}
 

@@ -136,7 +136,7 @@ public class KluchDatabase implements KluchDao {
 		if(timestamp == null) {
 			return new ArrayList<>();
 		}
-		String queryString = "SELECT k FROM Kluch k LEFT JOIN FETCH k.hashtags WHERE k.timestamp > ?1";
+		String queryString = "SELECT k FROM Kluch k INNER JOIN FETCH k.hashtags WHERE k.timestamp > ?1";
 		TypedQuery<Kluch> query = em.createQuery(queryString, Kluch.class);
 		query.setParameter(1, timestamp);
 		List<Kluch> kluchs = query.getResultList();

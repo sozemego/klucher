@@ -4,21 +4,21 @@ import java.util.List;
 
 public class AnalysisResults {
 
-	private final List<HashtagCount> hashtagCounts;
+	private final List<HashtagScore> hashtagScores;
 	
-	public AnalysisResults(List<HashtagCount> hashtagCounts) {
-		this.hashtagCounts = hashtagCounts;
+	public AnalysisResults(List<HashtagScore> hashtagScores) {
+		this.hashtagScores = hashtagScores;
 	}
 
-	public List<HashtagCount> getHashtagCounts() {
-		return hashtagCounts;
+	public List<HashtagScore> getHashtagScores() {
+		return hashtagScores;
 	}
 	
 	@Override
 	public String toString() {
-		String toReturn = "This analysis includes " + hashtagCounts.size() + " hashtags. "; 
-		for (HashtagCount count : hashtagCounts) {
-			toReturn += "[" + count.getHashtag() + " - " + count.getCount() + "]\n";
+		String toReturn = "This analysis includes " + hashtagScores.size() + " hashtags. "; 
+		for (HashtagScore count : hashtagScores) {
+			toReturn += "[" + count.getHashtag() + " - " + count.getScore() + "]\n";
 		}
 		return toReturn;
 	}

@@ -34,7 +34,7 @@ public class HashtagController {
 	
 	@PostConstruct
 	public void setUp() {
-		analysisService.setAnalysisStrategy(analysisFactory.getAnalysis(AnalysisType.SIMPLE));
+		analysisService.setAnalysisStrategy(analysisFactory.getAnalysis(AnalysisType.STATISTICAL));
 	}
 
 	@RequestMapping(value = "/hashtag/{hashtag}", method = RequestMethod.GET)

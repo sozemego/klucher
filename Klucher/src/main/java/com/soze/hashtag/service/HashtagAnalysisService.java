@@ -21,7 +21,7 @@ public class HashtagAnalysisService {
 		this.currentAnalysis = validate(analysis);
 	}
 	
-	@Scheduled(initialDelayString = "2500", fixedDelayString = "${hashtag.analysis.interval}")
+	@Scheduled(initialDelayString = "${hashtag.analysis.initialdelay}", fixedDelayString = "${hashtag.analysis.interval}")
 	public void analyse() {
 		currentAnalysis.analyse();
 	}

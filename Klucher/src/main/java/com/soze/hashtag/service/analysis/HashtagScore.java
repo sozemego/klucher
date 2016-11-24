@@ -1,21 +1,21 @@
 package com.soze.hashtag.service.analysis;
 
-public class HashtagCount {
+public class HashtagScore {
 
 	private final String hashtag;
-	private final int count;
+	private final float score;
 
-	public HashtagCount(String hashtag, int count) {
+	public HashtagScore(String hashtag, float score) {
 		this.hashtag = hashtag;
-		this.count = count;
+		this.score = score;
 	}
 
 	public String getHashtag() {
 		return hashtag;
 	}
 
-	public int getCount() {
-		return count;
+	public float getScore() {
+		return score;
 	}
 
 }
