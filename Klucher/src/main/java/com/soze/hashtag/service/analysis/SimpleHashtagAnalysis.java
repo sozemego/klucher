@@ -26,6 +26,9 @@ public class SimpleHashtagAnalysis implements HashtagAnalysis {
 	/** How many days to analyse. */
 	private final int daysBack;
 	private final int maximumTrendingHashtags;
+	/** Base score for each hashtag is 1. If the same user keeps posting the same hashtag
+	 * the score is multiplied by this coefficient for each same hashtag posted by the user (above 1). */
+	private final float hashtagScoreByUserDecayCoefficient = 0.8f;
 	private AnalysisResults results;
 	
 	
@@ -38,49 +41,75 @@ public class SimpleHashtagAnalysis implements HashtagAnalysis {
 
 	@Override
 	public void analyse() {
-		log.info("Running simple analysis.");
+		log.info("Running statistical analysis.");
 		long startingTime = System.nanoTime();
 		Instant now = Instant.now();
 		Instant twoDaysAgo = now.minus(daysBack, ChronoUnit.DAYS);
 		List<Kluch> kluchs = kluchDao.findAllAfterTimestamp(new Timestamp(twoDaysAgo.toEpochMilli()));
-		log.info("[{}] kluchs posted since [{}] days ago. ", kluchs.size(), daysBack);
+		log.info("[{}] kluchs with hashtags posted since [{}] days ago. ", kluchs.size(), daysBack);
 		computeResults(kluchs);
 		log.info("Analysis took [{}] seconds", ((System.nanoTime() - startingTime) / 1e9));
 	}
 	
 	private void computeResults(List<Kluch> kluchs) {
-		Map<String, Integer> hashtagCounts = new HashMap<>();
+		Map<String, Float> hashtagScores = new HashMap<>();
+		Map<String, List<String>> userHashtags = new HashMap<>();
 		for(Kluch kluch: kluchs) {
-			computeKluch(kluch, hashtagCounts);
+			computeKluch(kluch, hashtagScores, userHashtags);
 		}
-		assembleResult(hashtagCounts);
+		assembleResult(hashtagScores);
 	}
 	
-	private void computeKluch(Kluch kluch, Map<String, Integer> hashtagCounts) {
+	private void computeKluch(Kluch kluch, Map<String, Float> hashtagScores, Map<String, List<String>> userHashtags) {
 		Set<String> hashtags = kluch.getHashtags();
 		for(String hashtag: hashtags) {
-			Integer currentCount = hashtagCounts.get(hashtag);
-			hashtagCounts.put(hashtag, currentCount == null ? 1 : ++currentCount);
+			Float score = hashtagScores.get(hashtag);
+			if(score == null) {
+				score = 0f;
+				hashtagScores.put(hashtag, score);
+			}
+			String username = kluch.getAuthor().getUsername();
+			List<String> hashtagsByUser = userHashtags.get(username);
+			if(hashtagsByUser == null) {
+				hashtagsByUser = new ArrayList<>();
+				userHashtags.put(username, hashtagsByUser);
+			}
+			int postedByThisUserSoFar = getPostedByThisUserSoFar(hashtag, hashtagsByUser);
+			float addedScore = 1f;
+			if(postedByThisUserSoFar != 0) {
+				addedScore *= Math.pow(hashtagScoreByUserDecayCoefficient, postedByThisUserSoFar);
+			}
+			score += addedScore;
+			hashtagScores.put(hashtag, score);
+			hashtagsByUser.add(hashtag);
 		}
 	}
 	
-	private void assembleResult(Map<String, Integer> hashtagCounts){
-		Set<Entry<String, Integer>> entrySet = hashtagCounts.entrySet();
-		List<Entry<String, Integer>> entryList = new ArrayList<>(entrySet);
+	private int getPostedByThisUserSoFar(String hashtag, List<String> hashtags) {
+		return (int) hashtags.stream().filter(h -> h.equals(hashtag)).count();
+	}
+	
+	private void assembleResult(Map<String, Float> hashtagCounts){
+		Set<Entry<String, Float>> entrySet = hashtagCounts.entrySet();
+		List<Entry<String, Float>> entryList = new ArrayList<>(entrySet);
 		// sort in descending order
-		Collections.sort(entryList, (e1, e2) -> e2.getValue() - e1.getValue());
-		List<Entry<String, Integer>> topResults = entryList.stream()
+		Collections.sort(entryList, (e1, e2) -> {
+			if(e1.getValue() > e2.getValue()) return -1;
+			if(e1.getValue() < e2.getValue()) return 1;
+			return 0;
+		});
+		List<Entry<String, Float>> topResults = entryList.stream()
 				.limit(maximumTrendingHashtags)
 				.collect(Collectors.toList());
 		convertEntriesToCounts(topResults);
 	}
 	
-	private void convertEntriesToCounts(List<Entry<String, Integer>> entries) {
-		List<HashtagScore> hashtagScores = new ArrayList<>();
-		for(Entry<String, Integer> entry: entries) {
-			hashtagScores.add(new HashtagScore(entry.getKey(), entry.getValue()));
+	private void convertEntriesToCounts(List<Entry<String, Float>> entries) {
+		List<HashtagScore> hashtagCounts = new ArrayList<>();
+		for(Entry<String, Float> entry: entries) {
+			hashtagCounts.add(new HashtagScore(entry.getKey(), entry.getValue()));
 		}
-		results = new AnalysisResults(hashtagScores);
+		results = new AnalysisResults(hashtagCounts);
 		log.info("Analysis finished, results are: {}", results);
 	}
 

@@ -2,13 +2,18 @@ package com.soze.chat.service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -21,6 +26,7 @@ import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
 
 import com.soze.chat.dao.ChatRoomDao;
 import com.soze.chat.model.ChatMessageBundle;
+import com.soze.chat.model.ChatResponse;
 import com.soze.chat.model.ChatRoom;
 import com.soze.chat.model.ChatRoomEntity;
 import com.soze.chat.model.InboundSocketMessage;
@@ -39,8 +45,9 @@ import com.soze.hashtag.service.analysis.HashtagScore;
 @Service
 public class ChatService {
 	
-	private static final Logger log = LoggerFactory.getLogger(ChatService.class);
-
+	private static final Logger LOG = LoggerFactory.getLogger(ChatService.class);
+	private final ExecutorService executor = Executors.newCachedThreadPool();
+	
 	@Autowired
 	private WebSocketMessageBrokerStats stats;
 	@Autowired
@@ -110,16 +117,73 @@ public class ChatService {
 	}
 	
 	private void closeChatRoom(String roomName) {
-		// something else could be done here - like send messages to all users that
-		// room closure is imminent.
-		ChatRoom room = chatRooms.remove(roomName);
-		ChatRoomEntity entity = chatRoomDao.findNewest(roomName);
-		entity.setClosedAt(new Timestamp(Instant.now().toEpochMilli()));
-		entity.setUniqueUsers(room.getAllUniqueUsers().size());
-		entity.setMaxConcurrentUsers(room.getMaxConcurrentUsers());
-		chatRoomDao.save(entity);
+		
+		Queue<ScheduledMessage> closureMessages = new LinkedList<>(
+				Arrays.asList(new ScheduledMessage("Chat room closing in 1 minute", 1000 * 30),
+						new ScheduledMessage("Chat room closing in 30 seconds", 1000 * 20),
+						new ScheduledMessage("Chat room closing in 10 seconds", 1000 * 10),
+						new ScheduledMessage("Chat room closed.", 0L)));
+		
+		
+		executor.submit(new ChatRoomCloser(closureMessages, roomName, "System"));
+
 	}
 	
+	private class ChatRoomCloser implements Runnable {
+		
+		private final Queue<ScheduledMessage> messages;
+		private final String roomName;
+		private final String userName;
+		
+		public ChatRoomCloser(Queue<ScheduledMessage> messages, String roomName, String userName) {
+			this.messages = messages;
+			this.roomName = roomName;
+			this.userName = userName;
+		}
+		
+		public void run() {
+			while (!messages.isEmpty()) {
+				ScheduledMessage message = messages.poll();
+				sendMessageFrom(userName, roomName, message.getMessage());
+				try {
+					Thread.sleep(message.getMillisecondsToWait());
+				} catch (InterruptedException e) {
+
+				}
+			}
+			closeRoom();
+		}
+		
+		private void closeRoom() {
+			ChatRoom room = chatRooms.remove(roomName);
+			ChatRoomEntity entity = chatRoomDao.findNewest(roomName);
+			entity.setClosedAt(new Timestamp(Instant.now().toEpochMilli()));
+			entity.setUniqueUsers(room.getAllUniqueUsers().size());
+			entity.setMaxConcurrentUsers(room.getMaxConcurrentUsers());
+			chatRoomDao.save(entity);
+		}
+	}
+	
+	private static class ScheduledMessage {
+		private final String message;
+		private final long millisecondsToWait;
+
+		public ScheduledMessage(String message, long millisecondsToWait) {
+			super();
+			this.message = message;
+			this.millisecondsToWait = millisecondsToWait;
+		}
+
+		public String getMessage() {
+			return message;
+		}
+
+		public long getMillisecondsToWait() {
+			return millisecondsToWait;
+		}
+
+	}
+
 	/**
 	 * Attempts to add a user with sessionId and username to a given room. If this
 	 * user was not previously present in this room, sends a message to all
@@ -241,6 +305,10 @@ public class ChatService {
 		simp.convertAndSend("/chat/back/" + roomName, new NewUserMessage(username));
 	}
 	
+	private void sendMessageFrom(String userName, String roomName, String message) {
+		simp.convertAndSend("/chat/back/" + roomName, new ChatResponse(Instant.now().toEpochMilli(), userName, message));
+	}
+	
 	@Scheduled(initialDelayString = "${chat.updateusercount.initialdelay}", fixedDelayString = "${chat.updateusercount.interval}")
 	public void updateUserCounts() {
 		Map<String, Integer> userCounts = getUserCounts();
@@ -256,6 +324,9 @@ public class ChatService {
 			return;
 		}
 		List<HashtagScore> counts = results.getHashtagScores();
+		if(counts.isEmpty()) {
+			return;
+		}
 		Set<String> hashtagNames = counts.stream()
 				.map(hc -> hc.getHashtag())
 				.collect(Collectors.toSet());
@@ -272,7 +343,7 @@ public class ChatService {
 		for(String room: roomsToOpen) {
 			openChatRoom(room);
 		}
-		log.info("Closing: {}. Opening: {}", roomsToClose, roomsToOpen);
+		LOG.info("Closing: {}. Opening: {}", roomsToClose, roomsToOpen);
 	}
 	
 	public static class UserCount extends OutboundSocketMessage {

@@ -37,8 +37,8 @@
 				
 			</div>
 		</div>
-		<div class = "dashboard-section">
-			
+		<div class = "dashboard-section dashboard-section-right">
+			<div class = "chat-trending-list" id = "chat-trending-list"></div>
 		</div>
 	</div>
 </div>

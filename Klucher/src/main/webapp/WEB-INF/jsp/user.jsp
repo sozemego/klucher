@@ -64,6 +64,8 @@
 						<span id = "user-button-like-text" class="user-button-text">like</span>
 					</div>
 				</div>
+			<div class = "chat-trending-list" id = "chat-trending-list"></div>
+		</div>
 		</div>
 	</div>
 </div>

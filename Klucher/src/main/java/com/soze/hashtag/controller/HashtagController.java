@@ -34,7 +34,7 @@ public class HashtagController {
 	
 	@PostConstruct
 	public void setUp() {
-		analysisService.setAnalysisStrategy(analysisFactory.getAnalysis(AnalysisType.STATISTICAL));
+		analysisService.setAnalysisStrategy(analysisFactory.getAnalysis(AnalysisType.SIMPLE));
 	}
 
 	@RequestMapping(value = "/hashtag/{hashtag}", method = RequestMethod.GET)
@@ -56,7 +56,7 @@ public class HashtagController {
     return "redirect:/dashboard";
   }
   
-  @RequestMapping(value = "/hashtag/analysis/type", method = RequestMethod.POST)
+  @RequestMapping(value = "/hashtags/analysis/type", method = RequestMethod.POST)
   public ResponseEntity<Object> setAnalysisType(Authentication authentication, @RequestParam("name") String name) {
   	if(authentication == null) {
   		throw new NotLoggedInException();
@@ -68,6 +68,18 @@ public class HashtagController {
   	HashtagAnalysis analysis = analysisFactory.getAnalysis(type);
 		analysisService.setAnalysisStrategy(analysis);
 		return new ResponseEntity<Object>(HttpStatus.OK);
+  }
+  
+  @RequestMapping(value = "/hashtags/analysis/trigger", method = RequestMethod.POST)
+  public ResponseEntity<Object> triggerAnalysis(Authentication authentication) {
+  	if(authentication == null) {
+  		throw new NotLoggedInException();
+  	}
+  	if(!authentication.getAuthorities().contains("ADMIN")) {
+  		return new ResponseEntity<Object>(HttpStatus.BAD_REQUEST);
+  	}
+  	analysisService.analyse();
+  	return new ResponseEntity<>(HttpStatus.OK);
   }
   
   private AnalysisType getType(String name) {

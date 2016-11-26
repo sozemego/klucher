@@ -1144,3 +1144,16 @@ p.settings-header {
 .chat-user-element {
 	width: 100px;
 }
+
+.chat-trending-list {
+	text-align: top;
+}
+
+.chat-trending-list-roomname {
+	color: #1c8baf;
+}
+
+a.chat-trending-list-roomname {
+	text-decoration: none;
+	cursor: pointer;
+}

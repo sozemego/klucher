@@ -173,6 +173,7 @@ function dashboardOnLoad() {
 	displayTimeCreated();
 	displayUserSocialStats();
 	processProfileDescription();
+	getOpenChatRooms(displayOpenChatRooms);
 }
 
 function attachCharacterCountListener() {
@@ -756,6 +757,7 @@ function userOnLoad() {
 	displayTimeCreated();
 	displayUserSocialStats();
 	processProfileDescription();
+	getOpenChatRooms(displayOpenChatRooms);
 }
 
 function setUpUserButtons() {
@@ -1005,6 +1007,7 @@ function hashtagOnLoad() {
 	setUpLoginForm();
 	getHashtagFeed(parseInt($("#kluch-feed").attr("data-next")), true);
 	pollNotifications();
+	getOpenChatRooms(displayOpenChatRooms);
 }
 
 function attachInifiteScrollingListenerHashtag() {
@@ -1605,7 +1608,7 @@ var stompClient = null;
 function chatStart() {
 	const hashtag = getHashtag();
 	if(hashtag === null || hashtag === undefined || hashtag === "") {
-		displayMessage(getChatNotOpenMessage());
+		getOpenChatRooms(sendOpenRoomsAsChatMessage);
 		return;
 	}
 	var socket = new SockJS("/chat-socket");
@@ -1614,7 +1617,6 @@ function chatStart() {
 		console.log("Connected: " + frame);
 		stompClient.subscribe("/chat/back/" + getHashtag(), function(message) {
 			handleMessage(message);
-			console.log(message);
 		});
 		requestUserList();
 	});
@@ -1768,10 +1770,70 @@ function populateChatUserList(users) {
 	}
 }
 
-function getChatNotOpenMessage() {
+function getChatMessageFromSystem(message) {
 	return {
 		"timestamp" : new Date().getTime(),
 		"username" : "System",
-		"message": "This room is not open."
+		"message": message
 	};
+}
+
+function getOpenChatRooms(callback) {
+	$.ajax({
+		url: "/chats/trending",
+		type: "GET",
+		error: function(xhr, status, error) {
+			displayAlert(xhr.responseJSON.message);
+		},
+		success: function(data, status, xhr) {
+			console.log(data);
+			callback(data.chatRoomCounts);
+		}
+	});
+}
+
+function displayOpenChatRooms(chatRoomCounts) {
+
+	const chatListElement = $("#chat-trending-list");
+
+	if(chatRoomCounts.length > 0) {
+		const welcomeElement = $(document.createElement("div"));
+		const welcomeElementText = $(document.createElement("span"));
+		welcomeElementText.text("Chat rooms:");
+		welcomeElement.append(welcomeElementText);
+		chatListElement.append(welcomeElement);
+	}
+
+	for(var i = 0; i < chatRoomCounts.length; i++) {
+		const roomName = chatRoomCounts[i].roomName;
+		const userCount = chatRoomCounts[i].userCount;
+
+		const chatRoomElement = $(document.createElement("div"));
+
+		const roomNameElement = $(document.createElement("a"));
+		roomNameElement.text("#" + roomName);
+		roomNameElement.addClass("chat-trending-list-roomname");
+		roomNameElement.attr("href", "/chat/" + roomName);
+		const userCountElement = $(document.createElement("span"));
+		userCountElement.text(" (" + userCount + " users online)");
+		chatRoomElement.append(roomNameElement);
+		chatRoomElement.append(userCountElement);
+
+		chatListElement.append(chatRoomElement);
+
+	}
+
+}
+
+function sendOpenRoomsAsChatMessage(chatRoomCounts) {
+	displayMessage(getChatMessageFromSystem("This room is not open."));
+	displayMessage(getChatMessageFromSystem("You can follow these hashtags instead:"));
+	for(var i = 0; i < chatRoomCounts.length; i++) {
+		const roomName = chatRoomCounts[i].roomName;
+		displayMessage(getChatMessageFromSystem("#" + roomName));
+	}
+}
+
+function getChatRoomLink(roomName) {
+	return '<a href = "/chat/' + roomName + '">'+roomName+'</a>';
 }

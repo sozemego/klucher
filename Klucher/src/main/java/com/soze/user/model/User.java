@@ -151,10 +151,10 @@ public class User implements UserDetails, Serializable {
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> list = new ArrayList<>();
 		if (userRoles.isUser()) {
-			list.add(new SimpleGrantedAuthority("ROLE_USER"));
+			list.add(new SimpleGrantedAuthority("USER"));
 		}
 		if (userRoles.isAdmin()) {
-			list.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+			list.add(new SimpleGrantedAuthority("ADMIN"));
 		}
 		return list;
 	}
