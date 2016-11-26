@@ -20,6 +20,7 @@ public class ChatRoom {
 	private final Set<String> allUsers = new HashSet<>();
 	private final Map<String, String> sessionIdToUser = new HashMap<>();
 	private int maxConcurrentUsers = 0;
+	private boolean closed;
 
 	public ChatRoom(String name) {
 		this(name, LocalDateTime.now());
@@ -80,6 +81,14 @@ public class ChatRoom {
 
 	public Set<String> getAllUniqueUsers() {
 		return allUsers;
+	}
+
+	public boolean isClosed() {
+		return closed;
+	}
+
+	public void setClosed(boolean closed) {
+		this.closed = closed;
 	}
 
 	@Override

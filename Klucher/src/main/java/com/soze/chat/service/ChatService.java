@@ -97,7 +97,11 @@ public class ChatService {
 	}
 	
 	public boolean isChatRoomOpen(String roomName) {
-		return chatRooms.containsKey(roomName);
+		ChatRoom room = chatRooms.get(roomName);
+		if(room == null) {
+			return false;
+		}
+		return !room.isClosed();
 	}
 	
 	/**
@@ -118,15 +122,15 @@ public class ChatService {
 	
 	private void closeChatRoom(String roomName) {
 		
+		chatRooms.get(roomName).setClosed(true);
+		
 		Queue<ScheduledMessage> closureMessages = new LinkedList<>(
 				Arrays.asList(new ScheduledMessage("Chat room closing in 1 minute", 1000 * 30),
 						new ScheduledMessage("Chat room closing in 30 seconds", 1000 * 20),
 						new ScheduledMessage("Chat room closing in 10 seconds", 1000 * 10),
 						new ScheduledMessage("Chat room closed.", 0L)));
 		
-		
 		executor.submit(new ChatRoomCloser(closureMessages, roomName, "System"));
-
 	}
 	
 	private class ChatRoomCloser implements Runnable {

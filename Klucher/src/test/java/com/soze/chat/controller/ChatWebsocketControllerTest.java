@@ -67,10 +67,9 @@ public class ChatWebsocketControllerTest {
     this.testOutboundInterceptor = new TestChannelInterceptor();
 		this.brokerChannel.addInterceptor(testBrokerInterceptor);
 		this.clientOutboundChannel.addInterceptor(testOutboundInterceptor);
-		if(service.isChatRoomOpen("doge")) {
-			service.removeChatRoom("doge");
+		if(!service.isChatRoomOpen("doge")) {
+			service.addChatRoom("doge");
 		}
-		service.addChatRoom("doge");
   }
 	
 	@Test

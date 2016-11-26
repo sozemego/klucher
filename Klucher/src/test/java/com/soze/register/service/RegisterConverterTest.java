@@ -46,7 +46,7 @@ public class RegisterConverterTest {
     assertThat(user.getUsername(), equalTo(username));
     assertThat(user.getHashedPassword(), equalTo(hashedPassword));
     assertThat(user.getAuthorities().size(), equalTo(1));
-    assertThat(user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER")), equalTo(true));
+    assertThat(user.getAuthorities().contains(new SimpleGrantedAuthority("USER")), equalTo(true));
     assertThat(user.getUserSettings().getAvatarPath(), equalTo("avatar_path"));
     assertThat(user.getCreatedAt(), notNullValue());
   }
@@ -65,7 +65,7 @@ public class RegisterConverterTest {
     assertThat(user.getUsername(), equalTo(username));
     assertThat(user.getHashedPassword(), equalTo(hashedPassword));
     assertThat(user.getAuthorities().size(), equalTo(1));
-    assertThat(user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER")), equalTo(true));
+    assertThat(user.getAuthorities().contains(new SimpleGrantedAuthority("USER")), equalTo(true));
     assertThat(user.getUserSettings().getAvatarPath(), equalTo("avatar_path"));
     assertThat(user.getCreatedAt(), notNullValue());
   }
