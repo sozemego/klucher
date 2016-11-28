@@ -11,6 +11,11 @@ function registerOnLoad() {
 function checkAvailability(lastUsername) {
 
 	const currentUsername = $("#register-form-username").val();
+
+	if(!isVisible()) {
+		setTimeout(checkAvailability, 10000, currentUsername);
+	}
+
 	if(hasWhiteSpace(currentUsername)) {
 		setTimeout(checkAvailability, 2500, currentUsername);
 		return;
@@ -655,7 +660,7 @@ function isGettingFeed() {
 }
 
 function pollFeed() {
-	if(isGettingFeed()) {
+	if(isGettingFeed() || !isVisible()) {
 		setTimeout(pollFeed, 30000);
 		return;
 	}
@@ -1123,6 +1128,9 @@ function attachInifiteScrollingListenerMentions() {
 }
 
 function pollNotifications() {
+	if(!isVisible()) {
+		setTimeout(pollNotifications, 60 * 1000);
+	}
 	const loggedIn = isLoggedIn();
 	if(!loggedIn) {
 		return;
@@ -1844,4 +1852,11 @@ function sendOpenRoomsAsChatMessage(chatRoomCounts) {
 
 function getChatRoomLink(roomName) {
 	return '<a href = "/chat/' + roomName + '">'+roomName+'</a>';
+}
+
+function isVisible() {
+	if(document.visibilityState === "visible") {
+		return true;
+	}
+	return false;
 }
