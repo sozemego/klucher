@@ -65,7 +65,6 @@ public class KlucherSecurity extends WebSecurityConfigurerAdapter {
       .permitAll()
     .and()
       .rememberMe()
-      .authenticationSuccessHandler(authenticationSuccessHandler())
       .rememberMeParameter("remember-me")
       .tokenRepository(persistentTokenRepository())
       .tokenValiditySeconds(86400)
@@ -76,11 +75,6 @@ public class KlucherSecurity extends WebSecurityConfigurerAdapter {
        .authenticationEntryPoint(new AjaxAwareAuthenticationEntryPoint("/login"))
      .and()                                                               
        .headers().frameOptions().disable();
-  }
-  
-  @Bean
-  public AuthenticationSuccessHandler authenticationSuccessHandler() {
-    return new RememberMeSuccessHandler();
   }
   
   @Bean
