@@ -1685,12 +1685,20 @@ function hideChat() {
 
 function getTimeOfMessage(timestamp) {
 	const date = new Date(timestamp);
-	var mm = date.getMonth() + 1 + "";
-	var dd = "" + date.getDate();
-	var ddLength = dd.length;
+	const mm = date.getMonth() + 1 + "";
+	const dd = "" + date.getDate();
+	const ddLength = dd.length;
 	const day = ("00" + dd).substring(dd.length);
 	const month = ("00" + mm).substring(mm.length);
-	const returnString = [day, month, date.getFullYear()].join(".");
+	const dateString = [day, month, date.getFullYear()].join(".");
+	const hours = "" + date.getHours();
+	const hoursString = ("00" + hours).substring(hours.length);
+	const minutes = "" + date.getMinutes();
+	const minutesString = ("00" + minutes).substring(minutes.length);
+	const seconds = "" + date.getSeconds();
+	const secondsString = ("00" + seconds).substring(seconds.length);
+	const timeString = [hoursString, minutesString, secondsString].join(":");
+	const returnString = [dateString, timeString].join(" ");
 	return returnString;
 }
 
