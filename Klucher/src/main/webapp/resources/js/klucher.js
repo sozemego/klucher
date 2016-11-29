@@ -505,7 +505,17 @@ function userWithoutAt(user) {
 }
 
 function getLinkStyle(link) {
-	return "<a class = 'kluch-text-link-link' href = 'http://" + link + "'>" + link + "</a>";
+	link = link.trim();
+	const containsHttp = doesLinkContainHttps(link);
+	if(!containsHttp) {
+		link = "http://" + link;
+	}
+	return "<a class = 'kluch-text-link-link' href = '" + link + "'>" + link + "</a>";
+}
+
+function doesLinkContainHttps(link) {
+	const regex = /^(http|https)/;
+	return regex.test(link);
 }
 
 function getUsername() {
