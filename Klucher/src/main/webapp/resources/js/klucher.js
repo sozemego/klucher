@@ -14,6 +14,7 @@ function checkAvailability(lastUsername) {
 
 	if(!isVisible()) {
 		setTimeout(checkAvailability, 10000, currentUsername);
+		return;
 	}
 
 	if(hasWhiteSpace(currentUsername)) {
