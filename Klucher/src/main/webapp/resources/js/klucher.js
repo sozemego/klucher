@@ -1130,6 +1130,7 @@ function attachInifiteScrollingListenerMentions() {
 function pollNotifications() {
 	if(!isVisible()) {
 		setTimeout(pollNotifications, 60 * 1000);
+		return;
 	}
 	const loggedIn = isLoggedIn();
 	if(!loggedIn) {
