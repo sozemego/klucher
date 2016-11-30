@@ -66,8 +66,8 @@ public class UserSettingsService {
 	 */
 	public boolean deleteUser(String username) throws NullOrEmptyException, UserDoesNotExistException {
 		User user = getUser(username);
+		userDao.delete(user);
 		user.setDeleted(true);
-		userDao.save(user);
 		SecurityContextHolder.getContext().setAuthentication(null);
 		return true;
 	}

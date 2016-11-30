@@ -17,6 +17,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +28,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.soze.usersettings.model.UserSettings;
 
 @Entity
+@SQLDelete(sql = "UPDATE user SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted <> true")
 public class User implements UserDetails, Serializable {
 	
 	private static final long serialVersionUID = 6539127499242225817L;
