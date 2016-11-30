@@ -127,6 +127,25 @@ public class KluchFeedServiceTest extends TestWithMockUsers {
   }
   
   @Test
+  public void testPaginateKluchs() {
+  	User user = mockUser("test", "password");
+  	assertThat(user.getUserSettings().getKluchsPerRequest(), equalTo(30)); // 30 is the default number of kluchs per request
+  	List<Kluch> kluchs = postKluchsFor(Arrays.asList(user), 60);
+  	Feed<KluchFeedElement> feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.NEXT, null, Optional.empty()), false);
+  	assertThat(feed.getPrevious(), equalTo(kluchs.get(59).getId()));
+  	assertThat(feed.getNext(), equalTo(kluchs.get(30).getId()));
+  	assertThat(feed.getElements(), notNullValue());
+  	assertThat(feed.getElements().size(), equalTo(30));
+  	
+  	feed = feedService.constructFeed("test", new FeedRequest(FeedDirection.NEXT, kluchs.get(30).getId(),  Optional.empty()), false);
+  	assertThat(feed.getPrevious(), equalTo(kluchs.get(29).getId()));
+  	assertThat(feed.getNext(), equalTo(kluchs.get(0).getId()));
+  	assertThat(feed.getElements(), notNullValue());
+  	assertThat(feed.getElements().size(), equalTo(30));
+  	
+  }
+  
+  @Test
   public void testHashtagFeedNotExistent() {
     String hashtagText = "hashtag";
     Feed<KluchFeedElement> feed = feedService.constructHashtagFeed(hashtagText, new FeedRequest(FeedDirection.PREVIOUS, null, Optional.empty()));
