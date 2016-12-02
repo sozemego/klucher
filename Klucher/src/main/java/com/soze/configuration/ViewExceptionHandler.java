@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -26,7 +27,7 @@ public class ViewExceptionHandler implements HandlerExceptionResolver, Ordered {
 
 	@Override
 	public int getOrder() {
-		return Integer.MIN_VALUE;
+		return Integer.MAX_VALUE;
 	}
 
 	@Override
@@ -35,6 +36,7 @@ public class ViewExceptionHandler implements HandlerExceptionResolver, Ordered {
 		ModelAndView mav = new ModelAndView("error/error");
 		mav.addObject("statusCode", "");
 		mav.addObject("message", getMessage(ex));
+		mav.setStatus(HttpStatus.valueOf(response.getStatus()));
 		return mav;
 	}
 

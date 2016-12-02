@@ -52,7 +52,7 @@ public class FollowControllerTest extends TestWithMockUsers {
   	mvc.perform(MockMvcRequestBuilders.post("/user/follow")
   			.param("follow", "user"))
   	.andDo(print())
-  	.andExpect(status().isUnauthorized());  	
+  	.andExpect(status().isUnauthorized());
   }
   
   @Test
@@ -60,7 +60,7 @@ public class FollowControllerTest extends TestWithMockUsers {
   	mvc.perform(MockMvcRequestBuilders.post("/user/unfollow")
   			.param("follow", "user"))
   	.andDo(print())
-  	.andExpect(status().isUnauthorized());  	
+  	.andExpect(status().isUnauthorized());
   }
   
   @Test
