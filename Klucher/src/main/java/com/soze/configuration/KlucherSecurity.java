@@ -56,6 +56,7 @@ public class KlucherSecurity extends WebSecurityConfigurerAdapter {
       .antMatchers("/info/**").hasAuthority("ADMIN")
       .antMatchers("/chats/close/**").hasAuthority("ADMIN")
       .antMatchers("/chats/trigger").hasAuthority("ADMIN")
+      .antMatchers("/hashtags/**").hasAuthority("ADMIN")
     .and()
       .formLogin()
       .defaultSuccessUrl("/dashboard", false)

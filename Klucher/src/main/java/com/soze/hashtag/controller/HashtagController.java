@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.soze.common.exceptions.NotLoggedInException;
 import com.soze.hashtag.service.HashtagAnalysisService;
 import com.soze.hashtag.service.analysis.AnalysisFactory;
 import com.soze.hashtag.service.analysis.AnalysisFactory.AnalysisType;
@@ -58,12 +57,6 @@ public class HashtagController {
   
   @RequestMapping(value = "/hashtags/analysis/type", method = RequestMethod.POST)
   public ResponseEntity<Object> setAnalysisType(Authentication authentication, @RequestParam("name") String name) {
-  	if(authentication == null) {
-  		throw new NotLoggedInException();
-  	}
-  	if(!authentication.getAuthorities().contains("ADMIN")) {
-  		return new ResponseEntity<Object>(HttpStatus.BAD_REQUEST);
-  	}
   	AnalysisType type = getType(name);
   	HashtagAnalysis analysis = analysisFactory.getAnalysis(type);
 		analysisService.setAnalysisStrategy(analysis);
@@ -72,12 +65,6 @@ public class HashtagController {
   
   @RequestMapping(value = "/hashtags/analysis/trigger", method = RequestMethod.POST)
   public ResponseEntity<Object> triggerAnalysis(Authentication authentication) {
-  	if(authentication == null) {
-  		throw new NotLoggedInException();
-  	}
-  	if(!authentication.getAuthorities().contains("ADMIN")) {
-  		return new ResponseEntity<Object>(HttpStatus.BAD_REQUEST);
-  	}
   	analysisService.analyse();
   	return new ResponseEntity<>(HttpStatus.OK);
   }
