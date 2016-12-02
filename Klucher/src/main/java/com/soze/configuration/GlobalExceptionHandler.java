@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -189,6 +188,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ResponseEntity<Object>(response, new HttpHeaders(), response.getStatus());
 	}
 
+	/**
 	@Override
 	protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
@@ -200,7 +200,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 				builder.toString());
 		return new ResponseEntity<Object>(response, new HttpHeaders(), response.getStatus());
 	}
-
+*/
+	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Object> handleFallBack(Exception e) {
 		log.info("Some exception was thrown.", e);
