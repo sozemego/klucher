@@ -56,11 +56,13 @@ public class KluchDatabase implements KluchDao {
 	}
 
 	@Override
+	@CacheEvict(cacheNames = "kluchCount", key = "#id")
 	public void delete(long id) {
 		kluchRepository.delete(id);
 	}
 
 	@Override
+	@CacheEvict(cacheNames = "kluchCount", key = "#kluch.author.id")
 	public void delete(Kluch kluch) {
 		kluchRepository.delete(kluch);
 	}
