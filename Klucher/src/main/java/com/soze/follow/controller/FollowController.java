@@ -38,7 +38,7 @@ public class FollowController {
     String username = authentication.getName();
     log.info("User [{}] tried to follow [{}]", username, follow);
     followService.follow(username, follow);
-    notificationService.addNotification(username);
+    notificationService.addNotification(follow);
     return new ResponseEntity<String>(HttpStatus.OK);
     
   }
@@ -51,7 +51,7 @@ public class FollowController {
     String username = authentication.getName();
     log.info("User [{}] tried to unfollow [{}]", username, follow);
     followService.unfollow(username, follow);
-    notificationService.removeNotification(username);
+    notificationService.removeNotification(follow);
     return new ResponseEntity<String>(HttpStatus.OK);
     
   }
