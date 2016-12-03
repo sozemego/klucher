@@ -4,7 +4,7 @@
 			<span class="header-button" id="header-button-dashboard">
 				<a href="/dashboard" class="header-button-link">
 					<div class="header-button-content">
-						<img class="header-button-image" src="../../resources/images/dashboard_2.png"></img>
+						<img class="header-button-image" src="../../resources/images/dashboard_2.png" title = "http://www.flaticon.com/authors/madebyoliver"></img>
 						<span class="header-button-text">dashboard</span>
 					</div>
 				</a>
@@ -12,7 +12,7 @@
 			<span class="header-button"  id="header-button-notifications">
 				<a href="/notifications" class="header-button-link">
 					<div class="header-button-content">
-						<img class="header-button-image" src="../../resources/images/messages_5.png"></img>
+						<img class="header-button-image" src="../../resources/images/messages_5.png" title = "Freepik http://www.freepik.com"></img>
 						<span class="header-button-text">notifications</span>
 					</div>
 				</a>
@@ -22,7 +22,7 @@
 			<span class="header-button"  id="header-button-settings">
 				<a href="/settings" class="header-button-link">
 					<div class="header-button-content">
-						<img class="header-button-image" src="../../resources/images/settings.png"></img>
+						<img class="header-button-image" src="../../resources/images/settings.png" title = "Kenney http://kenney.nl/"></img>
 						<span class="header-button-text">settings</span>
 					</div>
 				</a>
@@ -30,7 +30,7 @@
 			<span class="header-button" id="header-logout-button">
 				<a href="/logout" class="header-button-link">
 					<div class="header-button-content">
-						<img class="header-button-image" src="../../resources/images/logout.png"></img>
+						<img class="header-button-image" src="../../resources/images/logout.png" title = "Kenney http://kenney.nl/"></img>
 						<span class="header-button-text">logout</span>
 					</div>
 				</a>

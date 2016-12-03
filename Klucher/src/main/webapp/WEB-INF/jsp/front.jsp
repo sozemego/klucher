@@ -23,19 +23,22 @@
 	<div class="front-side front-side-left">
 		<div class="front-side-introduction">
 			<div class="front-side-introduction-element">
-				<img class="front-introduction-image" src="../../resources/images/write-post-image-front_color.png">
+				<img class="front-introduction-image" src="../../resources/images/write-post-image-front_color.png" title = "Dario Ferrando
+http://dario.io/">
 				<div class="front-introduction-text-wrapper">
 					<span class="front-introduction-text">Publish your thoughts (up to 250 characters).
 				</div>		
 			</div>
 			<div class="front-side-introduction-element front-side-introduction-element-middle">
-				<img class="front-introduction-image" src="../../resources/images/followers_color.png">
+				<img class="front-introduction-image" src="../../resources/images/followers_color.png" title = "Freepik
+http://www.freepik.com">
 				<div class="front-introduction-text-wrapper">
 					<span class="front-introduction-text">Follow your favourite users and receive a feed of their thoughts.
 				</div>
 			</div>
 			<div class="front-side-introduction-element">
-				<img class="front-introduction-image" src="../../resources/images/chat_color.png">
+				<img class="front-introduction-image" src="../../resources/images/chat_color.png" title = "Freepik
+http://www.freepik.com">
 				<div class="front-introduction-text-wrapper">
 					<span class="front-introduction-text">Join the discussion! Most popular #topics will automatically open chat rooms.
 				</div>

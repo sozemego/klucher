@@ -332,6 +332,7 @@ function addKluchToFeed(kluchElement, append) {
 	const kluchAvatar = $(document.createElement("img"));
 	kluchAvatar.addClass("kluch-avatar");
 	kluchAvatar.attr("src", "../../resources/images/" + user.avatarPath);
+	kluchAvatar.attr("title", "Kenney http://kenney.nl/")
 	kluchContainer.append(kluchAvatar);
 
 	const kluchBody = $(document.createElement("div"));
@@ -377,6 +378,7 @@ function addKluchToFeed(kluchElement, append) {
 				const deleteImg = $(document.createElement("img"));
 				deleteImg.addClass("kluch-footer-icon");
 				deleteImg.attr("src", "../../resources/images/delete_2.png");
+				deleteImg.attr("title", "Freepik http://www.freepik.com");
 
 				deleteImg.hover(function() {
 					$(this).attr("src", "../../resources/images/delete_2_hover.png");
@@ -412,6 +414,7 @@ function addKluchToFeed(kluchElement, append) {
 	const likeButton = $(document.createElement("div"));
 	likeButton.addClass("kluch-footer-icon-container");
 	const likeImg = $(document.createElement("img"));
+	likeImg.attr("title", "Kenney http://kenney.nl/");
 	likeImg.addClass("kluch-footer-icon");
 	likeButton.append(likeImg);
 
@@ -808,6 +811,7 @@ function setUpFollowButtonLoggedIn() {
 function setUpFollowButton() {
 	const userButtonFollowImg = $("#user-button-follow-image");
 	userButtonFollowImg.attr("src", "../../resources/images/follow_1.png");
+	userButtonFollowImg.attr("title", "Freepik http://www.freepik.com");
 	const userButtonFollowText = $("#user-button-follow-text");
 	userButtonFollowText.text("follow");
 	$("#user-button-follow").unbind("click");
@@ -819,6 +823,7 @@ function setUpFollowButton() {
 function setUpUnfollowButton() {
 	const userButtonFollowImg = $("#user-button-follow-image");
 	userButtonFollowImg.attr("src", "../../resources/images/unfollow_1.png");
+	userButtonFollowImg.attr("title", "Freepik http://www.freepik.com");
 	const userButtonFollowText = $("#user-button-follow-text");
 	userButtonFollowText.text("unfollow");
 	$("#user-button-follow").unbind("click");
@@ -1458,6 +1463,7 @@ function populateRemainingFollowers(remainingFollowers, total, listedAlready) {
 		const avatar = $(document.createElement("img"));
 		avatar.addClass("followers-new-free-element-image");
 		avatar.attr("src", "../../resources/images/" + follower.avatarPath);
+		avatar.attr("title", "Kenney http://kenney.nl/");
 		avatarContainer.append(avatar);
 		element.append(avatarContainer);
 
@@ -1505,6 +1511,7 @@ function populateRemainingLikes(remainingLikes, total, listedAlready) {
 		const avatar = $(document.createElement("img"));
 		avatar.addClass("likes-new-free-element-image");
 		avatar.attr("src", "../../resources/images/" + like.avatarPath);
+		avatar.attr("title", "Kenney http://kenney.nl/");
 		avatarContainer.append(avatar);
 		element.append(avatarContainer);
 

@@ -22,20 +22,14 @@
 <c:import url="header_with_buttons.jsp"></c:import>
 <div class = "about">
 	<p class = "about-element">Hi! My name is Kamil Jurek and I'm a self-thought developer. I built this Twitter-like service
-	as a way to learn Spring (and get some front-end experience). All of the code is open-sourced
+	as a way to learn Spring (and get some basic front-end experience). All of the code is open-sourced
 	and if you want to dive right in, here's a link: <a class = "about-link" href = "https://bitbucket.org/sozemego/klucher">https://bitbucket.org/sozemego/klucher</a></p>
-	<p class = "about-element">In this project I've used the following languages/technologies/frameworks/libraries/buzzwords: Java, Spring Boot, JPA, Hibernate, MySQL, Mockito, git,	Gradle, Amazon Web Services, Tomcat, JSP, Flyway, HTML, CSS, JavaScript, jQuery. Here's a short explanation of what most of them do:</p>
-	<p class = "about-element">Spring Boot - klucher's heart. Provides dependency injection and MVC capabilities. Abstracts a lot of things and is mostly configured out of the box. It still lets you change any aspect of your app, if you desire. </p>
-	<p class = "about-element">JPA, Hibernate, MySQL - persistent data storage (MySQL) and ways to generate queries (JPA), map DB results to Java objects (Hibernate). </p>
-	<p class = "about-element">Mockito - an excellent library used for testing. Provides an easy way to create mocked objects, methods. Allows for easy verification of
-	called methods and their arguments.</p>
-	<p class = "about-element">git - version control provided by bitbucket.</p>
-	<p class = "about-element">Tomcat, JSP - a web container for the app. Jasper is the engine rendering JavaServer Pages (JSP). </p>
-	<p class = "about-element">Gradle - a build tool. Among many things, it manages dependencies for you, builds your app, runs tests and many more. I have not used this tool to maximum of its capabilities. </p>
-	<p class = "about-element">Amazon Web Services - This website runs on an Elastic Beanstalk, which is a service provided by AWS. It lets you auto-scale (spin up new instances of this app), manages load-balancing, monitors your instances health etc. Deploying a new app is easy and quite fast. Databases are using amazon's RDS, DNS is managed through their Route 53 service. </p>
-	<p class = "about-element">Flyway - database versioning system. Easy to use, makes sure all your databases (production, staging, dev etc) have the same schema.</p>
-	<p class = "about-element">HTML, CSS, JavaScript, jQuery - fundamental tools (except for jQuery) for building the front-facing part of your site. </p>
-
+	<p class = "about-element">In this project I've used the following languages/technologies/frameworks/libraries/buzzwords: Java, Spring Boot, JPA, Hibernate, MySQL, Mockito, git,	Gradle, Amazon Web Services, Tomcat, JSP, Flyway, HTML, CSS, JavaScript, jQuery.
+	<p class = "about-element">Most graphical assets are not made by me, however I only selected those assets which are royalty free. Where possible, attribution is displayed when an image is hovered over. Below is a list of all attributions:</p>
+	<p class = "about-element">Freepik <a href = "http://www.freepik.com">http://www.freepik.com</a></p>
+	<p class = "about-element">Dario Ferrando <a href = "http://dario.io/">http://dario.io/</a></p>
+	<p class = "about-element">Kenney <a href = "http://kenney.nl/">http://kenney.nl/</a></p>
+	<p class = "about-element">Madebyoliver <a href = "http://www.flaticon.com/authors/madebyoliver">http://www.flaticon.com/authors/madebyoliver</a></p>
 </div>
 <div id="page-overlay" class="page-overlay page-overlay-form page-overlay-inactive">
 </div>

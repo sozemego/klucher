@@ -29,7 +29,7 @@
 			
 			<div class="user-info-container">
 				<div class="user-avatar-container">
-					<img class="user-avatar" src="../../resources/images/${avatarPath}"></img>
+					<img class="user-avatar" src="../../resources/images/${avatarPath}" title = "Kenney http://kenney.nl/"></img>
 				</div>
 				<div class="user-info-text" id = "user-info-text">
 					<p class="user-info-text-name">${username}</p>
@@ -53,13 +53,13 @@
 			<div class="user-buttons-container">
 					<div class="user-button" id="user-button-follow">
 						<div class="user-button-image-container">
-							<img id = "user-button-follow-image" class="user-button-image" src = "../../resources/images/follow_1.png"></img>
+							<img id = "user-button-follow-image" class="user-button-image" src = "../../resources/images/follow_1.png" title = "Freepik http://www.freepik.com"></img>
 						</div>
 						<span id = "user-button-follow-text" class="user-button-text">follow</span>
 					</div>
 					<div class="user-button" id="user-button-like">
 						<div class="user-button-image-container">
-							<img id = "user-button-like-image" class="user-button-image" src = "../../resources/images/like_2.png"></img>
+							<img id = "user-button-like-image" class="user-button-image" src = "../../resources/images/like_2.png" title = "Kenney http://kenney.nl/"></img>
 						</div>
 						<span id = "user-button-like-text" class="user-button-text">like</span>
 					</div>

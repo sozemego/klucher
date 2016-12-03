@@ -27,7 +27,7 @@
 		<div class="dashboard-section dashboard-section-user">
 			<div class="user-info-container">
 				<div class="user-avatar-container">
-					<img class="user-avatar" src="../../resources/images/${avatarPath}"></img>
+					<img class="user-avatar" src="../../resources/images/${avatarPath}" title = "Kenney http://kenney.nl/"></img>
 				</div>
 				<div class="user-info-text">
 					<p class="user-info-text-name">${username}</p>
