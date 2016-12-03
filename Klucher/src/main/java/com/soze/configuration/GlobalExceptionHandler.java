@@ -21,6 +21,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.soze.common.errorresponse.ErrorResponse;
+import com.soze.common.exceptions.AlreadyFollowsException;
 import com.soze.common.exceptions.CannotDoItToYourselfException;
 import com.soze.common.exceptions.CannotLoginException;
 import com.soze.common.exceptions.ChatRoomDoesNotExistException;
@@ -142,6 +143,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		log.info("Someone tried to join room " + ex.getRoomName());
 		return getResponse("Cannot join room", HttpStatus.BAD_REQUEST);
 	}
+	
+	@ExceptionHandler(AlreadyFollowsException.class)
+	public ResponseEntity<Object> handleAlreadyFollowsException(AlreadyFollowsException ex) {
+		log.info("User [{}] tried to follow [{}], but this relationship already existed. ", ex.getFollowerName(), ex.getFolloweeName());
+		return getResponse("You already follow this user. ", HttpStatus.BAD_REQUEST);
+	}
 
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
@@ -187,20 +194,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND, ex.getLocalizedMessage(), error);
 		return new ResponseEntity<Object>(response, new HttpHeaders(), response.getStatus());
 	}
-
-	/**
-	@Override
-	protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
-			HttpHeaders headers, HttpStatus status, WebRequest request) {
-		StringBuilder builder = new StringBuilder();
-		builder.append(ex.getMethod() + " method is not supported for this request. Supported methods are ");
-		ex.getSupportedHttpMethods().forEach(t -> builder.append(t + " "));
-
-		ErrorResponse response = new ErrorResponse(HttpStatus.METHOD_NOT_ALLOWED, ex.getLocalizedMessage(),
-				builder.toString());
-		return new ResponseEntity<Object>(response, new HttpHeaders(), response.getStatus());
-	}
-*/
 	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Object> handleFallBack(Exception e) {

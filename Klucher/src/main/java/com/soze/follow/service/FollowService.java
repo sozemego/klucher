@@ -3,6 +3,7 @@ package com.soze.follow.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.soze.common.exceptions.AlreadyFollowsException;
 import com.soze.common.exceptions.CannotDoItToYourselfException;
 import com.soze.common.exceptions.NullOrEmptyException;
 import com.soze.common.exceptions.UserDoesNotExistException;
@@ -44,9 +45,10 @@ public class FollowService {
 	 *           if either username or follow do not exist
 	 * @throws CannotDoItToYourselfException
 	 *           if username equals to follow
+	 * @throws AlreadyFollowsException if follower already follows followee
 	 */
 	public Follow follow(String follower, String followee)
-			throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException {
+			throws NullOrEmptyException, UserDoesNotExistException, CannotDoItToYourselfException, AlreadyFollowsException {
 		validateInput(follower, followee);
 		User followerUser = userDao.findOne(follower);
 		if (followerUser == null) {
@@ -56,7 +58,11 @@ public class FollowService {
 		if (followeeUser == null) {
 			throw new UserDoesNotExistException(followee);
 		}
-		Follow followEntity = new Follow(followerUser.getId(), followeeUser.getId());
+		Follow followEntity = followDao.findByFollowerIdAndFolloweeId(followerUser.getId(), followeeUser.getId());
+		if(followEntity != null) {
+			throw new AlreadyFollowsException(followerUser.getUsername(), followeeUser.getUsername());
+		}
+		followEntity = new Follow(followerUser.getId(), followeeUser.getId());
 		return followDao.save(followEntity);
 	}
 

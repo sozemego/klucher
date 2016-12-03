@@ -4,8 +4,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+
+
 
 /**
  * An entity representing a follower/followee relationship.
@@ -14,7 +17,8 @@ import javax.validation.constraints.NotNull;
  *
  */
 @Entity
-@Table(name = "follows")
+@Table(name = "follows",
+		indexes = {@Index(name="follower_id", columnList="followerId,followeeId", unique = true)})
 public class Follow {
 
 	@Id
@@ -22,13 +26,13 @@ public class Follow {
 	private long id;
 
 	/**
-	 * Name of the user who follows.
+	 * Id of the user who follows.
 	 */
 	@NotNull
 	private long followerId;
 
 	/**
-	 * Name of the user who is being followed.
+	 * Id of the user who is being followed.
 	 */
 	@NotNull
 	private long followeeId;
