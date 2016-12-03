@@ -8,7 +8,7 @@ import com.soze.hashtag.service.analysis.AnalysisResults;
 import com.soze.hashtag.service.analysis.HashtagAnalysis;
 
 /**
- * A service which analyses trends among hashtags in user posts.
+ * A service which analyses trends among hashtags in user kluchs.
  * @author kamil jurek
  *
  */

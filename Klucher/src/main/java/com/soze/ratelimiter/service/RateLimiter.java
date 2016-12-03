@@ -31,13 +31,16 @@ import com.soze.utils.FileUtils;
 @Service
 public class RateLimiter {
 
-	@Value("${spring.profiles.active}")
-	private String profile;
+	
+	
   private static final String CONFIG_PATH = "config/limits_prod.txt";
   private static final String DEV_CONFIG_PATH = "config/limits_dev.txt";
   private static final int DEFAULT_REQUEST_LIMIT = 60;
   //time in seconds after made requests expire and stop counting towards limit
   private final static int REQUEST_TIME_PERIOD_IN_SECONDS = 60;
+  
+  @Value("${spring.profiles.active}")
+  private String profile;
   private final Map<String, Limit> limits = new HashMap<>();
   private final Map<HttpMethod, Integer> defaultLimits = new HashMap<>();
   private final Map<Interaction, List<Long>> requests = new HashMap<>();
@@ -69,7 +72,7 @@ public class RateLimiter {
     int requestLimit = limit;
     int requestsSince = requestsSince(interaction, currentTime);
     int remaining = Math.max(0, (requestLimit - requestsSince));
-    int secondsUntilRequest = requestsSince < requestLimit ? 0 : secondsUntilRequest(interaction, requestLimit, currentTime);
+    int secondsUntilRequest = secondsUntilRequest(interaction, requestLimit, currentTime);
     
     return new InteractionResult(interaction, requestLimit, remaining, secondsUntilRequest);
   }
@@ -112,8 +115,15 @@ public class RateLimiter {
     return purge(interaction, currentTime);
   }
   
+  /**
+   * Removes all requests outside of the accepted window
+   * and returns the number of remaining interactions (that are within the window).
+   * @param interaction
+   * @param currentTime
+   * @return
+   */
   private int purge(Interaction interaction, long currentTime) {
-  	//synchronized (requests) {
+
     List<Long> pastRequests = requests.get(interaction);
     synchronized (pastRequests) {
 	    Iterator<Long> it = pastRequests.iterator();
@@ -129,12 +139,30 @@ public class RateLimiter {
 	   }
   }
   
+	/**
+	 * Returns number of seconds till a given user can interact with given
+	 * endpoint with given HttpMethod (encapsulated as Interaction object).
+	 * Returns 0 if we can interact immediately.
+	 * @param interaction
+	 * @param limit
+	 * @param currentTime
+	 * @return
+	 */
   private int secondsUntilRequest(Interaction interaction, int limit, long currentTime) {
+  	
     List<Long> pastRequests = requests.get(interaction);
-    //the list's size() should be larger than limit at this point
+    // did not exceed the limit, so we can interact immidiately
+    if(pastRequests.size() < limit) {
+    	return 0;
+    }
+    
+    // get timestamp of the interaction which if it
+    // clears the number of interactions will fall under limit
     Long timestamp = pastRequests.get(pastRequests.size() - limit);
+    // how many seconds already passed between this interaction and now
     long differenceBetweenCurrentAndLimitTimestamp = currentTime - timestamp;
-    return (int) (REQUEST_TIME_PERIOD_IN_SECONDS - differenceBetweenCurrentAndLimitTimestamp); 
+    // calculate the time in seconds after which this interaction will be purged
+    return (int) (REQUEST_TIME_PERIOD_IN_SECONDS - differenceBetweenCurrentAndLimitTimestamp);
   }
   
   @PostConstruct

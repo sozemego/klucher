@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
 
 import com.soze.chat.dao.ChatRoomDao;
 import com.soze.chat.model.ChatMessageBundle;
@@ -48,8 +47,6 @@ public class ChatService {
 	private static final Logger LOG = LoggerFactory.getLogger(ChatService.class);
 	private final ExecutorService executor = Executors.newCachedThreadPool();
 	
-	@Autowired
-	private WebSocketMessageBrokerStats stats;
 	@Autowired
 	private ChatMessageService messageService;
 	@Autowired

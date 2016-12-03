@@ -19,6 +19,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.soze.kluch.dao.KluchDao;
 import com.soze.kluch.model.Kluch;
 
+/**
+ * This class is not actually implemented, it is a simple copy-paste of SimpleHashtagAnalysis.
+ * The reason is, this app actually has no real traffic.
+ * @author kamil jurek
+ *
+ */
 public class StatisticalHashtagAnalysis implements HashtagAnalysis {
 
 	private static final Logger log = LoggerFactory.getLogger(StatisticalHashtagAnalysis.class);

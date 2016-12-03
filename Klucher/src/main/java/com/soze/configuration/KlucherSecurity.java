@@ -71,9 +71,6 @@ public class KlucherSecurity extends WebSecurityConfigurerAdapter {
       .tokenValiditySeconds(86400)
      .and()
        .logout().permitAll()
-     .and()
-       .exceptionHandling()
-       .authenticationEntryPoint(new AjaxAwareAuthenticationEntryPoint("/login"))
      .and()                                                               
        .headers().frameOptions().disable();
   }

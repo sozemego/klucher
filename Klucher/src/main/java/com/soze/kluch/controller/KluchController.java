@@ -27,7 +27,7 @@ import com.soze.kluch.service.KluchService;
 @Controller
 public class KluchController {
 
-	private static final Logger log = LoggerFactory.getLogger(KluchController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(KluchController.class);
 	private final KluchService kluchService;
 	private final KluchFeedService kluchFeedService;
 
@@ -72,7 +72,7 @@ public class KluchController {
 
 		FeedRequest feedRequest = createFeedRequest(previous, next, authenticatedUsername);
 
-		log.info("User [{}] requested to construct a feed for user [{}], with feed request [{}].",
+		LOG.info("User [{}] requested to construct a feed for user [{}], with feed request [{}].",
 				authenticatedUsername, username, feedRequest);
 		return kluchFeedService.constructFeed(username, feedRequest, onlyForUser);
 	}
@@ -90,7 +90,7 @@ public class KluchController {
 		FeedRequest feedRequest = createFeedRequest(previous, next, authenticatedUsername);
 		boolean existsAfter = kluchFeedService.existsFeedAfter(username, feedRequest, onlyForUser);
 		
-		log.info("User [{}] polled feed for user [{}], with feedRequest [{}] and feed constructor returned [{}].",
+		LOG.info("User [{}] polled feed for user [{}], with feedRequest [{}] and feed constructor returned [{}].",
 				authenticatedUsername, username, feedRequest, existsAfter);
 
 		return existsAfter;
@@ -106,7 +106,7 @@ public class KluchController {
 		String username = authentication.getName();
 		FeedRequest feedRequest = createFeedRequest(null, next, username);
 		Feed<KluchFeedElement> feed = kluchFeedService.getMentions(username, feedRequest);
-		log.info("User [{}] requested their mentions feed with feed request [{}]. Feed returned : [{}]", username, feedRequest, feed);
+		LOG.info("User [{}] requested their mentions feed with feed request [{}]. Feed returned : [{}]", username, feedRequest, feed);
 		return feed;
 	}
 
@@ -117,7 +117,7 @@ public class KluchController {
 		String username = authentication == null ? null : authentication.getName();
 		FeedRequest feedRequest = createFeedRequest(null, next, username);
 		Feed<KluchFeedElement> feed = kluchFeedService.constructHashtagFeed(hashtag.toLowerCase(), feedRequest);
-		log.info("Someone requested feed of hashtags for hashtag [{}] with feed request [{}]. Feed returned [{}].", hashtag, feedRequest,
+		LOG.info("Someone requested feed of hashtags for hashtag [{}] with feed request [{}]. Feed returned [{}].", hashtag, feedRequest,
 				feed);
 		return feed;
 	}
@@ -159,8 +159,15 @@ public class KluchController {
 		return onlyForUser;
 	}
 
+	/**
+	 * Constructs a FeedRequest object based on the supplied parameters.
+	 * @param previous id of the element. Can be null
+	 * @param next id of the element. Can be null
+	 * @param sourceUsername username of the requesting user. Can be null
+	 * @return FeedRequest
+	 */
 	private FeedRequest createFeedRequest(Long previous, Long next, String sourceUsername) {
-  	Optional<String> source = sourceUsername == null ? Optional.empty() : Optional.of(sourceUsername);
+  	Optional<String> source = Optional.ofNullable(sourceUsername);
 		if (previous != null) {
 			return new FeedRequest(FeedDirection.PREVIOUS, previous, source);
 		}

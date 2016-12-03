@@ -3,6 +3,7 @@ package com.soze.common.exceptions;
 /**
  * Requires to use either of parent's constuctors (for logging),
  * but this information should not be exposed to the user.
+ * A generic "invalid username or password" should be returned instead.
  * @author sozek
  *
  */

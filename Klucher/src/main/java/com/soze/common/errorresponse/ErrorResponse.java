@@ -6,6 +6,12 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * A response returned when an exception is thrown and
+ * users should get a JSON object back, with neccessary information.
+ * @author kamil jurek
+ *
+ */
 public class ErrorResponse {
 
   private final HttpStatus status;

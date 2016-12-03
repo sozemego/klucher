@@ -14,6 +14,11 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
+/**
+ * Handles exceptions that are supposed to return a view (instead of a JSON error response).
+ * @author kamil jurek
+ *
+ */
 @Service
 public class ViewExceptionHandler implements HandlerExceptionResolver, Ordered {
 

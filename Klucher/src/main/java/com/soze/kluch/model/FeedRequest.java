@@ -4,6 +4,11 @@ import java.util.Optional;
 
 import com.soze.common.feed.FeedDirection;
 
+/**
+ * Object encapsulating a user's request to get or paginate through a feed of elements.
+ * @author kamil jurek
+ *
+ */
 public class FeedRequest {
 
 	private final FeedDirection feedDirection;

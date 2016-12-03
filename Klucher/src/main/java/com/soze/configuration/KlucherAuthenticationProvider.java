@@ -1,7 +1,6 @@
 package com.soze.configuration;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,8 +49,8 @@ public class KlucherAuthenticationProvider implements AuthenticationProvider {
     for (GrantedAuthority ga : user.getAuthorities()) {
       grantedAuths.add(ga);
     }
-    Authentication auth = new AuthenticationWithUser(username,
-        user.getHashedPassword(), grantedAuths, user);
+    Authentication auth = new UsernamePasswordAuthenticationToken(username,
+        user.getHashedPassword(), grantedAuths);
     return auth;
   }
 
@@ -60,22 +59,4 @@ public class KlucherAuthenticationProvider implements AuthenticationProvider {
     return authentication.equals(UsernamePasswordAuthenticationToken.class);
   }
   
-  @SuppressWarnings("serial")
-	public static class AuthenticationWithUser extends UsernamePasswordAuthenticationToken {
-  	
-  	private final User user;
-  	
-		public AuthenticationWithUser(Object principal, Object credentials,
-				Collection<? extends GrantedAuthority> authorities, User user) {
-			super(principal, credentials, authorities);
-			this.user = user;
-		}
-		
-		public User getUser() {
-			return user;
-		}
-
-  	
-  }
-
 }

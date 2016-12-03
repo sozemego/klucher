@@ -41,7 +41,7 @@ public class SimpleHashtagAnalysis implements HashtagAnalysis {
 
 	@Override
 	public void analyse() {
-		log.info("Running statistical analysis.");
+		log.info("Running simple analysis.");
 		long startingTime = System.nanoTime();
 		Instant now = Instant.now();
 		Instant twoDaysAgo = now.minus(daysBack, ChronoUnit.DAYS);
@@ -62,27 +62,37 @@ public class SimpleHashtagAnalysis implements HashtagAnalysis {
 	
 	private void computeKluch(Kluch kluch, Map<String, Float> hashtagScores, Map<String, List<String>> userHashtags) {
 		Set<String> hashtags = kluch.getHashtags();
+		String author = kluch.getAuthor().getUsername();
 		for(String hashtag: hashtags) {
-			Float score = hashtagScores.get(hashtag);
-			if(score == null) {
-				score = 0f;
-				hashtagScores.put(hashtag, score);
-			}
-			String username = kluch.getAuthor().getUsername();
-			List<String> hashtagsByUser = userHashtags.get(username);
-			if(hashtagsByUser == null) {
-				hashtagsByUser = new ArrayList<>();
-				userHashtags.put(username, hashtagsByUser);
-			}
-			int postedByThisUserSoFar = getPostedByThisUserSoFar(hashtag, hashtagsByUser);
-			float addedScore = 1f;
-			if(postedByThisUserSoFar != 0) {
-				addedScore *= Math.pow(hashtagScoreByUserDecayCoefficient, postedByThisUserSoFar);
-			}
-			score += addedScore;
-			hashtagScores.put(hashtag, score);
-			hashtagsByUser.add(hashtag);
+			computeHashtag(author, hashtagScores, userHashtags, hashtag);
 		}
+	}
+
+	private void computeHashtag(String author, Map<String, Float> hashtagScores, Map<String, List<String>> userHashtags,
+			String hashtag) {
+		
+		Float score = hashtagScores.get(hashtag);
+		if(score == null) {
+			score = 0f;
+			hashtagScores.put(hashtag, score);
+		}
+		
+		List<String> hashtagsByUser = userHashtags.get(author);
+		if(hashtagsByUser == null) {
+			hashtagsByUser = new ArrayList<>();
+			userHashtags.put(author, hashtagsByUser);
+		}
+		
+		int postedByThisUserSoFar = getPostedByThisUserSoFar(hashtag, hashtagsByUser);
+		float addedScore = 1f;
+		if(postedByThisUserSoFar != 0) {
+			addedScore *= Math.pow(hashtagScoreByUserDecayCoefficient, postedByThisUserSoFar);
+		}
+		
+		score += addedScore;
+		hashtagScores.put(hashtag, score);
+		hashtagsByUser.add(hashtag);
+		
 	}
 	
 	private int getPostedByThisUserSoFar(String hashtag, List<String> hashtags) {
@@ -90,18 +100,20 @@ public class SimpleHashtagAnalysis implements HashtagAnalysis {
 	}
 	
 	private void assembleResult(Map<String, Float> hashtagCounts){
-		Set<Entry<String, Float>> entrySet = hashtagCounts.entrySet();
-		List<Entry<String, Float>> entryList = new ArrayList<>(entrySet);
+		
+		List<Entry<String, Float>> entryList = new ArrayList<>(hashtagCounts.entrySet());
 		// sort in descending order
 		Collections.sort(entryList, (e1, e2) -> {
 			if(e1.getValue() > e2.getValue()) return -1;
 			if(e1.getValue() < e2.getValue()) return 1;
 			return 0;
 		});
+		
 		List<Entry<String, Float>> topResults = entryList.stream()
 				.limit(maximumTrendingHashtags)
 				.collect(Collectors.toList());
 		convertEntriesToCounts(topResults);
+		
 	}
 	
 	private void convertEntriesToCounts(List<Entry<String, Float>> entries) {
